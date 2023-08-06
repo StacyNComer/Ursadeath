@@ -7,6 +7,7 @@
 #include "UDPlayerAttack.generated.h"
 
 class UUDPlayerAttackData;
+class AUDEnemy;
 
 /** An enum representing the general source of an attack.*/
 UENUM(BlueprintType)
@@ -57,10 +58,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy.*/
+	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	/** Creates a PlayerAttackData object using this class's AttackStats.*/
-	UUDPlayerAttackData* CreateAttackDataFrom();
 };

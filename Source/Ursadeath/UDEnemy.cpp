@@ -19,21 +19,6 @@ void AUDEnemy::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AUDEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	//Apply any attacks that this enemy overlaps
-	AUDPlayerAttack* PlayerAttack = Cast<AUDPlayerAttack>(OtherActor);
-	if (PlayerAttack != nullptr)
-	{
-		UUDPlayerAttackData* AttackData = PlayerAttack->CreateAttackDataFrom();
-
-		ReceiveAttack(AttackData);
-
-		//Tell UE to delete the AttackData now that we are done with it.
-		AttackData->ConditionalBeginDestroy();
-	}
-}
-
 // Called every frame
 void AUDEnemy::Tick(float DeltaTime)
 {

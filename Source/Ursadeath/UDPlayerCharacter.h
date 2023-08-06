@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
-#include "UrsadeathCharacter.generated.h"
+#include "UDPlayerCharacter.generated.h"
 
 class UDPlayerDamageData;
 class UInputComponent;
@@ -17,85 +17,94 @@ class UAnimMontage;
 class USoundBase;
 class AUDPlayerAttack;
 
-UCLASS(config=Game)
-class AUrsadeathCharacter : public ACharacter
+/** A structure holding the common data for the player's abilities. Non-common data, such as if the attack has a cooldown or input functions, is stored in the PlayerCharacter itself.*/
+USTRUCT(BlueprintType)
+struct FPlayerAbility
+{
+	 GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attacking)
+	TSubclassOf<AUDPlayerAttack> AttackActorClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attacking)
+	class UInputAction* InputAction;
+};
+
+UCLASS(config = Game)
+class AUDPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category=Mesh)
-	USkeletalMeshComponent* Mesh1P;
+		/** Pawn mesh: 1st person view (arms; seen only by self) */
+		UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+		USkeletalMeshComponent* Mesh1P;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	UCameraComponent* FirstPersonCameraComponent;
+		UCameraComponent* FirstPersonCameraComponent;
 
 	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputMappingContext* DefaultMappingContext;
 
 	/** A component that represents the spawning position and rotation for attacks.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-	UArrowComponent* AttackSpawnComponent;
+		UArrowComponent* AttackSpawnComponent;
 
 	///////////////////////////////////////////////////////////////////////// Input Actions
 
 	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* JumpAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* JumpAction;
 
 	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
-	class UInputAction* MoveAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		FPlayerAbility PrimaryFireAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		FPlayerAbility RocketAbility;
 
 protected:
-	/** The class of PlayerAttack spawned when the player fires their primary.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AUDPlayerAttack> PrimaryAttackActor;
-
-	/** While true, the player's primary will fire as long as it is off cooldown.*/
-	UPROPERTY(BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-	bool bFiringPrimary;
 
 	/** The time in seconds between shots of the player's primary fire.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-	float primaryCooldown = .15f;
+		float primaryCooldown = .15f;
 
 	/** The current remaining seconds until the player can fire their primary again.*/
 	UPROPERTY(BlueprintReadOnly, Category = Attacking)
-	float primaryCooldownTracker;
+		float primaryCooldownTracker;
 
 	/** Player Controller (cached so it doesn't need to be casted every time!) */
 	APlayerController* playerController;
-	
+
 public:
-	AUrsadeathCharacter();
+	AUDPlayerCharacter();
 
 protected:
 	virtual void BeginPlay();
 
 	virtual void Tick(float deltaTime);
 
-public:	
-	/** Primary Fire Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* FirePrimaryAction;
+public:
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
+		class UInputAction* LookAction;
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
-	bool bHasRifle;
+		bool bHasRifle;
 
 	/** Setter to set the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	void SetHasRifle(bool bNewHasRifle);
+		void SetHasRifle(bool bNewHasRifle);
 
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
-	bool GetHasRifle();
+		bool GetHasRifle();
 
 protected:
 
@@ -109,11 +118,11 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	/** Causes the player to start firing their weapon.*/
-	void StartFiringPrimary();
+	/** Fires a primary attack, if it is off of cooldown. Used for Input*/
+	void FirePrimary();
 
-	/** Causes the player to stop firing their weapon.*/
-	void StopFiringPrimary();
+	/** Spawns the Rocket Ability. Kaboom! Used for Input.*/
+	void FireRocket();
 
 protected:
 	// APawn interface

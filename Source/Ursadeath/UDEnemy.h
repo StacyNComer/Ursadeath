@@ -37,9 +37,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	// Called when something overlaps any of this actor's components.
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

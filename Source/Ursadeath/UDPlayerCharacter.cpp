@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "UrsadeathCharacter.h"
+#include "UDPlayerCharacter.h"
 #include "UDPlayerAttack.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -9,17 +9,16 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
-
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
-AUrsadeathCharacter::AUrsadeathCharacter()
+AUDPlayerCharacter::AUDPlayerCharacter()
 {
 	// Character doesnt have a rifle at start
 	bHasRifle = true;
-	
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
-		
+
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
@@ -38,13 +37,10 @@ AUrsadeathCharacter::AUrsadeathCharacter()
 	//Creat attack spawn component
 	AttackSpawnComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("AttackSpawn"));
 	AttackSpawnComponent->SetupAttachment(FirstPersonCameraComponent);
-	AttackSpawnComponent->SetRelativeLocation(FVector(50,0,0));
-
-	//Initialize Attacks
-	bFiringPrimary = false;
+	AttackSpawnComponent->SetRelativeLocation(FVector(50, 0, 0));
 }
 
-void AUrsadeathCharacter::BeginPlay()
+void AUDPlayerCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
@@ -62,25 +58,18 @@ void AUrsadeathCharacter::BeginPlay()
 	}
 }
 
-void AUrsadeathCharacter::Tick(float deltaTime)
+void AUDPlayerCharacter::Tick(float deltaTime)
 {
-	//Tick down the cooldown of the player's primary fire. If the player's primary is off cooldown while they are firing their weapon, spawn the primary projectile.
+	//Tick down the cooldown of the player's primary fire.
 	if (primaryCooldownTracker > 0)
 	{
 		primaryCooldownTracker -= deltaTime;
-	}
-	else if(bFiringPrimary)
-	{
-		SpawnAttack(PrimaryAttackActor);
-
-		//Put the primary attack on cooldown.
-		primaryCooldownTracker = primaryCooldown;
 	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
 
-void AUrsadeathCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
@@ -90,18 +79,21 @@ void AUrsadeathCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		//Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AUrsadeathCharacter::Move);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::Move);
 
 		//Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUrsadeathCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::Look);
 
 		//Primary Fire
-		EnhancedInputComponent->BindAction(FirePrimaryAction, ETriggerEvent::Triggered, this, &AUrsadeathCharacter::StartFiringPrimary);
-		EnhancedInputComponent->BindAction(FirePrimaryAction, ETriggerEvent::Completed, this, &AUrsadeathCharacter::StopFiringPrimary);
+		EnhancedInputComponent->BindAction(PrimaryFireAbility.InputAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::FirePrimary);
+
+		//"Start" is used for Rockets and Shockwaves to make them "Semi-automatic".
+		//Firing Rockets.
+		EnhancedInputComponent->BindAction(RocketAbility.InputAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::FireRocket);
 	}
 }
 
-void AUrsadeathCharacter::Move(const FInputActionValue& Value)
+void AUDPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -114,7 +106,7 @@ void AUrsadeathCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AUrsadeathCharacter::Look(const FInputActionValue& Value)
+void AUDPlayerCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -127,7 +119,7 @@ void AUrsadeathCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AUrsadeathCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass)
+void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass)
 {
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
@@ -142,22 +134,29 @@ void AUrsadeathCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackC
 	}
 }
 
-void AUrsadeathCharacter::StartFiringPrimary()
+void AUDPlayerCharacter::FirePrimary()
 {
-	bFiringPrimary = true;
+	if (primaryCooldownTracker <= 0)
+	{
+		SpawnAttack(PrimaryFireAbility.AttackActorClass);
+
+		//Put the primary attack on cooldown.
+		primaryCooldownTracker = primaryCooldown;
+	}
 }
 
-void AUrsadeathCharacter::StopFiringPrimary()
+
+void AUDPlayerCharacter::FireRocket()
 {
-	bFiringPrimary = false;
+	SpawnAttack(RocketAbility.AttackActorClass);
 }
 
-void AUrsadeathCharacter::SetHasRifle(bool bNewHasRifle)
+void AUDPlayerCharacter::SetHasRifle(bool bNewHasRifle)
 {
 	bHasRifle = bNewHasRifle;
 }
 
-bool AUrsadeathCharacter::GetHasRifle()
+bool AUDPlayerCharacter::GetHasRifle()
 {
 	return bHasRifle;
 }

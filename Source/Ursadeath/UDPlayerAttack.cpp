@@ -2,6 +2,7 @@
 
 
 #include "UDPlayerAttack.h"
+#include "UDEnemy.h"
 #include "UDPlayerAttackData.h"
 
 // Sets default values
@@ -19,6 +20,16 @@ void AUDPlayerAttack::BeginPlay()
 	
 }
 
+void AUDPlayerAttack::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	//Apply any attacks that this enemy overlaps
+	AUDEnemy* EnemyHit = Cast<AUDEnemy>(OtherActor);
+	if (EnemyHit != nullptr)
+	{
+		ApplyAttackToEnemy(EnemyHit, AttackStats);
+	}
+}
+
 // Called every frame
 void AUDPlayerAttack::Tick(float DeltaTime)
 {
@@ -26,8 +37,13 @@ void AUDPlayerAttack::Tick(float DeltaTime)
 
 }
 
-UUDPlayerAttackData* AUDPlayerAttack::CreateAttackDataFrom()
+void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct)
 {
-	return UUDPlayerAttackData::CreatePlayerAttackData(AttackStats);
+	UUDPlayerAttackData* AttackData = UUDPlayerAttackData::CreatePlayerAttackData(AttackStats);
+
+	Enemy->ReceiveAttack(AttackData);
+
+	//Tell UE to delete the AttackData now that we are done with it.
+	AttackData->ConditionalBeginDestroy();
 }
 

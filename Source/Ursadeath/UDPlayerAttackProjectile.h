@@ -27,8 +27,8 @@ protected:
 public:
 	AUDPlayerAttackProjectile();
 
-private:
-	/** A method that is binded to the SphereComponent's begin overlap delegate.*/
-	UFUNCTION()
-	void OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+protected:
+	/** By default this destroys the projectile.*/
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
 };

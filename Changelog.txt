@@ -1,0 +1,14 @@
+
+ === Update 1 "Rockets of Doom!" ===
+
+	> General
+
+* The player can now press M2 to fire rockets. They look exactly like primary fire projectiles, but they explode when they hit something.
+
+* Deleted unused blueprints (Pickup and FirstPersonProjectile).
+
+* "UrsadeathCharacter" is now "UDPlayerCharacter" so that the naming scheme matches.
+
+	> Bugfixes
+
+* Fixed an issue where player attacks wouldn't collide with the arena.

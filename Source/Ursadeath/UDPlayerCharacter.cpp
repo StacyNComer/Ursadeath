@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UDPlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "UDPlayerAttack.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -149,6 +150,11 @@ void AUDPlayerCharacter::FirePrimary()
 void AUDPlayerCharacter::FireRocket()
 {
 	SpawnAttack(RocketAbility.AttackActorClass);
+}
+
+AUDPlayerCharacter* AUDPlayerCharacter::GetCharacterInPlay(UObject* WorldContextObject)
+{
+	return Cast<AUDPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(WorldContextObject, 0));
 }
 
 void AUDPlayerCharacter::SetHasRifle(bool bNewHasRifle)

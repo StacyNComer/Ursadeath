@@ -1,3 +1,18 @@
+ === Update 2 "AI of Doom!" ===
+
+	> General
+
+* Scripted the framework for enemy AI. An example melee enemy that chases the player (but doesn't attack) has been placed in the
+  arena map.
+	* All enemy AI Controllers are derived from the "UDEnemyController" class, which is made to have child classes made from it
+	  using blueprints.
+		* This class has an "EnemyBehavior" variable; Whatever Behavior Tree this variable is set to will be ran when the
+		  game starts.
+		* If the Behavior Tree's Blackboard has a value named "Player", it will be set to be the player's Actor.
+		  BB_EnemyBase should already be set up like this, so I recommend you make any new Blackboards a child of this.
+		* Enemies themselves have an "Attack" event that you can define behavior for in Blueprints. The enemy AI does
+		  not currently call this event.
+		* All of this info is on the project's Github under the "Enemy AI" wiki page.
 
  === Update 1 "Rockets of Doom!" ===
 

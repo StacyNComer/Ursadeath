@@ -22,7 +22,7 @@ public:
 	FAttackReceived OnAttackRecieved;
 
 	/** If true, the enemy is immune to dying.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Status)
 	bool bUndieable;
 
 protected:
@@ -44,4 +44,8 @@ public:
 	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy.*/
 	UFUNCTION(BlueprintCallable, Category=Status)
 	void ReceiveAttack(UUDPlayerAttackData* AttackData);
+
+	/** An event for when the enemy attacks.*/
+	UFUNCTION(BlueprintImplementableEvent)
+	void Attack();
 };

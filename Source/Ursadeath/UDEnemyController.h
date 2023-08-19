@@ -19,7 +19,7 @@ class URSADEATH_API AUDEnemyController : public AAIController
 protected:
 	/** The behavior tree the AI will run upon creation.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UBehaviorTree* enemyBehavior;
+		TObjectPtr<UBehaviorTree> enemyBehavior;
 
 protected:
 	virtual void BeginPlay();

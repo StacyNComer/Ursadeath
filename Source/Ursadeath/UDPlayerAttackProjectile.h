@@ -19,10 +19,10 @@ class URSADEATH_API AUDPlayerAttackProjectile : public AUDPlayerAttack
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	USphereComponent* SphereComponent;
+		TObjectPtr<USphereComponent> SphereComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UProjectileMovementComponent* ProjectileMovementComponent;
+		TObjectPtr<UProjectileMovementComponent> ProjectileMovementComponent;
 
 public:
 	AUDPlayerAttackProjectile();

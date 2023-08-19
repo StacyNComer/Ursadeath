@@ -69,7 +69,7 @@ Saved/*
 # Compiled source files for the engine to use
 Intermediate/*
 Plugins/*/Intermediate/*
-CompiledCode.zip
+UrsadeathCompiledCode.zip
 
 # Cache files for the editor to use
 DerivedDataCache/*

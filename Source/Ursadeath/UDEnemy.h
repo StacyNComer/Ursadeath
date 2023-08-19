@@ -7,6 +7,7 @@
 #include "UDEnemy.generated.h"
 
 class UUDPlayerAttackData;
+class UMeshComponent;
 
 /*A delegate type for when the enemy is damaged.*/
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackReceived, UUDPlayerAttackData*, DamageData);
@@ -26,8 +27,22 @@ public:
 	bool bUndieable;
 
 protected:
+	/** If true, the enemy won't undergo its spawning sequence. Instead, the enemy will recieve their default AI when play begins. Use for debug enemies without waiting for them to spawn.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
+	bool bSpawnInstantly;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
+	float SpawningTime = 3;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 	int32 health;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
+	TObjectPtr<UMaterialInterface> SpawningMaterial;
+
+private:
+	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning*/
+	TInlineComponentArray<UMeshComponent*> EnemyMeshes;
 
 public:
 	// Sets default values for this pawn's properties
@@ -44,4 +59,18 @@ public:
 	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy.*/
 	UFUNCTION(BlueprintCallable, Category=Status)
 	void ReceiveAttack(UUDPlayerAttackData* AttackData);
+
+protected:
+	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSpawnSequenceEnd();
+
+private:
+	/** A method called when the enemy finishes spawning. The OnSpawnSequenceEnd event can be used to add additional effects to the spawn sequence being completed from within blueprints.*/
+	UFUNCTION()
+	void EndSpawnSequence();
+
+	/** Sets the material of all meshes in EnemyMeshes. If given a null material, this will set the meshes to their default materials similar to how AActor's SetMaterial method does.
+	Meant to be used to set the material of the enmy mesh to or off from it's spawning material.*/
+	void SetEnemyMaterials(UMaterialInterface* newMaterial);
 };

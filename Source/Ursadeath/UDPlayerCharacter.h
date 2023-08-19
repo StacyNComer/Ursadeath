@@ -37,11 +37,11 @@ class AUDPlayerCharacter : public ACharacter
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	USkeletalMeshComponent* Mesh1P;
+	TObjectPtr<USkeletalMeshComponent> Mesh1P;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		UCameraComponent* FirstPersonCameraComponent;
+		TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
 
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -49,7 +49,7 @@ class AUDPlayerCharacter : public ACharacter
 
 	/** A component that represents the spawning position and rotation for attacks.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		UArrowComponent* AttackSpawnComponent;
+		TObjectPtr<UArrowComponent> AttackSpawnComponent;
 
 	///////////////////////////////////////////////////////////////////////// Input Actions
 

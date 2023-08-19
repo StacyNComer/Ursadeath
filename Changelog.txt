@@ -1,3 +1,13 @@
+ === Update 3 "Spawning of Doom!" ===
+
+* Enemies now take a moment to "Spawn In" before recieving their AI and becoming tangible. Enemies are give a special
+  material to show that they are spawning. The spawning sequence can be skipped by checking "Spawn Instantly".
+	* As a result of this change, enemy pawns are not set to be auto-possessed. Turning back on auto-possession
+	  will probably make something weird happen, so just use the "Spawn Instantly" variable!
+	* The "Dummies" placed around the arena spawn instantly by default.
+	* Note that enemy models are given their default material after going through the spawn sequence. "Spawn Instantly"
+	  will stop the textures from being swapped. You can also find the mesh asset and change its default material.
+
  === Update 2 "AI of Doom!" ===
 
 	> General

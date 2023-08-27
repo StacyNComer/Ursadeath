@@ -32,7 +32,7 @@ protected:
 	bool bSpawnInstantly;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
-	float SpawningTime = 3;
+	float SpawnTime = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 	int32 health;
@@ -59,6 +59,8 @@ public:
 	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy.*/
 	UFUNCTION(BlueprintCallable, Category=Status)
 	void ReceiveAttack(UUDPlayerAttackData* AttackData);
+
+	float GetSpawnTime();
 
 protected:
 	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/

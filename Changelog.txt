@@ -1,3 +1,14 @@
+ === Update 4 "Arena of Doom!" ===
+
+ * The game arena now takes the form of a blueprint.
+	* You can make the arena spawn enemies by editing the Current Wave structure and setting the "Spawn On Begin
+	  Play" value (under Debug) to true. The current arena in the game should already be set to spawn enemies.
+	* The Spawn Wave asks for "Knight" and "Squire" enemies. These are merely tiers of strength for enemies.
+	  Any enemy can be spawned as a Knight/Squire as there is no difference between them in script.
+
+ * Added a "Test Knight" enemy type. It is large and has 1500 health (thrice that of the melee squire). It has the 
+   same AI as the Melee Squire.
+
  === Update 3 "Spawning of Doom!" ===
 
 * Enemies now take a moment to "Spawn In" before recieving their AI and becoming tangible. Enemies are give a special

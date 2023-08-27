@@ -44,7 +44,7 @@ void AUDEnemy::BeginPlay()
 
 		//Sets a timer that completes the enemy's spawn sequence in SpawningTime seconds.
 		FTimerHandle SpawnTimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AUDEnemy::EndSpawnSequence, SpawningTime, false);
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AUDEnemy::EndSpawnSequence, SpawnTime, false);
 	}
 }
 
@@ -71,6 +71,11 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 	{
 		Destroy();
 	}
+}
+
+float AUDEnemy::GetSpawnTime()
+{
+	return SpawnTime;
 }
 
 void AUDEnemy::EndSpawnSequence()

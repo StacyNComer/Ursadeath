@@ -69,13 +69,21 @@ class AUDPlayerCharacter : public ACharacter
 
 protected:
 
+	/** The max amount of energy a player may store.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float MaxEnergy;
+
+	/** The current energy the player has stored. Use SetCurrentEnergy to modifiy this value.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float CurrentEnergy;
+
 	/** The time in seconds between shots of the player's primary fire.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		float primaryCooldown = .15f;
+		float PrimaryCooldown = .15f;
 
 	/** The current remaining seconds until the player can fire their primary again.*/
 	UPROPERTY(BlueprintReadOnly, Category = Attacking)
-		float primaryCooldownTracker;
+		float PrimaryCooldownTracker;
 
 	/** Player Controller (cached so it doesn't need to be casted every time!) */
 	APlayerController* playerController;
@@ -84,14 +92,14 @@ public:
 	AUDPlayerCharacter();
 
 protected:
-	virtual void BeginPlay();
+	virtual void BeginPlay() override;
 
-	virtual void Tick(float deltaTime);
+	virtual void Tick(float deltaTime) override;
 
 public:
 	/** A global method for getting the current active player character.*/
 	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-	static AUDPlayerCharacter* GetCharacterInPlay(UObject* WorldContextObject);
+		static AUDPlayerCharacter* GetCharacterInPlay(UObject* WorldContextObject);
 
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -109,6 +117,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 		bool GetHasRifle();
 
+	UFUNCTION(BlueprintCallable, Category = Status)
+		/** Adds to the player's current store of energy. TryUseEnergy should be used to reduce the player's energy, as this method does not clamp negative values correctly.*/
+		void AddEnergy(float value);
+
 protected:
 
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
@@ -120,6 +132,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Tests if the player has the given amount of energy, expending the energy and returning true if they do. Energy is only expended if the player has the given amount.*/
+	bool TryUseEnergy(float amount);
 
 	/** Fires a primary attack, if it is off of cooldown. Used for Input*/
 	void FirePrimary();

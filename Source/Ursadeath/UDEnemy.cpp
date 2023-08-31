@@ -55,7 +55,7 @@ void AUDEnemy::Tick(float DeltaTime)
 
 }
 
-void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
+bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 {
 	//Call the attack recieved event.
 	if(OnAttackRecieved.IsBound())
@@ -70,6 +70,11 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 	if (!bUndieable && health <= 0)
 	{
 		Destroy();
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 

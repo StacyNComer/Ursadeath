@@ -61,10 +61,12 @@ void AUDPlayerCharacter::BeginPlay()
 
 void AUDPlayerCharacter::Tick(float deltaTime)
 {
+	Super::Tick(deltaTime);
+
 	//Tick down the cooldown of the player's primary fire.
-	if (primaryCooldownTracker > 0)
+	if (PrimaryCooldownTracker > 0)
 	{
-		primaryCooldownTracker -= deltaTime;
+		PrimaryCooldownTracker -= deltaTime;
 	}
 }
 
@@ -135,21 +137,53 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackCl
 	}
 }
 
+void AUDPlayerCharacter::AddEnergy(float value)
+{
+	CurrentEnergy += value;
+
+	//Make sure the Current Energy is capped at max energy.
+	if (CurrentEnergy > MaxEnergy)
+	{
+		CurrentEnergy = MaxEnergy;
+	}
+}
+
+bool AUDPlayerCharacter::TryUseEnergy(float amount)
+{
+	if (CurrentEnergy >= amount)
+	{
+		CurrentEnergy -= amount;
+
+		if (CurrentEnergy < 0)
+		{
+			CurrentEnergy = 0;
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void AUDPlayerCharacter::FirePrimary()
 {
-	if (primaryCooldownTracker <= 0)
+	if (PrimaryCooldownTracker <= 0)
 	{
 		SpawnAttack(PrimaryFireAbility.AttackActorClass);
 
 		//Put the primary attack on cooldown.
-		primaryCooldownTracker = primaryCooldown;
+		PrimaryCooldownTracker = PrimaryCooldown;
 	}
 }
 
-
 void AUDPlayerCharacter::FireRocket()
 {
-	SpawnAttack(RocketAbility.AttackActorClass);
+	if (TryUseEnergy(1))
+	{
+		SpawnAttack(RocketAbility.AttackActorClass);
+	}
 }
 
 AUDPlayerCharacter* AUDPlayerCharacter::GetCharacterInPlay(UObject* WorldContextObject)

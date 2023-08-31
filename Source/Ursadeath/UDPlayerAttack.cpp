@@ -4,6 +4,7 @@
 #include "UDPlayerAttack.h"
 #include "UDEnemy.h"
 #include "UDPlayerAttackData.h"
+#include "UDPlayerCharacter.h"
 
 // Sets default values
 AUDPlayerAttack::AUDPlayerAttack()
@@ -27,6 +28,8 @@ void AUDPlayerAttack::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (EnemyHit != nullptr)
 	{
 		ApplyAttackToEnemy(EnemyHit, AttackStats);
+		
+		Cast<AUDPlayerCharacter>(Owner)->AddEnergy(EnergyGain);
 	}
 }
 

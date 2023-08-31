@@ -56,9 +56,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy.*/
+	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy. Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable, Category=Status)
-	void ReceiveAttack(UUDPlayerAttackData* AttackData);
+	bool ReceiveAttack(UUDPlayerAttackData* AttackData);
 
 	float GetSpawnTime();
 

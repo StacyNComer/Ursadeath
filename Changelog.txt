@@ -1,3 +1,18 @@
+ === Update 5 "HUD of Doom!" ===
+
+* Added the framework for UI. 
+	* The players HUD widget should be derived from the "UDPlayerHUDWidget" class. To define what happens when the
+	   player's health/energy changes, use the respective "Update Health/Energy" event.
+	* The player controller will automatically create and add whatever widget the "Player HUD Widget Class" is set to.
+	  You can find the player controller in the player blueprint folder.
+	* An example of the HUD Widget is in the UI folder. It should already be connected to the Player Controller.
+	* Finally, if you get a weird crash that opens Visual Studio, most likely the Player Controller's 
+	  "Player HUD Widget Class" value got set to "None".
+	* This info can also be found in the project's wiki on Github's website!
+
+# By the way, the player currently gains energy by shooting enemies with primary fire. You can change how much energy this
+  gives the player in the projectile's blueprint. Rockets need 100 energy to be fired.
+
  === Update 4 "Arena of Doom!" ===
 
  * The game arena now takes the form of a blueprint.

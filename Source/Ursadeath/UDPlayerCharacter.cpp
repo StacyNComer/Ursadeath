@@ -9,6 +9,8 @@
 #include "Components/CapsuleComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "UDPlayerController.h"
+#include "UDPlayerHUDWidget.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -35,10 +37,17 @@ AUDPlayerCharacter::AUDPlayerCharacter()
 	//Mesh1P->SetRelativeRotation(FRotator(0.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	//Creat attack spawn component
+	//Create attack spawn component
 	AttackSpawnComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("AttackSpawn"));
 	AttackSpawnComponent->SetupAttachment(FirstPersonCameraComponent);
 	AttackSpawnComponent->SetRelativeLocation(FVector(50, 0, 0));
+
+	//Set the player's default stats
+	MaxHealth = 100;
+	CurrentHealth = MaxHealth;
+
+	MaxEnergy = 400;
+	CurrentEnergy = 0;
 }
 
 void AUDPlayerCharacter::BeginPlay()
@@ -46,8 +55,14 @@ void AUDPlayerCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	// Cache PlayerController
-	playerController = Cast<APlayerController>(GetController());
+	// Set the UDPlayerController.
+	UDController = Cast<AUDPlayerController>(GetController());
+
+	// Cache the player HUD from the player controller.
+	PlayerHUDWidget = UDController->PlayerHUDWidget;
+	// Set the HUD to display the players starting stats.
+	PlayerHUDWidget->UpdateHealth(CurrentHealth);
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -146,6 +161,8 @@ void AUDPlayerCharacter::AddEnergy(float value)
 	{
 		CurrentEnergy = MaxEnergy;
 	}
+
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 }
 
 bool AUDPlayerCharacter::TryUseEnergy(float amount)
@@ -158,6 +175,8 @@ bool AUDPlayerCharacter::TryUseEnergy(float amount)
 		{
 			CurrentEnergy = 0;
 		}
+
+		PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 
 		return true;
 	}
@@ -180,7 +199,7 @@ void AUDPlayerCharacter::FirePrimary()
 
 void AUDPlayerCharacter::FireRocket()
 {
-	if (TryUseEnergy(1))
+	if (TryUseEnergy(100))
 	{
 		SpawnAttack(RocketAbility.AttackActorClass);
 	}

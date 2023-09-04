@@ -16,6 +16,8 @@ class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
 class AUDPlayerAttack;
+class AUDPlayerController;
+class UUDPlayerHUDWidget;
 
 /** A structure holding the common data for the player's abilities. Non-common data, such as if the attack has a cooldown or input functions, is stored in the PlayerCharacter itself.*/
 USTRUCT(BlueprintType)
@@ -68,6 +70,13 @@ class AUDPlayerCharacter : public ACharacter
 		FPlayerAbility RocketAbility;
 
 protected:
+	/** The max amount of health a player may have.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float MaxHealth;
+
+	/** How much health the player currently has.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float CurrentHealth;
 
 	/** The max amount of energy a player may store.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
@@ -85,8 +94,13 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = Attacking)
 		float PrimaryCooldownTracker;
 
-	/** Player Controller (cached so it doesn't need to be casted every time!) */
-	APlayerController* playerController;
+	/** The player's HUD. */
+	UPROPERTY(BlueprintReadOnly)
+		TObjectPtr<UUDPlayerHUDWidget> PlayerHUDWidget;
+
+	/** The player controller casted to UDPlayerController. */
+	UPROPERTY(BlueprintReadOnly)
+		TObjectPtr<AUDPlayerController> UDController;
 
 public:
 	AUDPlayerCharacter();

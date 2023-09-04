@@ -10,4 +10,8 @@ AUrsadeathGameMode::AUrsadeathGameMode()
 	// set default pawn class to our Blueprinted character
 	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Ursadeath/PlayerCharacter/Blueprints/BP_UrsadeathPlayer"));
 	DefaultPawnClass = PlayerPawnClassFinder.Class;
+
+	//Set default player controller
+	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassFinder(TEXT("/Game/Ursadeath/PlayerCharacter/Blueprints/BP_PlayerController"));
+	PlayerControllerClass = PlayerControllerClassFinder.Class;
 }

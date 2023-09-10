@@ -1,3 +1,25 @@
+ === Update 6 "Weapons of Doom!" ===
+
+	> General
+
+* Added melee attacks. Melee attacks give the player 66% energy on hit.
+	* This does not have a vfx, so for now the collision test is visible.
+
+* Added Shockwaves. Shockwaves deal no damage, but stun all enemies in a wide line for 4 seconds. 
+  Shockwave cost 100% energy.
+	* This does not have a vfx, so for now the collision test is visible.
+	# This probably needs to be nerfed somehow.
+
+* Refactored all of the player's abilities as PlayerAbilityComponents. This groups all the info about each particular
+  attack's interaction with the player (energy cost, cooldown, input binding) under their own blueprint component.
+	* Currently, PlayerAbilities are not automatically bound to their inputs. If you try and add your onw ability,
+	  you'll need to bind the input yourself!
+
+	> Bugfixes
+
+* Fixed a bug where the game would crash if a projectile hit an enemy within a frame of being spawned.
+
+
  === Update 5 "HUD of Doom!" ===
 
 * Added the framework for UI. 
@@ -13,6 +35,7 @@
 # By the way, the player currently gains energy by shooting enemies with primary fire. You can change how much energy this
   gives the player in the projectile's blueprint. Rockets need 100 energy to be fired.
 
+
  === Update 4 "Arena of Doom!" ===
 
  * The game arena now takes the form of a blueprint.
@@ -24,6 +47,7 @@
  * Added a "Test Knight" enemy type. It is large and has 1500 health (thrice that of the melee squire). It has the 
    same AI as the Melee Squire.
 
+
  === Update 3 "Spawning of Doom!" ===
 
 * Enemies now take a moment to "Spawn In" before recieving their AI and becoming tangible. Enemies are give a special
@@ -33,6 +57,7 @@
 	* The "Dummies" placed around the arena spawn instantly by default.
 	* Note that enemy models are given their default material after going through the spawn sequence. "Spawn Instantly"
 	  will stop the textures from being swapped. You can also find the mesh asset and change its default material.
+
 
  === Update 2 "AI of Doom!" ===
 
@@ -49,6 +74,7 @@
 		* Enemies themselves have an "Attack" event that you can define behavior for in Blueprints. The enemy AI does
 		  not currently call this event.
 		* All of this info is on the project's Github under the "Enemy AI" wiki page.
+
 
  === Update 1 "Rockets of Doom!" ===
 

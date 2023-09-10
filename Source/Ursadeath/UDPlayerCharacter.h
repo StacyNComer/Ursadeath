@@ -18,6 +18,8 @@ class USoundBase;
 class AUDPlayerAttack;
 class AUDPlayerController;
 class UUDPlayerHUDWidget;
+class UUDPlayerCooldownAbility;
+class UUDPlayerEnergyAbility;
 
 /** A structure holding the common data for the player's abilities. Non-common data, such as if the attack has a cooldown or input functions, is stored in the PlayerCharacter itself.*/
 USTRUCT(BlueprintType)
@@ -39,7 +41,7 @@ class AUDPlayerCharacter : public ACharacter
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	TObjectPtr<USkeletalMeshComponent> Mesh1P;
+		TObjectPtr<USkeletalMeshComponent> Mesh1P;
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -63,11 +65,20 @@ class AUDPlayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		FPlayerAbility PrimaryFireAbility;
+	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		FPlayerAbility PrimaryFireAbility;*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		FPlayerAbility RocketAbility;
+		TObjectPtr<UUDPlayerCooldownAbility> PrimaryFireAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UUDPlayerCooldownAbility> MeleeAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UUDPlayerEnergyAbility> RocketAbility;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<UUDPlayerEnergyAbility> ShockwaveAbility;
 
 protected:
 	/** The max amount of health a player may have.*/
@@ -86,13 +97,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 		float CurrentEnergy;
 
-	/** The time in seconds between shots of the player's primary fire.*/
+	/** When the player performs a melee attack, their primary fire is put on cooldown for this amount of time.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		float PrimaryCooldown = .15f;
-
-	/** The current remaining seconds until the player can fire their primary again.*/
-	UPROPERTY(BlueprintReadOnly, Category = Attacking)
-		float PrimaryCooldownTracker;
+		float MeleePrimaryPause;
 
 	/** The player's HUD. */
 	UPROPERTY(BlueprintReadOnly)
@@ -100,7 +107,7 @@ protected:
 
 	/** The player controller casted to UDPlayerController. */
 	UPROPERTY(BlueprintReadOnly)
-		TObjectPtr<AUDPlayerController> UDController;
+		TObjectPtr<AUDPlayerController> UDPlayerController;
 
 public:
 	AUDPlayerCharacter();
@@ -132,13 +139,18 @@ public:
 		bool GetHasRifle();
 
 	UFUNCTION(BlueprintCallable, Category = Status)
-		/** Adds to the player's current store of energy. TryUseEnergy should be used to reduce the player's energy, as this method does not clamp negative values correctly.*/
-		void AddEnergy(float value);
-
-protected:
+		/** Adds to the player's current store of energy, though not above the player's Max Energy.*/
+		void AddEnergy(float Value);
 
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass);
+
+	float GetEnergy();
+
+	/** Expends the given amount of player energy and updates the UI. This does not keep the value from dropping below zero, as it is assumed the value will be tested beforehand.*/
+	void ExpendEnergy(float ToExpend);
+
+protected:
 
 	///////////////////////////////////////////////////////////////////////// Input Functions
 	/** Called for movement input */
@@ -147,14 +159,17 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	/** Tests if the player has the given amount of energy, expending the energy and returning true if they do. Energy is only expended if the player has the given amount.*/
-	bool TryUseEnergy(float amount);
+	/** Uses the primary fire ability. Used for Input.*/
+	void UsePrimaryAbility();
 
-	/** Fires a primary attack, if it is off of cooldown. Used for Input*/
-	void FirePrimary();
+	/** Uses the melee attack ability. Used for Input.*/
+	void UseMeleeAbility();
 
-	/** Spawns the Rocket Ability. Kaboom! Used for Input.*/
-	void FireRocket();
+	/** Uses the rocket ability. Used for Input.*/
+	void UseRocketAbility();
+
+	/** Uses the shockwave ability. Used for Input.*/
+	void UseShockwaveAbility();
 
 protected:
 	// APawn interface

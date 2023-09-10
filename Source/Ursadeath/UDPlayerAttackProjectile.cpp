@@ -2,6 +2,8 @@
 #include "UDPlayerAttackProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "UDPlayerCharacter.h"
+#include "UDEnemy.h"
 
 AUDPlayerAttackProjectile::AUDPlayerAttackProjectile()
 {
@@ -15,7 +17,12 @@ AUDPlayerAttackProjectile::AUDPlayerAttackProjectile()
 
 void AUDPlayerAttackProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	Super::NotifyActorBeginOverlap(OtherActor);
+	//Apply any attacks that this enemy overlaps
+	AUDEnemy* EnemyHit = Cast<AUDEnemy>(OtherActor);
+	if (EnemyHit != nullptr)
+	{
+		ApplyAttackToEnemy(EnemyHit, AttackStats);
+	}
 
 	Destroy();
 }

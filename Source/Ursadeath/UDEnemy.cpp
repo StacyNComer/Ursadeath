@@ -5,6 +5,7 @@
 #include "Components/MeshComponent.h"
 #include "UDPlayerAttack.h"
 #include "UDPlayerAttackData.h"
+#include "UDEnemyController.h"
 
 // Sets default values
 AUDEnemy::AUDEnemy()
@@ -30,7 +31,7 @@ void AUDEnemy::BeginPlay()
 
 	if (bSpawnInstantly)
 	{
-		//If SpawnInstantly is set, EndSpawnSequence is calle
+		//If SpawnInstantly is set, spawn the controller on begin play.
 		SpawnDefaultController();
 	}
 	else
@@ -53,6 +54,17 @@ void AUDEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//Decrement the enemy's stun time.
+	if (IsStunned())
+	{
+		StunTime -= DeltaTime;
+
+		//The enemy's AI resumes once their stun time reaches 0.
+		if (StunTime <= 0)
+		{
+			EnemyController->ResumeAI();
+		}
+	}
 }
 
 bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
@@ -66,6 +78,13 @@ bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 	//Reduce the enemy's health
 	health -= AttackData->AttackStats.Damage;
 
+	//Stun the enemy if the attack should stun them.
+	float AttackStunTime = AttackData->AttackStats.StunTime; 
+	if (AttackStunTime > 0)
+	{
+		ApplyStun(AttackStunTime);
+	}
+
 	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
 	if (!bUndieable && health <= 0)
 	{
@@ -78,9 +97,36 @@ bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 	}
 }
 
+bool AUDEnemy::IsStunned()
+{
+	return StunTime > 0;
+}
+
 float AUDEnemy::GetSpawnTime()
 {
 	return SpawnTime;
+}
+
+void AUDEnemy::ApplyStun(float TimeStunned)
+{
+	//If the player was not stunned before stun them. If they were already stunned, only apply the stun if it would be longer.
+	if (!IsStunned())
+	{
+		StunTime = TimeStunned;
+
+		EnemyController->StopAI();
+	}
+	else if (TimeStunned > StunTime)
+	{
+		StunTime = TimeStunned;
+	}
+}
+
+void AUDEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	EnemyController = Cast<AUDEnemyController>(NewController);
 }
 
 void AUDEnemy::EndSpawnSequence()
@@ -95,6 +141,8 @@ void AUDEnemy::EndSpawnSequence()
 	SetEnemyMaterials(NULL);
 
 	OnSpawnSequenceEnd();
+
+	
 }
 
 void AUDEnemy::SetEnemyMaterials(UMaterialInterface* newMaterial)

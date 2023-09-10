@@ -62,9 +62,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
-	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy.*/
+	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain.*/
+	UFUNCTION(BlueprintCallable)
 	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
 
 public:	

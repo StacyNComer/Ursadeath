@@ -8,11 +8,12 @@
 
 class UUDPlayerAttackData;
 class UMeshComponent;
+class AUDEnemyController;
 
 /*A delegate type for when the enemy is damaged.*/
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackReceived, UUDPlayerAttackData*, DamageData);
 
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API AUDEnemy : public APawn
 {
 	GENERATED_BODY()
@@ -23,7 +24,7 @@ public:
 	FAttackReceived OnAttackRecieved;
 
 	/** If true, the enemy is immune to dying.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Status)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 	bool bUndieable;
 
 protected:
@@ -37,8 +38,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 	int32 health;
 
+	/** The remaining seconds an enemy has until they are no longer stunned. An enemy is considered to be stunned while this is > 0*/
+	UPROPERTY(BlueprintReadOnly, Category = Status)
+	float StunTime;
+
+	/** Controls the altered appearence enemies have while "spawning in"*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
 	TObjectPtr<UMaterialInterface> SpawningMaterial;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AUDEnemyController> EnemyController;
 
 private:
 	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning*/
@@ -60,12 +69,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category=Status)
 	bool ReceiveAttack(UUDPlayerAttackData* AttackData);
 
+	/** Returns true if the enemy is currently stunned*/
+	UFUNCTION(BlueprintCallable, Category = Status)
+		bool IsStunned();
+
+	/** Returns the amount of time this enemy should spend "spawning in"*/
 	float GetSpawnTime();
 
 protected:
 	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSpawnSequenceEnd();
+
+	/** Stuns the enemy for the given time. If the enemy is already stunned, the remaining time stunned will be set to TimeStunned if it is higher.*/
+	void ApplyStun(float TimeStunned);
+
+	virtual void PossessedBy(AController* NewController);
 
 private:
 	/** A method called when the enemy finishes spawning. The OnSpawnSequenceEnd event can be used to add additional effects to the spawn sequence being completed from within blueprints.*/
@@ -75,4 +94,6 @@ private:
 	/** Sets the material of all meshes in EnemyMeshes. If given a null material, this will set the meshes to their default materials similar to how AActor's SetMaterial method does.
 	Meant to be used to set the material of the enmy mesh to or off from it's spawning material.*/
 	void SetEnemyMaterials(UMaterialInterface* newMaterial);
+
+	friend AUDEnemyController;
 };

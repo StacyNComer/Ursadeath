@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "UDPlayerController.h"
 #include "UDPlayerHUDWidget.h"
+#include "UDPlayerCooldownAbility.h"
+#include "UDPlayerEnergyAbility.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -42,12 +44,20 @@ AUDPlayerCharacter::AUDPlayerCharacter()
 	AttackSpawnComponent->SetupAttachment(FirstPersonCameraComponent);
 	AttackSpawnComponent->SetRelativeLocation(FVector(50, 0, 0));
 
+	//Initialize Ability Components. The abilities are give their actual inputs, attack actors, and cooldowns in blueprints. Their input is setup in SetupPlayerInput.
+	PrimaryFireAbility = CreateDefaultSubobject<UUDPlayerCooldownAbility>(TEXT("PrimaryFireAbility"));
+	MeleeAbility = CreateDefaultSubobject<UUDPlayerCooldownAbility>(TEXT("MeleeAbility"));
+	RocketAbility = CreateDefaultSubobject<UUDPlayerEnergyAbility>(TEXT("RocketAbility"));
+	ShockwaveAbility = CreateDefaultSubobject<UUDPlayerEnergyAbility>(TEXT("ShockwaveAbility"));
+
 	//Set the player's default stats
 	MaxHealth = 100;
 	CurrentHealth = MaxHealth;
 
 	MaxEnergy = 400;
 	CurrentEnergy = 0;
+
+	MeleePrimaryPause = .5f;
 }
 
 void AUDPlayerCharacter::BeginPlay()
@@ -56,10 +66,10 @@ void AUDPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Set the UDPlayerController.
-	UDController = Cast<AUDPlayerController>(GetController());
+	UDPlayerController = Cast<AUDPlayerController>(GetController());
 
 	// Cache the player HUD from the player controller.
-	PlayerHUDWidget = UDController->PlayerHUDWidget;
+	PlayerHUDWidget = UDPlayerController->PlayerHUDWidget;
 	// Set the HUD to display the players starting stats.
 	PlayerHUDWidget->UpdateHealth(CurrentHealth);
 	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
@@ -77,12 +87,6 @@ void AUDPlayerCharacter::BeginPlay()
 void AUDPlayerCharacter::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
-
-	//Tick down the cooldown of the player's primary fire.
-	if (PrimaryCooldownTracker > 0)
-	{
-		PrimaryCooldownTracker -= deltaTime;
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -103,11 +107,16 @@ void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::Look);
 
 		//Primary Fire
-		EnhancedInputComponent->BindAction(PrimaryFireAbility.InputAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::FirePrimary);
+		EnhancedInputComponent->BindAction(PrimaryFireAbility->GetInputAction(), PrimaryFireAbility->GetInputTrigger(), this, &AUDPlayerCharacter::UsePrimaryAbility);
 
-		//"Start" is used for Rockets and Shockwaves to make them "Semi-automatic".
+		//Melee Attack
+		EnhancedInputComponent->BindAction(MeleeAbility->GetInputAction(), MeleeAbility->GetInputTrigger(), this, &AUDPlayerCharacter::UseMeleeAbility);
+
 		//Firing Rockets.
-		EnhancedInputComponent->BindAction(RocketAbility.InputAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::FireRocket);
+		EnhancedInputComponent->BindAction(RocketAbility->GetInputAction(), RocketAbility->GetInputTrigger(), this, &AUDPlayerCharacter::UseRocketAbility);
+
+		//Firing Shockwaves
+		EnhancedInputComponent->BindAction(ShockwaveAbility->GetInputAction(), ShockwaveAbility->GetInputTrigger(), this, &AUDPlayerCharacter::UseShockwaveAbility);
 	}
 }
 
@@ -145,16 +154,16 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackCl
 		//Set Spawn Collision Handling Override
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		ActorSpawnParams.Owner = this;
 
 		//Spawn the attack. Set the player spawning it as the attack's owner.
 		AUDPlayerAttack* attackSpawned = World->SpawnActor<AUDPlayerAttack>(attackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation(), ActorSpawnParams);
-		attackSpawned->Owner = this;
 	}
 }
 
-void AUDPlayerCharacter::AddEnergy(float value)
+void AUDPlayerCharacter::AddEnergy(float Value)
 {
-	CurrentEnergy += value;
+	CurrentEnergy += Value;
 
 	//Make sure the Current Energy is capped at max energy.
 	if (CurrentEnergy > MaxEnergy)
@@ -165,44 +174,39 @@ void AUDPlayerCharacter::AddEnergy(float value)
 	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 }
 
-bool AUDPlayerCharacter::TryUseEnergy(float amount)
+float AUDPlayerCharacter::GetEnergy()
 {
-	if (CurrentEnergy >= amount)
+	return CurrentEnergy;
+}
+
+void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
+{
+	CurrentEnergy -= ToExpend;
+
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+}
+
+void AUDPlayerCharacter::UsePrimaryAbility()
+{
+	PrimaryFireAbility->TryUseAbility();
+}
+
+void AUDPlayerCharacter::UseMeleeAbility()
+{
+	if (MeleeAbility->TryUseAbility())
 	{
-		CurrentEnergy -= amount;
-
-		if (CurrentEnergy < 0)
-		{
-			CurrentEnergy = 0;
-		}
-
-		PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
-
-		return true;
-	}
-	else
-	{
-		return false;
+		PrimaryFireAbility->ForceCooldown(MeleePrimaryPause);
 	}
 }
 
-void AUDPlayerCharacter::FirePrimary()
+void AUDPlayerCharacter::UseRocketAbility()
 {
-	if (PrimaryCooldownTracker <= 0)
-	{
-		SpawnAttack(PrimaryFireAbility.AttackActorClass);
-
-		//Put the primary attack on cooldown.
-		PrimaryCooldownTracker = PrimaryCooldown;
-	}
+	RocketAbility->TryUseAbility();
 }
 
-void AUDPlayerCharacter::FireRocket()
+void AUDPlayerCharacter::UseShockwaveAbility()
 {
-	if (TryUseEnergy(100))
-	{
-		SpawnAttack(RocketAbility.AttackActorClass);
-	}
+	ShockwaveAbility->TryUseAbility();
 }
 
 AUDPlayerCharacter* AUDPlayerCharacter::GetCharacterInPlay(UObject* WorldContextObject)

@@ -138,17 +138,28 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 		bool GetHasRifle();
 
-	UFUNCTION(BlueprintCallable, Category = Status)
-		/** Adds to the player's current store of energy, though not above the player's Max Energy.*/
-		void AddEnergy(float Value);
-
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass);
 
 	float GetEnergy();
 
+	/** Sets the player's current energy to the given value and updates the player's UI. All methods that modify the current energy in some way must call this method to update the UI.*/
+	void SetEnergy(float Value);
+
+	/** Adds to the player's current store of energy, though not above the player's Max Energy.*/
+	void AddEnergy(float ToAdd);
+	
 	/** Expends the given amount of player energy and updates the UI. This does not keep the value from dropping below zero, as it is assumed the value will be tested beforehand.*/
 	void ExpendEnergy(float ToExpend);
+
+	/** Sets the player's current health to the given value and update's their UI. All methods that modify the current health in some what must call this method to update the UI.*/
+	void SetHealth(int Value);
+
+	/** Causes the player to lose the given amount of health. This does not keep the player's health from going below 0 because screwing up and seeing "-999 Health" is funny.*/
+	void DamagePlayer(int Damage);
+
+	/** Restore the given amount of helath to the player, but not beyond their max health.*/
+	void RestoreHealth(int Value);
 
 protected:
 

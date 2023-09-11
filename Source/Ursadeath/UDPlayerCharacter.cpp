@@ -161,17 +161,25 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackCl
 	}
 }
 
-void AUDPlayerCharacter::AddEnergy(float Value)
+void AUDPlayerCharacter::SetEnergy(float Value)
 {
-	CurrentEnergy += Value;
+	CurrentEnergy = Value;
+
+	//Update the UI
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+}
+
+void AUDPlayerCharacter::AddEnergy(float ToAdd)
+{
+	float NewEnergy = CurrentEnergy + ToAdd;
 
 	//Make sure the Current Energy is capped at max energy.
-	if (CurrentEnergy > MaxEnergy)
+	if (NewEnergy > MaxEnergy)
 	{
-		CurrentEnergy = MaxEnergy;
+		NewEnergy = MaxEnergy;
 	}
 
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+	SetEnergy(NewEnergy);
 }
 
 float AUDPlayerCharacter::GetEnergy()
@@ -181,9 +189,35 @@ float AUDPlayerCharacter::GetEnergy()
 
 void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
 {
-	CurrentEnergy -= ToExpend;
+	float NewEnergy = CurrentEnergy - ToExpend;
 
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+	SetEnergy(NewEnergy);
+}
+
+void AUDPlayerCharacter::SetHealth(int Value)
+{
+	CurrentHealth = Value;
+	
+	//Update the UI
+	PlayerHUDWidget->UpdateHealth(CurrentHealth);
+}
+
+void AUDPlayerCharacter::DamagePlayer(int Damage)
+{
+	SetHealth(CurrentHealth - Damage);
+}
+
+void AUDPlayerCharacter::RestoreHealth(int ToRestore)
+{
+	float NewHealth = CurrentHealth + ToRestore;
+
+	//Make sure the Current Health is capped at max Health.
+	if (NewHealth > MaxHealth)
+	{
+		NewHealth = MaxHealth;
+	}
+
+	SetHealth(NewHealth);
 }
 
 void AUDPlayerCharacter::UsePrimaryAbility()

@@ -15,11 +15,14 @@ class URSADEATH_API UUDPlayerHUDWidget : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+
+
+public:
 	/**Called by the player character whenever their health changes. Override to define how the HUD should change in response to the player's health.*/
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateHealth(int value);
+	void UpdateHealth(int PlayerHealth);
 
 	/**Called by the player character whenever their energy changes. Override to define how the HUD should change in response to the player's energy.*/
 	UFUNCTION(BlueprintImplementableEvent)
-	void UpdateEnergy(float value);
+	void UpdateEnergy(float PlayerEnergy);
 };

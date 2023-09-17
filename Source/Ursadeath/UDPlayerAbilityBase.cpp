@@ -3,6 +3,9 @@
 
 #include "UDPlayerAbilityBase.h"
 #include "UDPlayerCharacter.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "Components/ArrowComponent.h"
 
 UUDPlayerAbilityBase::UUDPlayerAbilityBase()
 {
@@ -32,6 +35,12 @@ bool UUDPlayerAbilityBase::TryUseAbility()
 	if (CanUseAbility())
 	{
 		OwningPlayer->SpawnAttack(AttackActorClass);
+
+		//Spawn the abilities particles, if they exist.
+		if (ParticleSystem)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAttached(ParticleSystem, OwningPlayer->GetAttackSpawnComponent(), FName(TEXT("None")), FVector::Zero(), FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
+		}
 
 		NotifyOnAbilitySuccessful();
 

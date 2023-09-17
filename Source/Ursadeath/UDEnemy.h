@@ -24,7 +24,7 @@ public:
 	FAttackReceived OnAttackRecieved;
 
 	/** If true, the enemy is immune to dying.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
 	bool bUndieable;
 
 protected:

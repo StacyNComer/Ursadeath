@@ -9,6 +9,7 @@
 
 class AUDPlayerAttack;
 class AUDPlayerCharacter;
+class UNiagaraSystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAbilitySuccessful);
 
@@ -19,14 +20,17 @@ class URSADEATH_API UUDPlayerAbilityBase : public UActorComponent
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 		class UInputAction* InputAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+		ETriggerEvent InputTrigger;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 		TSubclassOf<AUDPlayerAttack> AttackActorClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		ETriggerEvent InputTrigger;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<UNiagaraSystem> ParticleSystem;
 
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerCharacter> OwningPlayer;

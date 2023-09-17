@@ -20,7 +20,7 @@ protected:
 		float CurrentCooldown;
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Attack)
 		float Cooldown;
 
 protected:

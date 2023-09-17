@@ -58,6 +58,8 @@ AUDPlayerCharacter::AUDPlayerCharacter()
 	CurrentEnergy = 0;
 
 	MeleePrimaryPause = .5f;
+
+	bInfiniteEnergy = false;
 }
 
 void AUDPlayerCharacter::BeginPlay()
@@ -184,14 +186,19 @@ void AUDPlayerCharacter::AddEnergy(float ToAdd)
 
 float AUDPlayerCharacter::GetEnergy()
 {
-	return CurrentEnergy;
+	//If the player has Infinite Energy, return MaxEnergy. Otherwise, return their current energy.
+	return bInfiniteEnergy? MaxEnergy : CurrentEnergy;
 }
 
 void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
 {
-	float NewEnergy = CurrentEnergy - ToExpend;
+	//Energy is only expended if the Infinite Energy is turned off.
+	if (!bInfiniteEnergy)
+	{
+		float NewEnergy = CurrentEnergy - ToExpend;
 
-	SetEnergy(NewEnergy);
+		SetEnergy(NewEnergy);
+	}
 }
 
 void AUDPlayerCharacter::SetHealth(int Value)
@@ -256,4 +263,9 @@ void AUDPlayerCharacter::SetHasRifle(bool bNewHasRifle)
 bool AUDPlayerCharacter::GetHasRifle()
 {
 	return bHasRifle;
+}
+
+UArrowComponent* AUDPlayerCharacter::GetAttackSpawnComponent()
+{
+	return AttackSpawnComponent;
 }

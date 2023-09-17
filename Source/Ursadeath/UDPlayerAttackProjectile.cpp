@@ -17,6 +17,8 @@ AUDPlayerAttackProjectile::AUDPlayerAttackProjectile()
 
 void AUDPlayerAttackProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+
 	//Apply any attacks that this enemy overlaps
 	AUDEnemy* EnemyHit = Cast<AUDEnemy>(OtherActor);
 	if (EnemyHit != nullptr)

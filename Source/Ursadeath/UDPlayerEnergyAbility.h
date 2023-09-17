@@ -18,7 +18,7 @@ protected:
 	UUDPlayerEnergyAbility();
 
 	/** How much energy that is needed to use this ability.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 	float EnergyCost;
 
 protected:

@@ -109,6 +109,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerController> UDPlayerController;
 
+	/** If true, energy is never expended and the player is always considered to have max energy (this won't change the UI to reflect this)*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
+		bool bInfiniteEnergy;
+
 public:
 	AUDPlayerCharacter();
 
@@ -137,6 +141,10 @@ public:
 	/** Getter for the bool */
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 		bool GetHasRifle();
+
+	/** Returns the transform of the component ths player's attacks spawn at. */
+	UFUNCTION(BlueprintCallable, Category = Weapon)
+		UArrowComponent* GetAttackSpawnComponent();
 
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass);

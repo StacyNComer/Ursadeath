@@ -1,3 +1,17 @@
+ === Update 7 "Particles of Doom!" ===
+
+	> General
+
+* Added VFX for the melee attack, Shockwave, and Rocket Explosion.
+
+* The player character can now be set to have infinite energy.
+	* As a reminder, you can also set individual ability components to require 0 energy. Only the Rocket
+	  and Shockwave abilities have an energy setting.
+
+* Explosive projectiles now have an "ExplosionDebug" property that prints each actor the explosion detected.
+	* Note that explosions should detect all Actors with the Pawn and Player object types, but will
+	  only damage actors that are derived from the Enemy or PlayerCharacter classes.
+
  === Update 6 "Weapons of Doom!" ===
 
 	> General

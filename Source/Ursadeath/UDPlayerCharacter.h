@@ -164,6 +164,7 @@ public:
 	void SetHealth(int Value);
 
 	/** Causes the player to lose the given amount of health. This does not keep the player's health from going below 0 because screwing up and seeing "-999 Health" is funny.*/
+	UFUNCTION(BlueprintCallable)
 	void DamagePlayer(int Damage);
 
 	/** Restore the given amount of helath to the player, but not beyond their max health.*/

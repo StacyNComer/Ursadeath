@@ -23,7 +23,7 @@ void AUDEnemyController::StopAI()
 	BrainComponent->StopLogic("Stunned");
 }
 
-/** Resumes the enemy AI if it was stopped before. */
+/** Resumes the enemy AI if it was stopped before.*/
 void AUDEnemyController::ResumeAI()
 {
 	BrainComponent->StartLogic();

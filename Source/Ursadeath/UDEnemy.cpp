@@ -6,6 +6,7 @@
 #include "UDPlayerAttack.h"
 #include "UDPlayerAttackData.h"
 #include "UDEnemyController.h"
+#include "GameFramework/PawnMovementComponent.h"
 
 // Sets default values
 AUDEnemy::AUDEnemy()
@@ -115,6 +116,7 @@ void AUDEnemy::ApplyStun(float TimeStunned)
 		StunTime = TimeStunned;
 
 		EnemyController->StopAI();
+		GetMovementComponent()->StopActiveMovement();
 	}
 	else if (TimeStunned > StunTime)
 	{
@@ -142,7 +144,6 @@ void AUDEnemy::EndSpawnSequence()
 
 	OnSpawnSequenceEnd();
 
-	
 }
 
 void AUDEnemy::SetEnemyMaterials(UMaterialInterface* newMaterial)

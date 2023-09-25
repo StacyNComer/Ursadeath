@@ -29,7 +29,7 @@ void AUDPlayerAttack::Tick(float DeltaTime)
 
 void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct)
 {
-	UUDPlayerAttackData* AttackData = UUDPlayerAttackData::CreatePlayerAttackData(AttackStats);
+	UUDPlayerAttackData* AttackData = UUDPlayerAttackData::CreatePlayerAttackData(AttackStatsStruct);
 
 	Enemy->ReceiveAttack(AttackData);
 

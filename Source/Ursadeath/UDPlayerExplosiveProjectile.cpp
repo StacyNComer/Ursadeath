@@ -25,7 +25,7 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 		}
 		
 		//THe explosion searches for Pawns (which all enemies are) and Players.
-		TArray< TEnumAsByte< EObjectTypeQuery > > objectTypes;
+		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PLAYER));
 

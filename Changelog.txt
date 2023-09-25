@@ -1,3 +1,29 @@
+ === Update 8 "Testing of Doom!" ===
+
+	> General
+
+* The Test Knight enemy now has its own models and animations
+	# It's just an upscaled version of the Melee Squire with x3 health.
+
+* Melee attacks have been tweaked some:
+	* They have slightly longer range: 250 -> 300.
+	* They give slightly less energy: 66% -> 50%.
+
+* Ranged Squires have a bit less health: 500 -> 400.
+
+	> Bugfixes
+
+* Fixed a bug where enemies would not stop moving when stunned.
+
+* The enemies with the new models now properly collide with the player and their attacks.
+
+* Fixed a bug where the sword of melee squires could be hit by player attacks.
+
+* Fixed a bug where Rocket explosions dealt damage as if it were a direct hit.
+
+* Fixed a bug where Ranged Squire projectiles would go through everything.
+
+
  === Update 7 "Particles of Doom!" ===
 
 	> General

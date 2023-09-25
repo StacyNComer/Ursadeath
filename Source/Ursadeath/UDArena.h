@@ -9,6 +9,7 @@
 class AUDEnemy;
 class UStaticMeshComponent;
 
+/** A struct for tracking how long until a given scene component's position is no longer occupied by a spawning enemy.*/
 struct OccupiedSpawnPoint
 {
 	TObjectPtr<USceneComponent> SpawnPoint;

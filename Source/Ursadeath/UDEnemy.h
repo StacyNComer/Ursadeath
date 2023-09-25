@@ -32,29 +32,31 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
 	bool bSpawnInstantly;
 
+	/** The time in seconds that it takes for an enemy to "Spawn In".*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
-	float SpawnTime = 3;
+		float SpawnTime = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
-	int32 health;
+		int32 health;
 
-	/** The remaining seconds an enemy has until they are no longer stunned. An enemy is considered to be stunned while this is > 0*/
+	/** The remaining seconds an enemy has until they are no longer stunned. An enemy is considered to be stunned while this is > 0.*/
 	UPROPERTY(BlueprintReadOnly, Category = Status)
-	float StunTime;
+		float StunTime;
 
-	/** Controls the altered appearence enemies have while "spawning in"*/
+	/** Controls the altered appearence enemies have while "spawning in".*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
-	TObjectPtr<UMaterialInterface> SpawningMaterial;
+		TObjectPtr<UMaterialInterface> SpawningMaterial;
 
+	/** A reference to the enemy controller casted as an UDEnemyController.*/
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<AUDEnemyController> EnemyController;
+		TObjectPtr<AUDEnemyController> EnemyController;
 
 private:
-	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning*/
+	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning.*/
 	TInlineComponentArray<UMeshComponent*> EnemyMeshes;
 
 public:
-	// Sets default values for this pawn's properties
+	// Sets default values for this pawn's properties.
 	AUDEnemy();
 
 protected:
@@ -67,7 +69,7 @@ public:
 
 	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy. Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable, Category=Status)
-	bool ReceiveAttack(UUDPlayerAttackData* AttackData);
+		bool ReceiveAttack(UUDPlayerAttackData* AttackData);
 
 	/** Returns true if the enemy is currently stunned*/
 	UFUNCTION(BlueprintCallable, Category = Status)
@@ -79,7 +81,7 @@ public:
 protected:
 	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnSpawnSequenceEnd();
+		void OnSpawnSequenceEnd();
 
 	/** Stuns the enemy for the given time. If the enemy is already stunned, the remaining time stunned will be set to TimeStunned if it is higher.*/
 	void ApplyStun(float TimeStunned);

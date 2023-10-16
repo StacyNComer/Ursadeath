@@ -7,6 +7,7 @@
 #include "UDPlayerController.generated.h"
 
 class UUDPlayerHUDWidget;
+class AUDPlayerCharacter;
 
 /**
  * 
@@ -16,9 +17,12 @@ class URSADEATH_API AUDPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<UUDPlayerHUDWidget> PlayerHUDWidgetClass;
+		TSubclassOf<UUDPlayerHUDWidget> PlayerHUDWidgetClass;
+
+	/** The Player Character being controlled by this controller.*/
+	TObjectPtr<AUDPlayerCharacter> ControlledPlayer;
 
 public:
 	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)

@@ -2,4 +2,11 @@
 
 
 #include "UrsadeathGameInstance.h"
+#include "UDArena.h"
+#include "UDPlayerCharacter.h"
 
+void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
+{
+	PlayerCharacter->DisplayEnemyWave(Wave);
+	GameArena->SetCurrentWave(Wave);
+}

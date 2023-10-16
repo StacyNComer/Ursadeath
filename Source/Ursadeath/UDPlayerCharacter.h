@@ -20,24 +20,32 @@ class AUDPlayerController;
 class UUDPlayerHUDWidget;
 class UUDPlayerCooldownAbility;
 class UUDPlayerEnergyAbility;
+class AUDEnemy;
+struct FEnemyWave;
+enum class EEnemyTier;
 
-/** A structure holding the common data for the player's abilities. Non-common data, such as if the attack has a cooldown or input functions, is stored in the PlayerCharacter itself.*/
+/** Holds the data for events ocurring when an attack hits an enemy.*/
 USTRUCT(BlueprintType)
-struct FPlayerAbility
+struct FEnemyHitData
 {
-	 GENERATED_BODY()
+	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attacking)
-	TSubclassOf<AUDPlayerAttack> AttackActorClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AUDEnemy> Enemy;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EEnemyTier EnemyTier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attacking)
-	class UInputAction* InputAction;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<AUDPlayerAttack> Attack;
 };
 
-UCLASS(config = Game)
+UCLASS(Abstract, config = Game)
 class AUDPlayerCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyKillSignature, FEnemyHitData, HitData);
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -81,6 +89,9 @@ class AUDPlayerCharacter : public ACharacter
 		TObjectPtr<UUDPlayerEnergyAbility> ShockwaveAbility;
 
 protected:
+	UPROPERTY(BlueprintAssignable)
+		FOnEnemyKillSignature OnEnemyDeath;
+
 	/** The max amount of health a player may have.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 		float MaxHealth;
@@ -146,8 +157,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Weapon)
 		UArrowComponent* GetAttackSpawnComponent();
 
+	/** Causes the player to lose the given amount of health. This does not keep the player's health from going below 0 because screwing up and seeing "-999 Health" is funny.*/
+	UFUNCTION(BlueprintCallable)
+		void DamagePlayer(int Damage);
+
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
-	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass);
+	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass);
 
 	float GetEnergy();
 
@@ -163,12 +178,17 @@ public:
 	/** Sets the player's current health to the given value and update's their UI. All methods that modify the current health in some what must call this method to update the UI.*/
 	void SetHealth(int Value);
 
-	/** Causes the player to lose the given amount of health. This does not keep the player's health from going below 0 because screwing up and seeing "-999 Health" is funny.*/
-	UFUNCTION(BlueprintCallable)
-	void DamagePlayer(int Damage);
-
 	/** Restore the given amount of helath to the player, but not beyond their max health.*/
 	void RestoreHealth(int Value);
+
+	/** Sets the player HUD widget and makes it display the players current stats.*/
+	void InitializeHUDWidget(UUDPlayerHUDWidget* NewHUDWidget);
+
+	/** Reports that the given enemy has been killed by the given attack to the player, updating the player's UI and invoking the OnEnemyKill delegate.*/
+	void NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack);
+
+	/** Displays the given enemy wave on the player's UI.*/
+	void DisplayEnemyWave(FEnemyWave Wave);
 
 protected:
 
@@ -203,7 +223,5 @@ public:
 
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-
-
 };
 

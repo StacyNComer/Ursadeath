@@ -13,6 +13,9 @@
 #include "UDPlayerHUDWidget.h"
 #include "UDPlayerCooldownAbility.h"
 #include "UDPlayerEnergyAbility.h"
+#include "UDEnemy.h"
+#include "UrsadeathGameInstance.h"
+#include "UDArena.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -67,14 +70,11 @@ void AUDPlayerCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	//Set this as the game instance's player.
+	GetGameInstance<UUrsadeathGameInstance>()->PlayerCharacter = this;
+
 	// Set the UDPlayerController.
 	UDPlayerController = Cast<AUDPlayerController>(GetController());
-
-	// Cache the player HUD from the player controller.
-	PlayerHUDWidget = UDPlayerController->PlayerHUDWidget;
-	// Set the HUD to display the players starting stats.
-	PlayerHUDWidget->UpdateHealth(CurrentHealth);
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
@@ -148,18 +148,19 @@ void AUDPlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> attackClass)
+void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass)
 {
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
-		//Set Spawn Collision Handling Override
 		FActorSpawnParameters ActorSpawnParams;
+		//Set Spawn Collision Handling Override
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		//Set the attack's owner.
 		ActorSpawnParams.Owner = this;
 
 		//Spawn the attack. Set the player spawning it as the attack's owner.
-		AUDPlayerAttack* attackSpawned = World->SpawnActor<AUDPlayerAttack>(attackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation(), ActorSpawnParams);
+		AUDPlayerAttack* AttackSpawned = World->SpawnActor<AUDPlayerAttack>(AttackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation(), ActorSpawnParams);
 	}
 }
 
@@ -225,6 +226,26 @@ void AUDPlayerCharacter::RestoreHealth(int ToRestore)
 	}
 
 	SetHealth(NewHealth);
+}
+
+void AUDPlayerCharacter::InitializeHUDWidget(UUDPlayerHUDWidget* NewHUDWidget)
+{
+	// Set the player's HUD.
+	PlayerHUDWidget = NewHUDWidget;
+
+	// Set the HUD to display the players starting stats.
+	PlayerHUDWidget->UpdateHealth(CurrentHealth);
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+}
+
+void AUDPlayerCharacter::NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack)
+{
+	PlayerHUDWidget->DecrementEnemyCount(EnemyKilled->GetClass(), EnemyKilled->GetEnemyTier());
+}
+
+void AUDPlayerCharacter::DisplayEnemyWave(FEnemyWave Wave)
+{	
+	PlayerHUDWidget->DisplayEnemyWave(Wave);
 }
 
 void AUDPlayerCharacter::UsePrimaryAbility()

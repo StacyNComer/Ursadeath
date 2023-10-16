@@ -108,6 +108,16 @@ float AUDEnemy::GetSpawnTime()
 	return SpawnTime;
 }
 
+EEnemyTier AUDEnemy::GetEnemyTier()
+{
+	return EnemyTier;
+}
+
+void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
+{
+	EnemyTier = Tier;
+}
+
 void AUDEnemy::ApplyStun(float TimeStunned)
 {
 	//If the player was not stunned before stun them. If they were already stunned, only apply the stun if it would be longer.

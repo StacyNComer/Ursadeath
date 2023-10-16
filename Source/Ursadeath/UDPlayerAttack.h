@@ -8,6 +8,7 @@
 
 class UUDPlayerAttackData;
 class AUDEnemy;
+class AUDPlayerCharacter;
 
 /** An enum representing the general source of an attack.*/
 UENUM(BlueprintType)
@@ -37,10 +38,14 @@ struct FPlayerAttackStats
 };
 
 /* An actor meant to deliver a player attack to an enemy (e.g. a projectile). UDEnemy derived actors take damage when overlapping actors of this class.*/
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API AUDPlayerAttack : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	/** The player chracter that spawned this attack. This value is not set until it is needed the for first time: To get this value safely, use GetOwningPlayer()*/
+	TObjectPtr<AUDPlayerCharacter> OwningPlayer;
 
 protected:
 	/** The name of the collision profile used for player attacks.*/
@@ -53,7 +58,7 @@ protected:
 	/** The energy that should be given to the player if the attack hits an enemy.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float EnergyGain;
-	
+
 public:	
 	// Sets default values for this actor's properties
 	AUDPlayerAttack();
@@ -62,9 +67,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain.*/
+	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain. 
+	* Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable)
 	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+
+	/** Returns the player that spawned this projectile.*/
+	UFUNCTION(BlueprintCallable)
+		AUDPlayerCharacter* GetOwningPlayer();
 
 public:	
 	// Called every frame

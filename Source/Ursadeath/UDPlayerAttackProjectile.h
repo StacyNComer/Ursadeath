@@ -12,7 +12,7 @@ class UProjectileMovementComponent;
 /**
  * The base class for player attacks that are projectiles. These are destroyed when they hit anything other than the player.
  */
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API AUDPlayerAttackProjectile : public AUDPlayerAttack
 {
 	GENERATED_BODY()

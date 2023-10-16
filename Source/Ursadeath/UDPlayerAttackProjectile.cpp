@@ -10,7 +10,6 @@ AUDPlayerAttackProjectile::AUDPlayerAttackProjectile()
 	//Initialize the sphere component and its overlap event.
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
 	SphereComponent->SetCollisionProfileName(PlayerAttackCollisionProfile);
-	/*SphereComponent->OnComponentBeginOverlap.AddDynamic(this, &AUDPlayerAttackProjectile::OnSphereBeginOverlap);*/
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 }
@@ -19,12 +18,13 @@ void AUDPlayerAttackProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	//Apply any attacks that this enemy overlaps
+	//Apply the attack to an ememy that it overlaps.
 	AUDEnemy* EnemyHit = Cast<AUDEnemy>(OtherActor);
 	if (EnemyHit != nullptr)
 	{
 		ApplyAttackToEnemy(EnemyHit, AttackStats);
 	}
 
+	//Destroy the project whenever it hits something. The projectile's collision settings should prevent it from hitting anything other than an enemy or wall.
 	Destroy();
 }

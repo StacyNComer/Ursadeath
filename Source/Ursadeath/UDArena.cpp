@@ -85,6 +85,9 @@ void AUDArena::Tick(float DeltaTime)
 
 				//Spawn the enemy
 				AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass);
+				
+				//Set the enemy to be a Knight. ARISE A KNIGHT!
+				EnemySpawned->SetEnemyTier(EEnemyTier::KNIGHT);
 
 				//Decrement the amount of the spawned enemy type in the wave. If that enemy type is depleted, remove it from the wave and spawn pool so it is not chosen anymore.
 				if (--CurrentWave.EnemyCounts[EnemyClass] == 0)
@@ -109,12 +112,17 @@ void AUDArena::Tick(float DeltaTime)
 				//Choose a random enemy class from the spawn pool to spawn.
 				TSubclassOf<AUDEnemy> EnemyClass = SquireSpawnPool[FMath::RandRange(0, SquireSpawnPool.Num() - 1)];
 
+				//Spawn the enemy
 				AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass);
+
+				//Set the enemy tier to be a squire.
+				EnemySpawned->SetEnemyTier(EEnemyTier::SQUIRE);
 
 				CurrentWave.SquireSpawns--;
 
 				SquiresInPlay++;
 
+				//Tell the enemy to signal the arena when it dies.
 				EnemySpawned->OnDestroyed.AddDynamic(this, &AUDArena::DecrementSquiresInPlay);
 
 			} while (CanSpawnSquire() && FreeEnemySpawnPoints.Num() > 0);

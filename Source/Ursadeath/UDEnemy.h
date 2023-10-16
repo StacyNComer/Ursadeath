@@ -10,22 +10,33 @@ class UUDPlayerAttackData;
 class UMeshComponent;
 class AUDEnemyController;
 
-/*A delegate type for when the enemy is damaged.*/
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackReceived, UUDPlayerAttackData*, DamageData);
+/** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
+UENUM(BlueprintType)
+enum class EEnemyTier
+{
+	UNTIERED = 0,
+	SQUIRE = 1,
+	KNIGHT = 2,
+	CHAMPION = 3
+};
+
 
 UCLASS(Abstract)
 class URSADEATH_API AUDEnemy : public APawn
 {
 	GENERATED_BODY()
 
+	/*A delegate type for when the enemy is damaged.*/
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackReceivedSignature, UUDPlayerAttackData*, DamageData);
+
 public:
 	/** A delegate invoked before an enemy is affected by an attack during ReceiveAttack. This delegate is used to modify the attack based on an enemy's strength/weakness toward it.*/
 	UPROPERTY(BlueprintAssignable)
-	FAttackReceived OnAttackRecieved;
+		FAttackReceivedSignature OnAttackRecieved;
 
 	/** If true, the enemy is immune to dying.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
-	bool bUndieable;
+		bool bUndieable;
 
 protected:
 	/** If true, the enemy won't undergo its spawning sequence. Instead, the enemy will recieve their default AI when play begins. Use for debug enemies without waiting for them to spawn.*/
@@ -50,6 +61,9 @@ protected:
 	/** A reference to the enemy controller casted as an UDEnemyController.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDEnemyController> EnemyController;
+
+	/** This enemy's tier. Enemies do not have a hard coded tier.*/
+	EEnemyTier EnemyTier;
 
 private:
 	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning.*/
@@ -77,6 +91,12 @@ public:
 
 	/** Returns the amount of time this enemy should spend "spawning in"*/
 	float GetSpawnTime();
+
+	/** Returns the enemy's tier.*/
+	EEnemyTier GetEnemyTier();
+
+	/** Sets the enemy tier. This should be used when an enemy first spawns.*/
+	void SetEnemyTier(EEnemyTier Tier);
 
 protected:
 	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/

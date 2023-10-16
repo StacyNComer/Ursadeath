@@ -1,3 +1,16 @@
+ === Update 9 "Spawn Counts of Doom!" ===
+
+	> General
+
+* Added counters that show how much of a given enemy type is left in a given wave.
+	* Information on editting the UI for this can be found in the "Player HUD" section of the project's GitHub Wiki:
+	   https://github.com/StacyNComer/Ursadeath/wiki
+
+* You now spawn enemies in by pressing the "P" key. You can still set the Arena to spawn on Begin Play, 
+  but the Spawn Indicators will not update to show what's in the wave.
+	* You can change what is in the wave and its spawning behavior from the player character blueprint.
+
+
  === Update 8 "Testing of Doom!" ===
 
 	> General

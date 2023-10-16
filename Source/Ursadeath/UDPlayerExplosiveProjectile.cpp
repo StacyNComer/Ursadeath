@@ -51,9 +51,11 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 				PlayerHit->DamagePlayer(ExplosionPlayerDamage);
 			}
 
+#if WITH_EDITOR
 			//Show a message for each Actor the explosion detected if the explosion is being debugged.
 			if(bExplosionDebug)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, OutActorsHit[i]->GetActorNameOrLabel());
+#endif
 		}
 
 #if WITH_EDITOR

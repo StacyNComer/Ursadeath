@@ -30,25 +30,25 @@ struct FEnemyWave
 
 public:
 	/** A map linking each enemy class to how many of that enemy should spawn during a wave. An enemy class should only exist here if more than 0 of it should spawn.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TSubclassOf<AUDEnemy>, int32> EnemyCounts;
 
 	/** How many squire class enemies that spawn during a given wave. Once this is depleted, squires spawn at a slow rate.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite);
 	int32 SquireSpawns;
 
 	/** The maximum Knight class enemies that may be in play at once.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxKnights;
 
 	/** The maximum Squire class enemies that may be in play at once.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 MaxSquires;
 };
 
 
 /** An actor holding the arena mesh as well as all the locations for enemy and health bobule spawns.*/
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API AUDArena : public AActor
 {
 	GENERATED_BODY()
@@ -87,7 +87,7 @@ protected:
 #if WITH_EDITORONLY_DATA
 	/** Spawns whatever the current wave is set to on Begin Play.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
-	bool bSpawnAtBeginPlay;
+		bool bSpawnAtBeginPlay;
 #endif
 
 public:	
@@ -131,7 +131,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
 	/** Sets the current enemy wave and begins spawning it.*/
-	void SetCurrentWave(FEnemyWave Wave);
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentWave(FEnemyWave Wave);
 };

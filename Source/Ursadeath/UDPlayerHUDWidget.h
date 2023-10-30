@@ -14,19 +14,6 @@ class UDataTable;
 struct FEnemyWave;
 enum class EEnemyTier;
 
-/** Holds information about spawning a given type of Knight tier enemy. Ony one entry should exist on the data table per class of enemy.*/
-USTRUCT(BlueprintType)
-struct FKnightSpawningData : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TSubclassOf<AUDEnemy> KnightClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TObjectPtr<UTexture2D> EnemyIcon;
-};
-
 /**
  * 
  */
@@ -36,11 +23,11 @@ class URSADEATH_API UUDPlayerHUDWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
-	/** The widget used to contain the enemy indicators. The indicators are created and set */
+	/** The widget used to contain the Enemy Spawn Indicators.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TObjectPtr<UPanelWidget> SpawnIndicatorContainer;
 	
-	/** The blueprint class that will be used for enemy spawn indicators*/
+	/** The blueprint class that will be used for enemy spawn indicators.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TSubclassOf<UUDEnemySpawnIndicator> EnemySpawnIndicatorClass;
 
@@ -62,13 +49,13 @@ protected:
 	virtual void NativeOnInitialized() override;
 
 public:
-	/**Called by the player character whenever their health changes. Override to define how the HUD should change in response to the player's health.*/
+	/**Called by the player character whenever their health changes. When Health Change is 0, the player's health is being initialized at the start of the game. Override to define how the HUD should change in response to the player's health.*/
 	UFUNCTION(BlueprintImplementableEvent)
-		void UpdateHealth(int PlayerHealth);
+		void UpdateHealth(int PlayerHealth, int HealthChange);
 
-	/**Called by the player character whenever their energy changes. Override to define how the HUD should change in response to the player's energy.*/
+	/**Called by the player character whenever their energy changes. When the Energy Change is 0, the player's energy is being initialized at the start of the game. Override to define how the HUD should change in response to the player's energy.*/
 	UFUNCTION(BlueprintImplementableEvent)
-		void UpdateEnergy(float PlayerEnergy);
+		void UpdateEnergy(float PlayerEnergy, float EnergyChange, bool EnergyBarGained);
 
 	/** Decrement the count of the indicator for the given enemy type.*/
 	void DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier);

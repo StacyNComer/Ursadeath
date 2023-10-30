@@ -18,6 +18,7 @@ class USoundBase;
 class AUDPlayerAttack;
 class AUDPlayerController;
 class UUDPlayerHUDWidget;
+class UUDRoundScreenWidget;
 class UUDPlayerCooldownAbility;
 class UUDPlayerEnergyAbility;
 class AUDEnemy;
@@ -58,6 +59,9 @@ class AUDPlayerCharacter : public ACharacter
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputMappingContext* RoundMenuMappingContext;
 
 	/** A component that represents the spawning position and rotation for attacks.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
@@ -112,9 +116,21 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 		float MeleePrimaryPause;
 
-	/** The player's HUD. */
+	/** The class the player's HUD will be created as.*/
+	UPROPERTY(EditAnywhere, Category = UI)
+		TSubclassOf<UUDPlayerHUDWidget> PlayerHUDWidgetClass;
+
+	/** The class the player's Round Screen will be created as.*/
+	UPROPERTY(EditAnywhere, Category = UI)
+		TSubclassOf<UUDRoundScreenWidget> RoundScreenWidgetClass;
+
+	/** The player's HUD.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUDPlayerHUDWidget> PlayerHUDWidget;
+
+	/** The player's Round Screen for viewing the upcoming enemy waves and their upgrades.*/
+	UPROPERTY(BlueprintReadOnly)
+		TObjectPtr<UUDRoundScreenWidget> RoundScreenWidget;
 
 	/** The player controller casted to UDPlayerController. */
 	UPROPERTY(BlueprintReadOnly)
@@ -140,6 +156,9 @@ public:
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* LookAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* RoundMenuAction;
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -181,14 +200,14 @@ public:
 	/** Restore the given amount of helath to the player, but not beyond their max health.*/
 	void RestoreHealth(int Value);
 
-	/** Sets the player HUD widget and makes it display the players current stats.*/
-	void InitializeHUDWidget(UUDPlayerHUDWidget* NewHUDWidget);
-
 	/** Reports that the given enemy has been killed by the given attack to the player, updating the player's UI and invoking the OnEnemyKill delegate.*/
 	void NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack);
 
 	/** Displays the given enemy wave on the player's UI.*/
 	void DisplayEnemyWave(FEnemyWave Wave);
+
+	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
+	void NotifyOnHealthPickupUsed();
 
 protected:
 
@@ -198,6 +217,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Swaps whether the round menu is on or off.*/
+	void ToggleRoundMenu();
 
 	/** Uses the primary fire ability. Used for Input.*/
 	void UsePrimaryAbility();

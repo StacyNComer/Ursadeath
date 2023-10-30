@@ -6,7 +6,6 @@
 #include "UDEnemySpawnIndicator.h"
 #include "Blueprint/WidgetTree.h"
 #include "UDEnemy.h"
-#include "UDArena.h"
 #include "UrsadeathGameInstance.h"
 
 void UUDPlayerHUDWidget::NativeOnInitialized()
@@ -22,19 +21,19 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 	SquireSpawnIndicator = CreateSpawnIndicatorWidget(UrsadeathGameInstance->SquireIcon);
 
 	//Get an array of all game's types of Knight tier enemies from the data table.
-	TArray<FKnightSpawningData*> KnightSpawnData;
-	KnightSpawnDataTable->GetAllRows<FKnightSpawningData>(TEXT("PlayerHUDKnightIndicatorInit"), KnightSpawnData);
+	TArray<FEnemySpawnData*> KnightSpawnData;
+	KnightSpawnDataTable->GetAllRows<FEnemySpawnData>(TEXT("PlayerHUDKnightIndicatorInit"), KnightSpawnData);
 
 	//Create an indicator for each type of Knight tier enemy 
 	for (int i = 0; i < KnightSpawnData.Num(); i++)
 	{
-		const FKnightSpawningData* KnightSpawnDataEntry = KnightSpawnData[i];
+		const FEnemySpawnData* KnightSpawnDataEntry = KnightSpawnData[i];
 
 		//Contruct the indicator widget.
 		UUDEnemySpawnIndicator* KnightSpawnIndicator = CreateSpawnIndicatorWidget(KnightSpawnDataEntry->EnemyIcon);
 
 		//Add the indicator to the Knight Spawn Indicator map so that it is linked to its enemy type.
-		KnightSpawnIndicators.Add(KnightSpawnData[i]->KnightClass, KnightSpawnIndicator);
+		KnightSpawnIndicators.Add(KnightSpawnData[i]->EnemyClass, KnightSpawnIndicator);
 	}
 }
 

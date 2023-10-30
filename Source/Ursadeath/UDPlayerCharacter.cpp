@@ -16,6 +16,7 @@
 #include "UDEnemy.h"
 #include "UrsadeathGameInstance.h"
 #include "UDArena.h"
+#include "UDRoundScreenWidget.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -76,13 +77,24 @@ void AUDPlayerCharacter::BeginPlay()
 	// Set the UDPlayerController.
 	UDPlayerController = Cast<AUDPlayerController>(GetController());
 
+	//Create player hud
+	PlayerHUDWidget = CreateWidget<UUDPlayerHUDWidget>(UDPlayerController, PlayerHUDWidgetClass);
+	PlayerHUDWidget->AddToViewport();
+
+	// Set the HUD to display the players starting stats.
+	PlayerHUDWidget->UpdateHealth(CurrentHealth, 0);
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy, 0, false);
+
+	//Create the round screen.
+	RoundScreenWidget = CreateWidget<UUDRoundScreenWidget>(UDPlayerController, RoundScreenWidgetClass);
+	RoundScreenWidget->AddToViewport();
+	//The round screen should be closed by default.
+	RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+
 	//Add Input Mapping Context
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer()))
 	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 	}
 }
 
@@ -98,6 +110,9 @@ void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
+		//Toggling the round menu
+		EnhancedInputComponent->BindAction(RoundMenuAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::ToggleRoundMenu);
+
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -148,6 +163,21 @@ void AUDPlayerCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AUDPlayerCharacter::ToggleRoundMenu()
+{
+	switch (RoundScreenWidget->Visibility)
+	{
+		case ESlateVisibility::Visible:
+			RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+			break;
+	
+
+		case ESlateVisibility::Collapsed:
+			RoundScreenWidget->SetVisibility(ESlateVisibility::Visible);
+			break;
+	}
+}
+
 void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass)
 {
 	UWorld* const World = GetWorld();
@@ -166,10 +196,16 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackCl
 
 void AUDPlayerCharacter::SetEnergy(float Value)
 {
+	//Record the change in energy for the UI update.
+	float DeltaEnergy = Value - CurrentEnergy;
+
+	//Check if the change in energy resulted in an energy bar being filled.
+	bool EnergyBarGained = floorf(Value / 100) > floorf(CurrentEnergy / 100);
+	
 	CurrentEnergy = Value;
 
 	//Update the UI
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
+	PlayerHUDWidget->UpdateEnergy(CurrentEnergy, DeltaEnergy, EnergyBarGained);
 }
 
 void AUDPlayerCharacter::AddEnergy(float ToAdd)
@@ -204,10 +240,12 @@ void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
 
 void AUDPlayerCharacter::SetHealth(int Value)
 {
+	int DeltaHealth = Value - CurrentEnergy;
+
 	CurrentHealth = Value;
 	
 	//Update the UI
-	PlayerHUDWidget->UpdateHealth(CurrentHealth);
+	PlayerHUDWidget->UpdateHealth(CurrentHealth, DeltaHealth);
 }
 
 void AUDPlayerCharacter::DamagePlayer(int Damage)
@@ -226,16 +264,6 @@ void AUDPlayerCharacter::RestoreHealth(int ToRestore)
 	}
 
 	SetHealth(NewHealth);
-}
-
-void AUDPlayerCharacter::InitializeHUDWidget(UUDPlayerHUDWidget* NewHUDWidget)
-{
-	// Set the player's HUD.
-	PlayerHUDWidget = NewHUDWidget;
-
-	// Set the HUD to display the players starting stats.
-	PlayerHUDWidget->UpdateHealth(CurrentHealth);
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy);
 }
 
 void AUDPlayerCharacter::NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack)

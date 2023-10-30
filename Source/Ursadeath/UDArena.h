@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "UDEnemy.h"
 #include "UDArena.generated.h"
 
 class AUDEnemy;
@@ -22,31 +23,6 @@ struct OccupiedSpawnPoint
 	}
 };
 
-/* A structure storing the information about each wave.**/
-USTRUCT(BlueprintType)
-struct FEnemyWave
-{
-	GENERATED_BODY()
-
-public:
-	/** A map linking each enemy class to how many of that enemy should spawn during a wave. An enemy class should only exist here if more than 0 of it should spawn.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TMap<TSubclassOf<AUDEnemy>, int32> EnemyCounts;
-
-	/** How many squire class enemies that spawn during a given wave. Once this is depleted, squires spawn at a slow rate.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite);
-	int32 SquireSpawns;
-
-	/** The maximum Knight class enemies that may be in play at once.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxKnights;
-
-	/** The maximum Squire class enemies that may be in play at once.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MaxSquires;
-};
-
-
 /** An actor holding the arena mesh as well as all the locations for enemy and health bobule spawns.*/
 UCLASS(Abstract)
 class URSADEATH_API AUDArena : public AActor
@@ -55,27 +31,27 @@ class URSADEATH_API AUDArena : public AActor
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UStaticMeshComponent> ArenaMesh;
+		TObjectPtr<UStaticMeshComponent> ArenaMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<USceneComponent> EnemySpawnRoot;
+		TObjectPtr<USceneComponent> EnemySpawnRoot;
 
 	/** An array of spawn points that do not have an enemy currently being spawned at them.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<TObjectPtr<USceneComponent>> FreeEnemySpawnPoints;
-
-	TArray<OccupiedSpawnPoint*> OccupiedSpawnPoints;
+		TArray<TObjectPtr<USceneComponent>> FreeEnemySpawnPoints;
 
 	/** The current wave that the arena will try to spawn. Note that the data in this struct is modified as enemies are spawned.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FEnemyWave CurrentWave;
+		FEnemyWave CurrentWave;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<TSubclassOf<AUDEnemy>> SquireSpawnPool;
+		TArray<TSubclassOf<AUDEnemy>> SquireSpawnPool;
 
 	/** While true, the arena will try and spawn the current wave.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bSpawningWave;
+
+	TArray<OccupiedSpawnPoint*> OccupiedSpawnPoints;
 
 	/** An array of Knight class enemies that the current wave can spawn.*/
 	TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;

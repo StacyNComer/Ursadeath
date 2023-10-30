@@ -7,6 +7,7 @@
 #include "UDPlayerController.generated.h"
 
 class UUDPlayerHUDWidget;
+class UUDRoundScreenWidget;
 class AUDPlayerCharacter;
 
 /**
@@ -18,15 +19,8 @@ class URSADEATH_API AUDPlayerController : public APlayerController
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere)
-		TSubclassOf<UUDPlayerHUDWidget> PlayerHUDWidgetClass;
-
 	/** The Player Character being controlled by this controller.*/
 	TObjectPtr<AUDPlayerCharacter> ControlledPlayer;
-
-public:
-	UPROPERTY(VisibleAnywhere, BLueprintReadOnly)
-	TObjectPtr<UUDPlayerHUDWidget> PlayerHUDWidget;
 
 protected:
 	void BeginPlay() override;

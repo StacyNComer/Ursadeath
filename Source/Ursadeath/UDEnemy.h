@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "Engine/DataTable.h"
 #include "UDEnemy.generated.h"
 
 class UUDPlayerAttackData;
 class UMeshComponent;
 class AUDEnemyController;
+class AUDEnemy;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -20,6 +22,42 @@ enum class EEnemyTier
 	CHAMPION = 3
 };
 
+/** Holds information about spawning a given type of enemy. Ony one entry should exist on the data table per class of enemy. Squire tier enemies do not currentlt get spawn data.*/
+USTRUCT(BlueprintType)
+struct FEnemySpawnData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf<AUDEnemy> EnemyClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UTexture2D> EnemyIcon;
+};
+
+/* A structure storing the information about each wave.**/
+USTRUCT(BlueprintType)
+struct FEnemyWave
+{
+	GENERATED_BODY()
+
+public:
+	/** A map linking each enemy class to how many of that enemy should spawn during a wave. An enemy class should only exist here if more than 0 of it should spawn.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TMap<TSubclassOf<AUDEnemy>, int32> EnemyCounts;
+
+	/** How many squire class enemies that spawn during a given wave. Once this is depleted, squires spawn at a slow rate.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite);
+	int32 SquireSpawns;
+
+	/** The maximum Knight class enemies that may be in play at once.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 MaxKnights;
+
+	/** The maximum Squire class enemies that may be in play at once.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		int32 MaxSquires;
+};
 
 UCLASS(Abstract)
 class URSADEATH_API AUDEnemy : public APawn

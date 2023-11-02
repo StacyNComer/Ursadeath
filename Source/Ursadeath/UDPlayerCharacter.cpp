@@ -169,11 +169,13 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	{
 		case ESlateVisibility::Visible:
 			RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+			UGameplayStatics::SetGamePaused(GetWorld(), false);
 			break;
 	
 
 		case ESlateVisibility::Collapsed:
 			RoundScreenWidget->SetVisibility(ESlateVisibility::Visible);
+			UGameplayStatics::SetGamePaused(GetWorld(), true);
 			break;
 	}
 }
@@ -251,6 +253,11 @@ void AUDPlayerCharacter::SetHealth(int Value)
 void AUDPlayerCharacter::DamagePlayer(int Damage)
 {
 	SetHealth(CurrentHealth - Damage);
+}
+
+void AUDPlayerCharacter::NotifyOnHealthPickupUsed()
+{
+	RestoreHealth(35);
 }
 
 void AUDPlayerCharacter::RestoreHealth(int ToRestore)

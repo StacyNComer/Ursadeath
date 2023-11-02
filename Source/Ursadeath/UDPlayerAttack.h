@@ -73,7 +73,7 @@ protected:
 	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
 
 	/** Returns the player that spawned this projectile.*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 		AUDPlayerCharacter* GetOwningPlayer();
 
 public:	

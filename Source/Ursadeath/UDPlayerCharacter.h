@@ -180,6 +180,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DamagePlayer(int Damage);
 
+	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
+	void NotifyOnHealthPickupUsed();
+
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass);
 
@@ -205,9 +208,6 @@ public:
 
 	/** Displays the given enemy wave on the player's UI.*/
 	void DisplayEnemyWave(FEnemyWave Wave);
-
-	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
-	void NotifyOnHealthPickupUsed();
 
 protected:
 

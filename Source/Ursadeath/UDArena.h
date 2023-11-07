@@ -5,10 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "UDEnemy.h"
+#include "UrsadeathGameInstance.h"
 #include "UDArena.generated.h"
 
 class AUDEnemy;
 class UStaticMeshComponent;
+class AUDHealthPickup;
+class UArrowComponent;
+struct FEnemyWave;
 
 /** A struct for tracking how long until a given scene component's position is no longer occupied by a spawning enemy.*/
 struct OccupiedSpawnPoint
@@ -33,6 +37,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UStaticMeshComponent> ArenaMesh;
 
+	/** The transform that the Health Pickups will spawn at. These are blue to distinguish them from Enemy Spawn Points.*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		TArray<TObjectPtr<UArrowComponent>> HealthPickupSpawnPoints;
+
+	/** The class of health pickup this arena will spawn.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf<AUDHealthPickup> HealthPickupClass;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		TObjectPtr<USceneComponent> EnemySpawnRoot;
 
@@ -49,16 +61,19 @@ protected:
 
 	/** While true, the arena will try and spawn the current wave.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bSpawningWave;
+		bool bSpawningWave;
 
 	TArray<OccupiedSpawnPoint*> OccupiedSpawnPoints;
 
 	/** An array of Knight class enemies that the current wave can spawn.*/
 	TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;
 
-	int32 SquiresInPlay = 0;
+	/** The amount of seconds left before a Squire spawns when SquireSlowSpawnActive returns true.*/
+		float SquireSlowSpawnCooldownTracker;
 
-	int32 KnightsInPlay = 0;
+	int SquiresInPlay = 0;
+
+	int KnightsInPlay = 0;
 
 #if WITH_EDITORONLY_DATA
 	/** Spawns whatever the current wave is set to on Begin Play.*/
@@ -79,6 +94,12 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	/** Returns true if the current wave is currently in its "Squire Slow Spawn" phase. This generally occurs when the current wave's "Squire Count" has been depleted but there are still Knight or Champion enemies in play.*/
+	bool GetSquireSlowSpawnActive();
+
+	/** Test if there are no non-Squire enemies remaining and if current wave has no enemies left to be spawned. If these are true, the wave stops trying to spawn anything. If there are no Squires in play, then game will also proceed to the next wave/round.*/
+	void CheckWaveDepletion();
+
 	UFUNCTION(BlueprintCallable)
 	/** Spawns an enemy at a random free spawn point. This will not check if a there is actually a free place to spawn at.*/
 	AUDEnemy* SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass);
@@ -97,11 +118,11 @@ protected:
 
 	/** Signal to the arena that a knight class enemy has died.*/
 	UFUNCTION()
-	void DecrementKnightsInPlay(AActor* EnemyDestroyed);
+		void DecrementKnightsInPlay(AActor* EnemyDestroyed);
 
 	/** Signal to the arena that a squire class enemy has died.*/
 	UFUNCTION()
-	void DecrementSquiresInPlay(AActor* EnemyDestroyed);
+		void DecrementSquiresInPlay(AActor* EnemyDestroyed);
 
 public:	
 	// Called every frame

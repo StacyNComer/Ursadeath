@@ -15,7 +15,7 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 	UUrsadeathGameInstance* UrsadeathGameInstance = Cast<UUrsadeathGameInstance>(GetGameInstance());
 
 	//Get the spawning data from the game instance.
-	KnightSpawnDataTable = UrsadeathGameInstance->KnightSpawnDataTable;
+	KnightSpawnDataTable = UrsadeathGameInstance->EnemySpawnDataTable;
 
 	//Create the indicator widget for squires.
 	SquireSpawnIndicator = CreateSpawnIndicatorWidget(UrsadeathGameInstance->SquireIcon);
@@ -71,7 +71,7 @@ void UUDPlayerHUDWidget::DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, E
 
 void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 {
-	SquireSpawnIndicator->SetEnemyCount(Wave.SquireSpawns);
+	SquireSpawnIndicator->SetEnemyCount(Wave.WaveData.SquireCount);
 
 	TArray<TSubclassOf<AUDEnemy>> KnightClasses;
 	KnightSpawnIndicators.GenerateKeyArray(KnightClasses);
@@ -81,9 +81,9 @@ void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 		TSubclassOf<AUDEnemy> KnightClass = KnightClasses[i];
 		UUDEnemySpawnIndicator* SpawnIndicator = KnightSpawnIndicators[KnightClass];
 
-		if (Wave.EnemyCounts.Contains(KnightClass))
+		if (Wave.KnightCounts.Contains(KnightClass))
 		{
-			SpawnIndicator->SetEnemyCount(Wave.EnemyCounts[KnightClass]);
+			SpawnIndicator->SetEnemyCount(Wave.KnightCounts[KnightClass]);
 			SpawnIndicator->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else

@@ -13,10 +13,12 @@ void UUDWaveEntryWidget::NativeOnInitialized()
 
 	UrsadeathGameInstance = Cast<UUrsadeathGameInstance>(GetGameInstance());
 	
+	//Create the spawn indicator for Squires and set its image.
 	SquireSpawnIndicator = CreateSpawnIndicatorWidget();
 	SquireSpawnIndicator->SetEnemyImage(UrsadeathGameInstance->SquireIcon);
 
-	for(int i = 0; i < UrsadeathGameInstance->MaxKnightTypesPerWave; i++)
+	//Create spawn indicators for the non-Squire enemies. Instead of creating an indicator for each class of enemy, enough indicators are created for the Wave Entry to display the game instance's MaxNonSquireTypesPerWave.
+	for(int i = 0; i < UrsadeathGameInstance->MaxNonSquireTypesPerWave; i++)
 	{
 		NonSquireSpawnIndicators.Add(CreateSpawnIndicatorWidget());
 	}
@@ -24,18 +26,41 @@ void UUDWaveEntryWidget::NativeOnInitialized()
 
 void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 {
-	SquireSpawnIndicator->SetEnemyCount(Wave.SquireSpawns);
+	//Display the number of squires in the wave
+	SquireSpawnIndicator->SetEnemyCount(Wave.WaveData.SquireCount);
 
+	//Generate an array of the enemy types to be iterated through
 	TArray <TSubclassOf<AUDEnemy>> NonSquireClasses;
-	Wave.EnemyCounts.GenerateKeyArray(NonSquireClasses);
+	Wave.KnightCounts.GenerateKeyArray(NonSquireClasses);
 
-	for (int i = 0; i < NonSquireClasses.Num(); i++)
+	int i = 0;
+
+	//Start be iterating through the enemy types, setting a Spawn Indicator to display enemy type's icon and the number present in the wave.
+	while(i < NonSquireClasses.Num())
 	{
 		UUDEnemySpawnIndicator* SpawnIndicator = NonSquireSpawnIndicators[i];
+
+		TSubclassOf<AUDEnemy> EnemyClass = NonSquireClasses[i];
 		
-		FEnemySpawnData SpawnDataEntry = UrsadeathGameInstance->GetSpawnDataEntry(NonSquireClasses[i]);
+		FEnemySpawnData SpawnDataEntry = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass);
 
 		SpawnIndicator->SetEnemyImage(SpawnDataEntry.EnemyIcon);
+
+		SpawnIndicator->SetEnemyCount(Wave.KnightCounts[EnemyClass]);
+
+		//Make sure the spawn indicator is visible.
+		SpawnIndicator->SetVisibility(ESlateVisibility::Visible);
+
+		i++;
+	}
+
+	//Then, if there are less enemy types than Spawn Indicators, hide the extra spawn indicators.
+	//Because "i" is tracked outside of the loops, we can pick up where the previous loop left off.
+	while (i < NonSquireSpawnIndicators.Num())
+	{
+		NonSquireSpawnIndicators[i]->SetVisibility(ESlateVisibility::Collapsed);
+
+		i++;
 	}
 }
 

@@ -46,7 +46,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void SetWaveNumber(int WaveNum);
 	
-	/** Sets the widget to show the contents of the given wave.*/
+	/** Sets the widget to show the contents of the given wave. This method assumes that the number of Non-Squire enemy types does not exceed the game instance's */
 	UFUNCTION()
 		void DisplayWave(FEnemyWave Wave);
 

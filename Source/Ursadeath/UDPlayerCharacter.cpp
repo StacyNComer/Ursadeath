@@ -165,7 +165,7 @@ void AUDPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AUDPlayerCharacter::ToggleRoundMenu()
 {
-	switch (RoundScreenWidget->Visibility)
+	switch (RoundScreenWidget->GetVisibility())
 	{
 		case ESlateVisibility::Visible:
 			RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);

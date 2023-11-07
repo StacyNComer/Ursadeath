@@ -4,11 +4,13 @@
 #include "UDEnemy.h"
 #include "Components/StaticMeshComponent.h"
 #include "UrsadeathGameInstance.h"
+#include "UDHealthPickup.h"
+#include "Components/ArrowComponent.h"
 
 // Sets default values
 AUDArena::AUDArena()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Create the Arena's mesh.
@@ -17,6 +19,19 @@ AUDArena::AUDArena()
 	//Create the EnemySpawnRoot and attach it to the arena mesh.
 	EnemySpawnRoot = CreateDefaultSubobject<USceneComponent>(TEXT("EnemySpawnRoot"));
 	EnemySpawnRoot->SetupAttachment(ArenaMesh);
+
+	for (int i = 0; i < 2; i++)
+	{
+		FString SpawnPointName = "HealthPickupSpawnPoint";
+		SpawnPointName.AppendInt(i);
+
+		UArrowComponent* HealthPickupSpawnPoint = CreateDefaultSubobject<UArrowComponent>(FName(*SpawnPointName));
+		HealthPickupSpawnPoint->SetupAttachment(ArenaMesh);
+
+		HealthPickupSpawnPoint->SetArrowFColor(FColor::Blue);
+
+		HealthPickupSpawnPoints.Add(HealthPickupSpawnPoint);
+	}
 }
 
 void AUDArena::OnConstruction(const FTransform& Transform)
@@ -32,6 +47,22 @@ void AUDArena::BeginPlay()
 
 	//Tell the game instance that this is the current arena.
 	GetGameInstance<UUrsadeathGameInstance>()->GameArena = this;
+
+	//Spawn a health pickup at each spawn point.
+	for(int i = 0; i < HealthPickupSpawnPoints.Num(); i++)
+	{
+		FActorSpawnParameters ActorSpawnParams;
+		//Set Spawn Collision Handling Override.
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		//Set the attack's owner.
+		ActorSpawnParams.Owner = this;
+
+		//Get the spawn point for the pickup to spawn at.
+		UArrowComponent* SpawnPoint = HealthPickupSpawnPoints[i];
+
+		//Spawn the pickup.
+		GetWorld()->SpawnActor<AUDHealthPickup>(HealthPickupClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
+	}
 
 #if WITH_EDITOR
 	if (bSpawnAtBeginPlay)
@@ -66,9 +97,15 @@ void AUDArena::Tick(float DeltaTime)
 		}
 		else
 		{
-			//The loop is only incremented if a spawn point was not remove, since TArrays automatically resize.
+			//The loop is only incremented if a spawn point was not removed, since TArrays automatically resize.
 			i++;
 		}
+	}
+
+	//Decrement the Slow Squire Spawn Cooldown, but only if the Squire Slow Spawn is active and only if a Squire is otherwise qualified to spawn in those circumstances
+	if (GetSquireSlowSpawnActive() && SquiresInPlay < CurrentWave.WaveData.MaxSlowSpawnSquires && SquireSlowSpawnCooldownTracker > 0)
+	{
+		SquireSlowSpawnCooldownTracker -= DeltaTime;
 	}
 
 	//Enemy Spawning
@@ -90,9 +127,9 @@ void AUDArena::Tick(float DeltaTime)
 				EnemySpawned->SetEnemyTier(EEnemyTier::KNIGHT);
 
 				//Decrement the amount of the spawned enemy type in the wave. If that enemy type is depleted, remove it from the wave and spawn pool so it is not chosen anymore.
-				if (--CurrentWave.EnemyCounts[EnemyClass] == 0)
+				if (--CurrentWave.KnightCounts[EnemyClass] == 0)
 				{
-					CurrentWave.EnemyCounts.Remove(EnemyClass);
+					CurrentWave.KnightCounts.Remove(EnemyClass);
 					KnightSpawnPool.RemoveAt(EnemyClassIndex);
 				}
 
@@ -118,7 +155,15 @@ void AUDArena::Tick(float DeltaTime)
 				//Set the enemy tier to be a squire.
 				EnemySpawned->SetEnemyTier(EEnemyTier::SQUIRE);
 
-				CurrentWave.SquireSpawns--;
+				//If the wave is slow spawning squires, set the squire spawning on cooldown. Otherwise, decrement the squire count.
+				if (GetSquireSlowSpawnActive())
+				{
+					SquireSlowSpawnCooldownTracker = CurrentWave.WaveData.SquireSlowSpawnCooldown;
+				}
+				else
+				{
+					CurrentWave.WaveData.SquireCount--;
+				}
 
 				SquiresInPlay++;
 
@@ -128,9 +173,16 @@ void AUDArena::Tick(float DeltaTime)
 			} while (CanSpawnSquire() && FreeEnemySpawnPoints.Num() > 0);
 		}
 	}
+}
 
-	//Stop spawning when the wave runs out of enemies.
-	if (CurrentWave.EnemyCounts.Num() == 0 && CurrentWave.SquireSpawns == 0)
+bool AUDArena::GetSquireSlowSpawnActive()
+{
+	return KnightsInPlay > 0 && CurrentWave.WaveData.SquireCount == 0;
+}
+
+void AUDArena::CheckWaveDepletion()
+{
+	if (CurrentWave.WaveData.SquireCount == 0 && CurrentWave.KnightCounts.Num() == 0 && KnightsInPlay == 0)
 	{
 		bSpawningWave = false;
 	}
@@ -163,7 +215,10 @@ void AUDArena::SetCurrentWave(FEnemyWave Wave)
 	CurrentWave = Wave;
 
 	//Generate the pool of Knight enemy types from the ones set to spawn in the enemy wave.
-	CurrentWave.EnemyCounts.GenerateKeyArray(KnightSpawnPool);
+	CurrentWave.KnightCounts.GenerateKeyArray(KnightSpawnPool);
+
+	//THe squire slow spawning starts on cooldown.
+	SquireSlowSpawnCooldownTracker = CurrentWave.WaveData.SquireSlowSpawnCooldown;
 
 	//Tell the arena to start spawning the current wave.
 	bSpawningWave = true;
@@ -176,20 +231,32 @@ bool AUDArena::SpawnPointFree()
 
 bool AUDArena::CanSpawnKnight()
 {
-	return CurrentWave.EnemyCounts.Num() > 0 && KnightsInPlay < CurrentWave.MaxKnights;
+	return CurrentWave.KnightCounts.Num() > 0 && KnightsInPlay < CurrentWave.WaveData.MaxKnights;
 }
 
 bool AUDArena::CanSpawnSquire()
 {
-	return CurrentWave.SquireSpawns > 0 && SquiresInPlay < CurrentWave.MaxSquires;
+	if (GetSquireSlowSpawnActive())
+	{
+		return SquiresInPlay < CurrentWave.WaveData.MaxSlowSpawnSquires && SquireSlowSpawnCooldownTracker <= 0;
+	}
+	else
+	{
+		return CurrentWave.WaveData.SquireCount > 0 && SquiresInPlay < CurrentWave.WaveData.MaxSquires;
+	}
+	
 }
 
 void AUDArena::DecrementKnightsInPlay(AActor* EnemyDestroyed)
 {
 	KnightsInPlay--;
+
+	CheckWaveDepletion();
 }
 
 void AUDArena::DecrementSquiresInPlay(AActor* EnemyDestroyed)
 {
 	SquiresInPlay--;
+
+	CheckWaveDepletion();
 }

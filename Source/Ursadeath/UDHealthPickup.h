@@ -8,6 +8,7 @@
 
 class AUDPlayerCharacter;
 
+/** The base class for health pickups. Health pickups are used by the player melee attacking them. Health Pickups are reusable; When used, they merely disappear until a cooldown elapses.*/
 UCLASS(Abstract)
 class URSADEATH_API AUDHealthPickup : public AActor
 {

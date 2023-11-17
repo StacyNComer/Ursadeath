@@ -33,6 +33,7 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 	TArray <TSubclassOf<AUDEnemy>> NonSquireClasses;
 	Wave.KnightCounts.GenerateKeyArray(NonSquireClasses);
 
+	//"i" is declared here since we'll need it for multiple loops.
 	int i = 0;
 
 	//Start be iterating through the enemy types, setting a Spawn Indicator to display enemy type's icon and the number present in the wave.

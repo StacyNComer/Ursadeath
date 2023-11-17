@@ -30,12 +30,7 @@ void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackSta
 {
 	UUDPlayerAttackData* AttackData = UUDPlayerAttackData::CreatePlayerAttackData(AttackStatsStruct);
 
-	bool EnemyKilled = Enemy->ReceiveAttack(AttackData);
-
-	if (EnemyKilled)
-	{
-		GetOwningPlayer()->NotifyOnEnemyKill(Enemy, this);
-	}
+	Enemy->ReceiveAttack(AttackData, this);
 
 	//Tell UE to delete the AttackData now that we are done with it.
 	AttackData->ConditionalBeginDestroy();
@@ -43,7 +38,7 @@ void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackSta
 	GetOwningPlayer()->AddEnergy(EnergyGain);
 }
 
-AUDPlayerCharacter* AUDPlayerAttack::GetOwningPlayer()
+AUDPlayerCharacter* const AUDPlayerAttack::GetOwningPlayer()
 {
 	//Set the owning player if it hasn't been set yet. 
 	//We set the ownng player here instead of in BeginPlay because the C++ begin play runs after blueprints; If the projectile hits an enemy the frame it spawns, OwningPlayer wouldn't have been set yet!

@@ -45,8 +45,8 @@ void AUDArena::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Tell the game instance that this is the current arena.
-	GetGameInstance<UUrsadeathGameInstance>()->GameArena = this;
+	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
+	UrsadeathGameInstance->GameArena = this;
 
 	//Spawn a health pickup at each spawn point.
 	for(int i = 0; i < HealthPickupSpawnPoints.Num(); i++)
@@ -67,7 +67,7 @@ void AUDArena::BeginPlay()
 #if WITH_EDITOR
 	if (bSpawnAtBeginPlay)
 	{
-		SetCurrentWave(CurrentWave);
+		SpawnEnemyWave(CurrentWave);
 	}
 #endif
 }
@@ -185,6 +185,11 @@ void AUDArena::CheckWaveDepletion()
 	if (CurrentWave.WaveData.SquireCount == 0 && CurrentWave.KnightCounts.Num() == 0 && KnightsInPlay == 0)
 	{
 		bSpawningWave = false;
+
+		if (SquiresInPlay == 0)
+		{
+			UrsadeathGameInstance->ProcessEndWave();
+		}
 	}
 }
 
@@ -210,7 +215,7 @@ AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass)
 	return World->SpawnActor<AUDEnemy>(EnemyClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
 }
 
-void AUDArena::SetCurrentWave(FEnemyWave Wave)
+void AUDArena::SpawnEnemyWave(FEnemyWave Wave)
 {
 	CurrentWave = Wave;
 

@@ -16,6 +16,7 @@
 #include "UDEnemy.h"
 #include "UrsadeathGameInstance.h"
 #include "UDArena.h"
+#include "Components/Button.h"
 #include "UDRoundScreenWidget.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
@@ -75,21 +76,23 @@ void AUDPlayerCharacter::BeginPlay()
 	GetGameInstance<UUrsadeathGameInstance>()->PlayerCharacter = this;
 
 	// Set the UDPlayerController.
-	UDPlayerController = Cast<AUDPlayerController>(GetController());
+	UDPlayerController = GetController<AUDPlayerController>();
 
 	//Create player hud
-	PlayerHUDWidget = CreateWidget<UUDPlayerHUDWidget>(UDPlayerController, PlayerHUDWidgetClass);
-	PlayerHUDWidget->AddToViewport();
+	HUDWidget = CreateWidget<UUDPlayerHUDWidget>(UDPlayerController, PlayerHUDWidgetClass);
+	HUDWidget->AddToViewport();
 
 	// Set the HUD to display the players starting stats.
-	PlayerHUDWidget->UpdateHealth(CurrentHealth, 0);
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy, 0, false);
+	HUDWidget->UpdateHealth(CurrentHealth, 0);
+	HUDWidget->UpdateEnergy(CurrentEnergy, 0, false);
 
 	//Create the round screen.
 	RoundScreenWidget = CreateWidget<UUDRoundScreenWidget>(UDPlayerController, RoundScreenWidgetClass);
 	RoundScreenWidget->AddToViewport();
 	//The round screen should be closed by default.
 	RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	//When the player starts the round from the round menu, the round menu should close.
+	RoundScreenWidget->GetRoundStartButton()->OnClicked.AddDynamic(this, &AUDPlayerCharacter::ToggleRoundMenu);
 
 	//Add Input Mapping Context
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer()))
@@ -165,18 +168,21 @@ void AUDPlayerCharacter::Look(const FInputActionValue& Value)
 
 void AUDPlayerCharacter::ToggleRoundMenu()
 {
-	switch (RoundScreenWidget->GetVisibility())
-	{
-		case ESlateVisibility::Visible:
-			RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
-			UGameplayStatics::SetGamePaused(GetWorld(), false);
-			break;
-	
+	//Decide whether the round screen should be opening or closing. The round screen closes if its visibity is already set to "Visible", and opens if the visibility is set to ANYTHING else.
+	bool RoundScreenOpening = RoundScreenWidget->GetVisibility() != ESlateVisibility::Visible;
 
-		case ESlateVisibility::Collapsed:
-			RoundScreenWidget->SetVisibility(ESlateVisibility::Visible);
-			UGameplayStatics::SetGamePaused(GetWorld(), true);
-			break;
+	//Collapse the round screen if it is open. Make the round screen visible otherwise.
+	ESlateVisibility NewRoundScreenVisibility = RoundScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	RoundScreenWidget->SetVisibility(NewRoundScreenVisibility);
+
+	//Pause the game if the round screen is being opened. Unpause if it is being closed.
+	UGameplayStatics::SetGamePaused(GetWorld(), RoundScreenOpening);
+
+	UDPlayerController->bShowMouseCursor = RoundScreenOpening;
+
+	if (RoundScreenOpening)
+	{
+		RoundScreenWidget->SetFocus();
 	}
 }
 
@@ -207,7 +213,7 @@ void AUDPlayerCharacter::SetEnergy(float Value)
 	CurrentEnergy = Value;
 
 	//Update the UI
-	PlayerHUDWidget->UpdateEnergy(CurrentEnergy, DeltaEnergy, EnergyBarGained);
+	HUDWidget->UpdateEnergy(CurrentEnergy, DeltaEnergy, EnergyBarGained);
 }
 
 void AUDPlayerCharacter::AddEnergy(float ToAdd)
@@ -247,7 +253,7 @@ void AUDPlayerCharacter::SetHealth(int Value)
 	CurrentHealth = Value;
 	
 	//Update the UI
-	PlayerHUDWidget->UpdateHealth(CurrentHealth, DeltaHealth);
+	HUDWidget->UpdateHealth(CurrentHealth, DeltaHealth);
 }
 
 void AUDPlayerCharacter::DamagePlayer(int Damage)
@@ -275,13 +281,19 @@ void AUDPlayerCharacter::RestoreHealth(int ToRestore)
 
 void AUDPlayerCharacter::NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack)
 {
-	PlayerHUDWidget->DecrementEnemyCount(EnemyKilled->GetClass(), EnemyKilled->GetEnemyTier());
+	HUDWidget->DecrementEnemyCount(EnemyKilled->GetClass(), EnemyKilled->GetEnemyTier());
 }
 
-void AUDPlayerCharacter::DisplayEnemyWave(FEnemyWave Wave)
-{	
-	PlayerHUDWidget->DisplayEnemyWave(Wave);
+UUDPlayerHUDWidget* const AUDPlayerCharacter::GetHUDWidget()
+{
+	return HUDWidget;
 }
+
+UUDRoundScreenWidget* const AUDPlayerCharacter::GetRoundScreenWidget()
+{
+	return RoundScreenWidget;
+}
+
 
 void AUDPlayerCharacter::UsePrimaryAbility()
 {

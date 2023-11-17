@@ -6,6 +6,7 @@
 #include "UDPlayerAttack.h"
 #include "UDPlayerAttackData.h"
 #include "UDEnemyController.h"
+#include "UDPlayerCharacter.h"
 #include "GameFramework/PawnMovementComponent.h"
 
 // Sets default values
@@ -68,7 +69,7 @@ void AUDEnemy::Tick(float DeltaTime)
 	}
 }
 
-bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
+void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource)
 {
 	//Call the attack recieved event.
 	if(OnAttackRecieved.IsBound())
@@ -89,12 +90,14 @@ bool AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData)
 	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
 	if (!bUndieable && health <= 0)
 	{
+		
+		//Report the kill to the attacking player, if they exist.
+		if (AttackSource)
+		{
+			AttackSource->GetOwningPlayer()->NotifyOnEnemyKill(this, AttackSource);
+		}
+
 		Destroy();
-		return true;
-	}
-	else
-	{
-		return false;
 	}
 }
 

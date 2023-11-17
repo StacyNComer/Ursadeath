@@ -72,7 +72,7 @@ struct FEnemyWaveScheme : public FTableRowBase
 
 	/** Forces one of the Knight Types to be the newest Knight tier enemy added to the spawn pool.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool UseNewKnight;
+		bool bUseNewKnight;
 };
 
 /** A structure storing the information about each wave of enemies.*/
@@ -92,12 +92,16 @@ public:
 };
 
 /**
- *
+ * A class meant to act as Ursadeath's "Game Manager". Useful as GameInstances persist between levels.
  */
 UCLASS(Abstract)
 class URSADEATH_API UUrsadeathGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+
+private:
+	/** If true, OnLevelSetup has been bound the UWorld's begin play and shouldn't be bound again.*/
+		bool bLevelSetupBound = false;
 
 protected:
 	FRandomStream RandomStream;
@@ -106,12 +110,24 @@ protected:
 	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData*> EnemyDataMap;
 
 	/** The name used to generate the game's random seed.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		FName GameSeedName;
 
-	/** An array of waves that will spawn during the current round.*/
-	UPROPERTY(BlueprintReadOnly)
-		TArray<FEnemyWave> RoundWaves;
+	/** Holds the number of waves that each round has. The index of each round corresponds with the order they appear in game.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		TArray<int> RoundWaveCounts;
+
+	/** The waves set to spawn during the current round.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		TArray<FEnemyWave> CurrentRoundWaves;
+
+	/** The current round the player is fighting.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		int RoundNumber = 0;
+
+	/** The time it takes in seconds for the next wave to begin after the previous wave ends.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		float WaveStartDelay = 3;
 
 	/** The current set of Knights types which the game will choose to place in waves. As the game progresses from round to round, more Knight types are added to the spawn pool. Though it should start the game empty, it can be editted in blueprints to allow for debugging.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
@@ -125,13 +141,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SpawnData)
 		UDataTable* WaveSchemeDataTable;
 
+	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
+	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
+
+	/** The current wave number in the current round that the player is fighting.*/
+	int RoundWaveNumber;
+
+	/** The current wave the player is fighting. This values does not get reset to 0 after the last wave in a round is completed (like CurrentRoundWave does) and instead continues to increment. Used to tell the game which wave to generate yet.*/
+	int AbsoluteWaveNumber;
+
 public:
 	/** The maximum different classes of Non-Squire tier enemy that should ever be in a single wave.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		int MaxNonSquireTypesPerWave = 4;
 
 	/** The maximum waves a round may ever have.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		int MaxWavesPerRound = 5;
 
 	/* The current arena in play.**/
@@ -150,9 +175,15 @@ public:
 		TObjectPtr<UTexture2D> SquireIcon;
 
 protected:
-	/** Tells the Arena to spawn the given wave and set the player to display the given wave to their UI.*/
+	/** Generates the given round and populates the CurrentRoundWaves value. The value stored RoundWaveCounts[RoundIndex] determines the number of waves generated. 
+	* The waves are generated using the wave schemes starting from EnemyWaveSchemes[CurrentAbsoluteWave] and ending at EnemyWaveSchemes[CurrentAbsoluteWave + RoundWaveCount] inclusive. Hence, assuming CurrentAbsoluteWave is updated properly, the waves should be generated in the order they appear on the data table, with new calls of this method continuing from where the previous left off.
+	* After a wave is generated, it may be spawned with the StartRound() method.*/
 	UFUNCTION(BlueprintCallable)
-		void StartWave(FEnemyWave Wave);
+		void GenerateRound(int RoundIndex);
+
+	/** Starts the given wave without announcing it to player or displaying it in their HUD. Called by Start Wave after the WaveStartDelay completes.*/
+	UFUNCTION(BlueprintCallable)
+		void StartWaveInstant(FEnemyWave Wave);
 
 	/** Create an Enemy Wave from the given Wave Scheme and the instance's current Knight pool.*/
 	UFUNCTION(BlueprintCallable)
@@ -160,9 +191,25 @@ protected:
 
 	virtual void Init() override;
 
+	/** Called after the player and arena have been set up. */
+	void OnLevelSetup();
+
+	/** Announces a new wave to the player and displays the enemy counts to their HUD. After the GameInstance's WaveStartDelay expires, StartWaveInstant is called and the wave's start sequence is complete.*/
+	void StartWave(FEnemyWave Wave);
+
 public:
 	/** Returns the Spawn Data for a given class of enemy from the SpawnDataTable.*/
 	UFUNCTION(BlueprintCallable)
 		FEnemySpawnData GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass);
 
+	/** Tell the game to start spawning the CurrentRoundWaves.*/
+	UFUNCTION(BlueprintCallable)
+		void StartRound();
+
+	/** Should be called whenever an enemy wave is complete. Increments CurrentRoundWave and CurrentAbsoluteWave. If the round has more waves to spawn, the next wave begins. Otherwise, the next round begins and spawning ceases until StartRound is called again.*/
+	UFUNCTION(BlueprintCallable)
+		void ProcessEndWave();
+	
+	/** Update the player's Round Screen to show the current round's waves.*/
+	void UpdateRoundScreen();
 };

@@ -12,6 +12,7 @@ class AUDEnemy;
 class UStaticMeshComponent;
 class AUDHealthPickup;
 class UArrowComponent;
+class UUrsadeathGameInstance;
 struct FEnemyWave;
 
 /** A struct for tracking how long until a given scene component's position is no longer occupied by a spawning enemy.*/
@@ -62,6 +63,9 @@ protected:
 	/** While true, the arena will try and spawn the current wave.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		bool bSpawningWave;
+
+	/** A casted reference to the game instance.*/
+	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 	TArray<OccupiedSpawnPoint*> OccupiedSpawnPoints;
 
@@ -130,5 +134,5 @@ public:
 
 	/** Sets the current enemy wave and begins spawning it.*/
 	UFUNCTION(BlueprintCallable)
-		void SetCurrentWave(FEnemyWave Wave);
+		void SpawnEnemyWave(FEnemyWave Wave);
 };

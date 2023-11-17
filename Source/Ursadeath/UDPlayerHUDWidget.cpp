@@ -12,7 +12,7 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	UUrsadeathGameInstance* UrsadeathGameInstance = Cast<UUrsadeathGameInstance>(GetGameInstance());
+	UUrsadeathGameInstance* UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 
 	//Get the spawning data from the game instance.
 	KnightSpawnDataTable = UrsadeathGameInstance->EnemySpawnDataTable;
@@ -37,6 +37,21 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 	}
 }
 
+void UUDPlayerHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (AnnouncementTimeTracker > 0)
+	{
+		AnnouncementTimeTracker -= InDeltaTime;
+
+		if (AnnouncementTimeTracker <= 0)
+		{
+			SetAnnouncementVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+}
+
 UUDEnemySpawnIndicator* UUDPlayerHUDWidget::CreateSpawnIndicatorWidget(TObjectPtr<UTexture2D> IndicatorIcon)
 {
 	//Contruct the indicator widget.
@@ -49,6 +64,17 @@ UUDEnemySpawnIndicator* UUDPlayerHUDWidget::CreateSpawnIndicatorWidget(TObjectPt
 	SpawnIndicatorContainer->AddChild(SpawnIndicator);
 
 	return SpawnIndicator;
+}
+
+void UUDPlayerHUDWidget::DisplayAnnouncement(const FText& Message, float DisplayTime)
+{
+	//Make sure the announcement is visible.
+	SetAnnouncementVisibility(ESlateVisibility::Visible);
+
+	SetAnnounementText(Message);
+
+	//Set the announcement to disappear after DisplayTime seconds.
+	AnnouncementTimeTracker = DisplayTime;
 }
 
 void UUDPlayerHUDWidget::DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier)

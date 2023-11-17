@@ -11,6 +11,7 @@ class UUDPlayerAttackData;
 class UMeshComponent;
 class AUDEnemyController;
 class AUDEnemy;
+class AUDPlayerCharacter;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -82,9 +83,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy. Returns true if the attack killed the enemy.*/
+	/** Applies the given attack data to this enemy. The attacking player's OnAttackHit and this actor's own OnAttackReceived is called before the damage/stun is applied to the enemy.
+	* AttackSource is safe to omit if such needs to be done for debug/testing. Just note that this will cause the UI to not update!*/
 	UFUNCTION(BlueprintCallable, Category=Status)
-		bool ReceiveAttack(UUDPlayerAttackData* AttackData);
+		void ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource);
 
 	/** Returns true if the enemy is currently stunned*/
 	UFUNCTION(BlueprintCallable, Category = Status)

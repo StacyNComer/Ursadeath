@@ -5,12 +5,15 @@
 #include "UrsadeathGameInstance.h"
 #include "Blueprint/WidgetTree.h"
 #include "UDWaveEntryWidget.h"
+#include "Components/Button.h"
 
 void UUDRoundScreenWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	UUrsadeathGameInstance* UrsadeathGameInstance = Cast<UUrsadeathGameInstance>(GetGameInstance());
+	SetIsFocusable(true);
+
+	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 
 	//Create the Wave Entry widgets.
 	for (int i = 0; i < UrsadeathGameInstance->MaxWavesPerRound; i++)
@@ -25,10 +28,22 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 		//Give the wave entry its wave number.
 		WaveEntryWidget->SetWaveNumber(i+1);
 	}
+
+	RoundStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::OnRoundStartPressed);
 }
 
-void UUDRoundScreenWidget::DisplayRound(TArray<FEnemyWave> RoundWaves)
+void UUDRoundScreenWidget::OnRoundStartPressed()
 {
+	RoundStartButton->SetIsEnabled(false);
+	
+	UrsadeathGameInstance->StartRound();
+}
+
+void UUDRoundScreenWidget::DisplayRound(int RoundNumber, TArray<FEnemyWave> RoundWaves)
+{
+	SetRoundNumber(RoundNumber);
+
+	//"i" is declared here since we'll need it for multiple loops.
 	int i = 0;
 
 	//First, Iterate through the Round Waves, setting the corresponding index of Wave Entry Widget to display it.
@@ -53,5 +68,15 @@ void UUDRoundScreenWidget::DisplayRound(TArray<FEnemyWave> RoundWaves)
 
 		i++;
 	}
+}
+
+void UUDRoundScreenWidget::SetRoundRewards()
+{
+	RoundStartButton->SetIsEnabled(true);
+}
+
+UButton* const UUDRoundScreenWidget::GetRoundStartButton()
+{
+	return RoundStartButton;
 }
 

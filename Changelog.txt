@@ -1,3 +1,27 @@
+ === Update 9 "Round Screen of Doom!" ===
+
+	> General
+
+* Added a "Round Screen" that can be open/closed with 'T'.
+
+* Rounds are now started by pressing a "Begin Round" button in the Round Screen. Once a round is complete, the next round
+  can be begun in the same manner, assuming a next round exists.
+
+* Added health pickups which spawn at the arena's blue arrows when play is begun. They are used by meleeing them and
+  respawn after 35 seconds.
+
+* Added "Spawn Data" for the Lazer enemy. It currently uses a placeholder graphic for its icon.
+
+* Made some adjustments to the Player HUD to make the spawn counters stay centered on different screen sizes.
+
+	~ Known Bugs
+
+* The game must be clicked before the Round Screen's "Begin Round" button may be pressed.
+
+* When the Round Screen's "Begin Round" button is pressed and the Round Screen is exitted, the mouse must be clicked before
+  the player can aim with it.
+
+
  === Update 9 "Spawn Counts of Doom!" ===
 
 	> General

@@ -126,7 +126,7 @@ protected:
 
 	/** The player's HUD.*/
 	UPROPERTY(BlueprintReadOnly)
-		TObjectPtr<UUDPlayerHUDWidget> PlayerHUDWidget;
+		TObjectPtr<UUDPlayerHUDWidget> HUDWidget;
 
 	/** The player's Round Screen for viewing the upcoming enemy waves and their upgrades.*/
 	UPROPERTY(BlueprintReadOnly)
@@ -206,8 +206,11 @@ public:
 	/** Reports that the given enemy has been killed by the given attack to the player, updating the player's UI and invoking the OnEnemyKill delegate.*/
 	void NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack);
 
-	/** Displays the given enemy wave on the player's UI.*/
-	void DisplayEnemyWave(FEnemyWave Wave);
+	/** Returns a reference to the player's HUD wudget.*/
+	UUDPlayerHUDWidget* const GetHUDWidget();
+
+	/** Returns a reference to the player's round screen*/
+	UUDRoundScreenWidget* const GetRoundScreenWidget();
 
 protected:
 
@@ -218,8 +221,10 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	/** Swaps whether the round menu is on or off.*/
-	void ToggleRoundMenu();
+	/** Swaps whether the round menu is on or off. 
+	* This is a UFUNCTION so that it may be bound to the Round Screen's round start button.*/
+	UFUNCTION()
+		void ToggleRoundMenu();
 
 	/** Uses the primary fire ability. Used for Input.*/
 	void UsePrimaryAbility();

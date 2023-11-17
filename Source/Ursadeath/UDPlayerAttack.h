@@ -60,6 +60,10 @@ protected:
 		float EnergyGain;
 
 public:	
+	/** Returns the player that spawned this projectile.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		AUDPlayerCharacter* const GetOwningPlayer();
+
 	// Sets default values for this actor's properties
 	AUDPlayerAttack();
 
@@ -71,10 +75,6 @@ protected:
 	* Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable)
 	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
-
-	/** Returns the player that spawned this projectile.*/
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-		AUDPlayerCharacter* GetOwningPlayer();
 
 public:	
 	// Called every frame

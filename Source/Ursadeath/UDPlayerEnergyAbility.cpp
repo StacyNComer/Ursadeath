@@ -6,13 +6,13 @@
 
 UUDPlayerEnergyAbility::UUDPlayerEnergyAbility()
 {
-	//Set default energy cost.
+	//Set default energy cost. This should equal whatever 1 bar of energy is.
 	EnergyCost = 100;
 }
 
 bool UUDPlayerEnergyAbility::CanUseAbility()
 {
-	return OwningPlayer->GetEnergy() >= EnergyCost;
+	return OwningPlayer->TestEnergyWithFX(EnergyCost);
 }
 
 void UUDPlayerEnergyAbility::NotifyOnAbilitySuccessful()

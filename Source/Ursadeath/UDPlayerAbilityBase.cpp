@@ -6,6 +6,8 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Components/ArrowComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 UUDPlayerAbilityBase::UUDPlayerAbilityBase()
 {
@@ -40,6 +42,11 @@ bool UUDPlayerAbilityBase::TryUseAbility()
 		if (ParticleSystem)
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAttached(ParticleSystem, OwningPlayer->GetAttackSpawnComponent(), FName(TEXT("None")), FVector::Zero(), FRotator::ZeroRotator, EAttachLocation::SnapToTarget, true);
+		}
+
+		if (AbilitySound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), AbilitySound);
 		}
 
 		NotifyOnAbilitySuccessful();

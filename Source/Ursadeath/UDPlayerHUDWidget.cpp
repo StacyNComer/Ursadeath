@@ -18,7 +18,7 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 	KnightSpawnDataTable = UrsadeathGameInstance->EnemySpawnDataTable;
 
 	//Create the indicator widget for squires.
-	SquireSpawnIndicator = CreateSpawnIndicatorWidget(UrsadeathGameInstance->SquireIcon);
+	SquireSpawnIndicator = CreateSpawnIndicatorWidget(UrsadeathGameInstance->GetSquireSpawnData().EnemyIcon);
 
 	//Get an array of all game's types of Knight tier enemies from the data table.
 	TArray<FEnemySpawnData*> KnightSpawnData;

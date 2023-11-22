@@ -7,11 +7,28 @@
 #include "UDWaveEntryWidget.generated.h"
 
 class UUDEnemySpawnIndicator;
+class UUDDescriptionSourceWidget;
+class IUDUIDescriptionReceiver;
 class UUrsadeathGameInstance;
 struct FEnemyWave;
 
+/** A struct acting as a container for an Enemy Counter and the Description Source describing the enemy.*/
+struct EnemyEntry
+{
+	EnemyEntry(TObjectPtr<UUDEnemySpawnIndicator> SpawnCounterWidget, TObjectPtr<UUDDescriptionSourceWidget> DescriptionSourceWidget)
+	{
+		this->SpawnCounterWidget = SpawnCounterWidget;
+
+		this->DescriptionSourceWidget = DescriptionSourceWidget;
+	}
+
+	TObjectPtr<UUDEnemySpawnIndicator> SpawnCounterWidget;
+
+	TObjectPtr<UUDDescriptionSourceWidget> DescriptionSourceWidget;
+};
+
 /**
- * A Widget for showing the enemies the player will face in a wave from within the Upgrade Menu
+ * A Widget for showing the enemies the player will face in a wave from within the Round Screen
  */
 UCLASS()
 class URSADEATH_API UUDWaveEntryWidget : public UUserWidget
@@ -19,6 +36,10 @@ class URSADEATH_API UUDWaveEntryWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	/** The class of Description Source which will act as the wrapper for each Spawn Indicator. This is what causes the spawn indicators to display a description.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf <UUDDescriptionSourceWidget> DescriptionSourceWidgetClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TSubclassOf<UUDEnemySpawnIndicator> WaveSpawnIndicatorClass;
 
@@ -30,16 +51,16 @@ protected:
 	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 	/** The indicator used to show the number of squire tier enemies that will be in a wave.*/
-	TObjectPtr<UUDEnemySpawnIndicator> SquireSpawnIndicator;
+	EnemyEntry* SquireEnemyEntry;
 
 	/** An array of spawn indicators used for Knight and Champion tier enemies.*/
-	TArray<TObjectPtr<UUDEnemySpawnIndicator>> NonSquireSpawnIndicators;
+	TArray<EnemyEntry*> NonSquireEnemyEntries;
 
 protected:
 	virtual void NativeOnInitialized() override;
 
-	/** Create a spawn indicator and attaches it to the Spawn Indicator Container.*/
-	UUDEnemySpawnIndicator* CreateSpawnIndicatorWidget();
+	/** Creates and returns an Enemy Entry meant to hold an Enemy Counter and Description Source for this widget.*/
+	EnemyEntry* CreateEnemyEntry();
 
 public:
 	/** Override to define what occurs when the wave recieves the number it will be labelled as.*/
@@ -50,6 +71,6 @@ public:
 	UFUNCTION()
 		void DisplayWave(FEnemyWave Wave);
 
-
-	
+	/** Sets the description receiver for all of the spawn counter's description sources.*/
+	void SetDescriptionReceiver(TScriptInterface<IUDUIDescriptionReceiver> DescriptionReceiver);
 };

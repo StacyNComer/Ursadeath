@@ -77,9 +77,6 @@ class AUDPlayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* MoveAction;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
-		FPlayerAbility PrimaryFireAbility;*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UUDPlayerCooldownAbility> PrimaryFireAbility;
 
@@ -136,6 +133,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerController> UDPlayerController;
 
+	/** Audio played when the player attempts to use an ability but does not have enough energy.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Audio)
+		TObjectPtr<USoundBase> NoEnergySound;
+
+	/** The audio that plays when the player takes damage.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Audio)
+		TObjectPtr<USoundBase> DamageSound;
+
 	/** If true, energy is never expended and the player is always considered to have max energy (this won't change the UI to reflect this)*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
 		bool bInfiniteEnergy;
@@ -186,7 +191,14 @@ public:
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass);
 
+	/** Returns the player's current energy amount.*/
 	float GetEnergy();
+
+	/** Tests if the player has the given amount of energy or greater. Abilities should use TestEnergyWithFX so that FX play if the player doesn't have enough energy.*/
+	bool TestEnergy(float amount);
+
+	/** Tests if the player has the given amount of energy or greater, playing FX to the player if their energy amount is insufficient.*/
+	bool TestEnergyWithFX(float amount);
 
 	/** Sets the player's current energy to the given value and updates the player's UI. All methods that modify the current energy in some way must call this method to update the UI.*/
 	void SetEnergy(float Value);

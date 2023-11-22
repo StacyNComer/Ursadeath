@@ -8,6 +8,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
+
 
 #define ECC_PLAYER ECC_GameTraceChannel2
 
@@ -22,6 +25,11 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 			UNiagaraComponent* ExplosionParticles = UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, ExplosionParticleSystem, GetActorLocation());
 			//Adjust the size of the particle FX to be that of the explosion.
 			ExplosionParticles->SetFloatParameter(FName("User.ExplosionRadius"), ExplosionRadius);
+		}
+
+		if (ExplosionSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 		}
 		
 		//THe explosion searches for Pawns (which all enemies are) and Players.

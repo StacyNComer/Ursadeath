@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "UDWaveEntryWidget.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 
 void UUDRoundScreenWidget::NativeOnInitialized()
 {
@@ -20,6 +21,8 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	{
 		UUDWaveEntryWidget* WaveEntryWidget = WidgetTree->ConstructWidget<UUDWaveEntryWidget>(WaveEntryClass);
 
+		WaveEntryWidget->SetDescriptionReceiver(this);
+
 		WaveEntries.Add(WaveEntryWidget);
 
 		//Attach the entry widget to its containter.
@@ -29,6 +32,7 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 		WaveEntryWidget->SetWaveNumber(i+1);
 	}
 
+	//Bind the round Start Button.
 	RoundStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::OnRoundStartPressed);
 }
 
@@ -78,5 +82,12 @@ void UUDRoundScreenWidget::SetRoundRewards()
 UButton* const UUDRoundScreenWidget::GetRoundStartButton()
 {
 	return RoundStartButton;
+}
+
+void UUDRoundScreenWidget::ReceiveDescription(FUIDescription Description)
+{
+	DescriptionTitleUI->SetText(Description.Title);
+
+	DescriptionBodyUI->SetText(Description.Body);
 }
 

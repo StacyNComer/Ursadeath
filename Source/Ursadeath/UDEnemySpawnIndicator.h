@@ -9,7 +9,7 @@
 /**
  * A widget for displaying the number of an enemy type in a wave to the player. Rather than hold the enemy type itself, the widget takes an image meant to represent the enemy type.
  */
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API UUDEnemySpawnIndicator : public UUserWidget
 {
 	GENERATED_BODY()

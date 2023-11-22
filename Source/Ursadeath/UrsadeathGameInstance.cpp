@@ -30,11 +30,6 @@ void UUrsadeathGameInstance::Init()
 	//Initialize the game's random seed.
 	RandomStream.Initialize(GameSeedName);
 
-	//RoundNumber = 0;
-	//RoundWaveNumber = 0;
-	//AbsoluteWaveNumber = 0;
-	//WaveStartDelay = 3;
-
 	//Generate the game's first round.
 	GenerateRound(RoundNumber);
 
@@ -202,6 +197,11 @@ void UUrsadeathGameInstance::ProcessEndWave()
 		//Announce to the player that the round has been completed.
 		PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("EnemyWaveStartAnnouncement", "Round Complete!"), 2);
 	}
+}
+
+FEnemySpawnData UUrsadeathGameInstance::GetSquireSpawnData()
+{
+	return SquireSpawnData;
 }
 
 void UUrsadeathGameInstance::UpdateRoundScreen()

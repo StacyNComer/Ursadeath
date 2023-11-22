@@ -10,6 +10,7 @@
 class AUDPlayerAttack;
 class AUDPlayerCharacter;
 class UNiagaraSystem;
+class USoundBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAbilitySuccessful);
 
@@ -31,6 +32,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
 		TObjectPtr<UNiagaraSystem> ParticleSystem;
+
+	/** The audio played whenever the ability is used successfully. Safe to omit.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USoundBase> AbilitySound;
 
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerCharacter> OwningPlayer;

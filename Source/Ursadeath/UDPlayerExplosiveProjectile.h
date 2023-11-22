@@ -7,6 +7,7 @@
 #include "UDPlayerExplosiveProjectile.generated.h"
 
 class UNiagaraSystem;
+class USoundBase;
 
 /**
  * The base class for player projectiles that damages enemies in an area after hitting something. The actor directly hit by the projectile does not take the explosion's damage.
@@ -31,6 +32,10 @@ protected:
 	/** A particle system spawned when the projectile explodes.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attack)
 		TObjectPtr<UNiagaraSystem> ExplosionParticleSystem;
+
+	/** The sound played when this projectile detonates. Safe to omit.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USoundBase> ExplosionSound;
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)

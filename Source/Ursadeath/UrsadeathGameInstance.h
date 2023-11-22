@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "UDUIDescriptionReceiver.h"
 #include "Engine/DataTable.h"
 #include "UrsadeathGameInstance.generated.h"
  
@@ -23,6 +24,9 @@ struct FEnemySpawnData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UTexture2D> EnemyIcon;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		FUIDescription Description;
 };
 
 /** Holds the data shared between the EnemyWaveScheme and the actual EnemyWave.*/
@@ -141,6 +145,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SpawnData)
 		UDataTable* WaveSchemeDataTable;
 
+	/** The icon used for squires in their spawn counter.*/
+	UPROPERTY(EditAnywhere, Category = EnemyData)
+		FEnemySpawnData SquireSpawnData;
+
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
 	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
 
@@ -169,10 +177,6 @@ public:
 	/** This should contain a data table of all of the game's non-Squire tier (Knight/Champion) enemies and any other information for spawning them.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
 		TObjectPtr<UDataTable> EnemySpawnDataTable;
-
-	/** The icon used for squires in their spawn counter.*/
-	UPROPERTY(EditAnywhere, Category = EnemyData)
-		TObjectPtr<UTexture2D> SquireIcon;
 
 protected:
 	/** Generates the given round and populates the CurrentRoundWaves value. The value stored RoundWaveCounts[RoundIndex] determines the number of waves generated. 
@@ -209,6 +213,9 @@ public:
 	/** Should be called whenever an enemy wave is complete. Increments CurrentRoundWave and CurrentAbsoluteWave. If the round has more waves to spawn, the next wave begins. Otherwise, the next round begins and spawning ceases until StartRound is called again.*/
 	UFUNCTION(BlueprintCallable)
 		void ProcessEndWave();
+
+	/** Returns the spawn data used for Ursadeath's squire enemy types. Note that the EnemyClass within this data will always be null.*/
+	FEnemySpawnData GetSquireSpawnData();
 	
 	/** Update the player's Round Screen to show the current round's waves.*/
 	void UpdateRoundScreen();

@@ -4,18 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "UDUIDescriptionReceiver.h"
 #include "UDRoundScreenWidget.generated.h"
 
 class UUDWaveEntryWidget;
 class UUrsadeathGameInstance;
 class UButton;
+class UTextBlock;
 struct FEnemyWave;
+struct FUIDescription;
 
 /**
  * A widget used for the player's round menu, where they can see the upcoming waves in the game as well as their upgrades.
  */
 UCLASS(Abstract)
-class URSADEATH_API UUDRoundScreenWidget : public UUserWidget
+class URSADEATH_API UUDRoundScreenWidget : public UUserWidget, public IUDUIDescriptionReceiver
 {
 	GENERATED_BODY()
 
@@ -34,6 +37,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RoundDisplay, meta = (BindWidget))
 		TObjectPtr<UButton> RoundStartButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
+		TObjectPtr<UTextBlock> DescriptionTitleUI;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
+		TObjectPtr<UTextBlock> DescriptionBodyUI;
 
 	/** The wave entry widgets used to display the contents of each enemy wave within the round.*/
 	TArray<TObjectPtr<UUDWaveEntryWidget>> WaveEntries;
@@ -59,4 +68,9 @@ public:
 	/** Upgrades are not in the game, so currently this simply enables the Round Start button.*/
 		void SetRoundRewards();
 	
+	// Begin UIDescriptionReciever Interface
+		/** Sets the title and body text for the Round Screen's description.*/
+		void ReceiveDescription(FUIDescription Description) override;
+	// End UIDescriptionReciever Interface
+
 };

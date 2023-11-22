@@ -18,6 +18,7 @@
 #include "UDArena.h"
 #include "Components/Button.h"
 #include "UDRoundScreenWidget.h"
+#include "Sound/SoundBase.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -235,6 +236,28 @@ float AUDPlayerCharacter::GetEnergy()
 	return bInfiniteEnergy? MaxEnergy : CurrentEnergy;
 }
 
+bool AUDPlayerCharacter::TestEnergy(float amount)
+{
+	return CurrentEnergy >= amount;
+}
+
+bool AUDPlayerCharacter::TestEnergyWithFX(float amount)
+{
+	//If the player didn't have enough energy, play FX alerting the player to their poor resource management skillz.
+	if (!TestEnergy(amount))
+	{
+		//Play a mean audio sound.
+		if (NoEnergySound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), NoEnergySound);
+		}
+		
+		return false;
+	}
+
+	return true;
+}
+
 void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
 {
 	//Energy is only expended if the Infinite Energy is turned off.
@@ -259,6 +282,11 @@ void AUDPlayerCharacter::SetHealth(int Value)
 void AUDPlayerCharacter::DamagePlayer(int Damage)
 {
 	SetHealth(CurrentHealth - Damage);
+
+	if (DamageSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), DamageSound);
+	}
 }
 
 void AUDPlayerCharacter::NotifyOnHealthPickupUsed()

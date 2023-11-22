@@ -3,6 +3,8 @@
 
 #include "UDHealthPickup.h"
 #include "UDPlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 // Sets default values
 AUDHealthPickup::AUDHealthPickup()
@@ -50,6 +52,12 @@ void AUDHealthPickup::UsePickup(AUDPlayerCharacter* UsingPlayer)
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 
+	//Pickup FX
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), PickupSound);
+	}
+	
 	//Put the pickup on cooldown.
 	CooldownTracker = Cooldown;
 }

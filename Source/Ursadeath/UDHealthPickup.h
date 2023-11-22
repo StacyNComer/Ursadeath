@@ -23,6 +23,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		float CooldownTracker;
 
+	/** Audio played when the player picks this item up.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USoundBase> PickupSound;
+
 public:	
 	// Sets default values for this actor's properties
 	AUDHealthPickup();

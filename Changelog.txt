@@ -1,3 +1,20 @@
+ === Update 11 "Descriptions of Doom!" ===
+
+	> General
+
+* The Round Screen now displays a description of an enemy type whenever its icon is moused over. (You might have to click
+  the screen after opening the Round Screen to get this working)
+	* Enemy descriptions can be editted in their "Spawn Data" data table. The description for squires can be editted in
+	  the UrsadeathGameInstance class.
+
+	~ Known Bugs
+
+* The game must be clicked before the Round Screen's "Begin Round" button may be pressed.
+
+* When the Round Screen's "Begin Round" button is pressed and the Round Screen is exitted, the mouse must be clicked before
+  the player can aim with it.
+
+
  === Update 10 "Round Screen of Doom!" ===
 
 	> General

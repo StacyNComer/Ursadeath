@@ -1,3 +1,50 @@
+ === Update 12 "QoL of Doom!" ===
+
+	> General
+
+* Added a crosshair
+
+* Shockwaves now destroy projectiles.
+
+* Enemies now have particles above their head while stunned.
+
+* Enemies now make a sound when they take damage.
+
+* Ranged Squires have been adjusted:
+	* Their projectiles now have a bright gold emissive material.
+	* They deal less damage (25 => 15) but have faster projectiles (800 => 1800).
+
+* Reduced the attack cooldown of Laser Knights (5 => 3 seconds).
+
+* Adjusted the player's primary fire.
+	* The attack's energy gain has been reduced (5% => 3%)
+	* The projectiles now move 50% faster (3000 => 4500).
+		# This help make them feel like they have more "Oomf!" to them.
+
+* The energy gain from melee attacks have been reduced (50% => 40%).
+
+	> Bugfixes
+		
+* Fixed a bug where the InfiniteEnergy setting didn't actually work.
+
+* Fixed a bug where the Laser Knight would continue to fire their laser even when stunned.
+
+* Fixed a bug where the Ranged Squire's projectiles would block player movement but not actually damage them.
+
+* The player start now ALWAYS spawns the player, preventing a confusing crash if something was placed over their spawn
+   point.
+
+	~ Known Bugs
+
+* The game must be clicked before the Round Screen's "Begin Round" button may be pressed.
+
+* When the Round Screen's "Begin Round" button is pressed and the Round Screen is exitted, the mouse must be clicked before
+  the player can aim with it.
+
+* When a ranged enemy spawns, they don't do anything until the player leaves their line of sight. Sometimes they will also
+  freeze if the player is far away.
+
+
  === Update 11 "Descriptions of Doom!" ===
 
 	> General

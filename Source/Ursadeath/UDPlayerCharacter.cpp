@@ -230,7 +230,7 @@ void AUDPlayerCharacter::AddEnergy(float ToAdd)
 	SetEnergy(NewEnergy);
 }
 
-float AUDPlayerCharacter::GetEnergy()
+float AUDPlayerCharacter::GetCurrentEnergy()
 {
 	//If the player has Infinite Energy, return MaxEnergy. Otherwise, return their current energy.
 	return bInfiniteEnergy? MaxEnergy : CurrentEnergy;
@@ -238,7 +238,7 @@ float AUDPlayerCharacter::GetEnergy()
 
 bool AUDPlayerCharacter::TestEnergy(float amount)
 {
-	return CurrentEnergy >= amount;
+	return GetCurrentEnergy() >= amount;
 }
 
 bool AUDPlayerCharacter::TestEnergyWithFX(float amount)

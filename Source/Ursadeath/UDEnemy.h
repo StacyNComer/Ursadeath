@@ -12,6 +12,8 @@ class UMeshComponent;
 class AUDEnemyController;
 class AUDEnemy;
 class AUDPlayerCharacter;
+class UNiagaraComponent;
+class USoundBase;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -41,6 +43,21 @@ public:
 		bool bUndieable;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<USceneComponent> SceneRoot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<UNiagaraComponent> StunParticleComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USoundBase> DamageSound;
+
+	/** The spawn radius of the stun particle effect. 
+	*
+	* User parameters for Niagara Components don't appear in the detail panel if the component is made in C++ and all I got from looking this issue up was that this is a bug...*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		float StunParticleRadius = 75;
+
 	/** If true, the enemy won't undergo its spawning sequence. Instead, the enemy will recieve their default AI when play begins. Use for debug enemies without waiting for them to spawn.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
 	bool bSpawnInstantly;
@@ -89,7 +106,7 @@ public:
 		void ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource);
 
 	/** Returns true if the enemy is currently stunned*/
-	UFUNCTION(BlueprintCallable, Category = Status)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Status)
 		bool IsStunned();
 
 	/** Returns the amount of time this enemy should spend "spawning in"*/
@@ -105,6 +122,12 @@ protected:
 	/** An event right after the enemy's spawn sequence ends. Use this to add additional effects to the enemy's spawn sequence completing from inside blueprints.*/
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnSpawnSequenceEnd();
+
+	/** Called whenever the enemy is hit by an attack that stuns them. Implement this event whenever the enemy being stunned requires additional behavior (such as interupting an ongoing attack).
+	* WasAlreadyStunned returns true if the enemy was already under the effects of a stun from a different effect.
+	*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnStunned(bool WasAlreadyStunned);
 
 	/** Stuns the enemy for the given time. If the enemy is already stunned, the remaining time stunned will be set to TimeStunned if it is higher.*/
 	void ApplyStun(float TimeStunned);

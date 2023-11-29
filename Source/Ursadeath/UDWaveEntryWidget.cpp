@@ -14,7 +14,7 @@ void UUDWaveEntryWidget::NativeOnInitialized()
 
 	UrsadeathGameInstance = Cast<UUrsadeathGameInstance>(GetGameInstance());
 	
-	//Create the spawn indicator for Squires and set its image and description.
+	//Create the enemy entry for Squires and set its image and description.
 	SquireEnemyEntry = CreateEnemyEntry();
 	SquireEnemyEntry->SpawnCounterWidget->SetEnemyImage(UrsadeathGameInstance->GetSquireSpawnData().EnemyIcon);
 	SquireEnemyEntry->DescriptionSourceWidget->SetDescription(UrsadeathGameInstance->GetSquireSpawnData().Description);
@@ -42,16 +42,20 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 	while(i < NonSquireClasses.Num())
 	{
 		EnemyEntry* EnemyEntry = NonSquireEnemyEntries[i];
+
+		//Get the spawn counter from the EnemyEntry.
 		UUDEnemySpawnIndicator* SpawnIndicator = EnemyEntry->SpawnCounterWidget;
 
+		//Get the class of enemy that the Entry will represent.
 		TSubclassOf<AUDEnemy> EnemyClass = NonSquireClasses[i];
 		
 		FEnemySpawnData SpawnDataEntry = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass);
 
+		//Display the enemy's icon and count for the wave.
 		SpawnIndicator->SetEnemyImage(SpawnDataEntry.EnemyIcon);
-
 		SpawnIndicator->SetEnemyCount(Wave.KnightCounts[EnemyClass]);
 
+		//Set the enemy's description from their Spawn Data.
 		EnemyEntry->DescriptionSourceWidget->SetDescription(SpawnDataEntry.Description);
 
 		//Make sure the spawn indicator is visible.

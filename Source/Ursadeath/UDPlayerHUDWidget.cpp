@@ -15,7 +15,7 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 	UUrsadeathGameInstance* UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 
 	//Get the spawning data from the game instance.
-	KnightSpawnDataTable = UrsadeathGameInstance->EnemySpawnDataTable;
+	KnightSpawnDataTable = UrsadeathGameInstance->KnightSpawnDataTable;
 
 	//Create the indicator widget for squires.
 	SquireSpawnIndicator = CreateSpawnIndicatorWidget(UrsadeathGameInstance->GetSquireSpawnData().EnemyIcon);
@@ -34,6 +34,9 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 
 		//Add the indicator to the Knight Spawn Indicator map so that it is linked to its enemy type.
 		KnightSpawnIndicators.Add(KnightSpawnData[i]->EnemyClass, KnightSpawnIndicator);
+
+		//Make the knight indicator invisible until it is needed.
+		KnightSpawnIndicator->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 

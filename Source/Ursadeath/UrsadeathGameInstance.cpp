@@ -15,7 +15,7 @@ void UUrsadeathGameInstance::Init()
 {
 	//Generate an array of the EnemySpawnData structures.
 	TArray<FEnemySpawnData*> KnightSpawnData;
-	EnemySpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
+	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
 
 	//Populate the EnemyDataMap with the spawn data of each enemy.
 	for (int i = 0; i < KnightSpawnData.Num(); i++)

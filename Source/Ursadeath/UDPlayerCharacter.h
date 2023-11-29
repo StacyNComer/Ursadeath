@@ -192,7 +192,7 @@ public:
 	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass);
 
 	/** Returns the player's current energy amount.*/
-	float GetEnergy();
+	float GetCurrentEnergy();
 
 	/** Tests if the player has the given amount of energy or greater. Abilities should use TestEnergyWithFX so that FX play if the player doesn't have enough energy.*/
 	bool TestEnergy(float amount);

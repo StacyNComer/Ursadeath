@@ -149,6 +149,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = EnemyData)
 		FEnemySpawnData SquireSpawnData;
 
+	/** The Knight enemy types that are out of play due to not yet being selected to be in the spawn pool by the player. Initialized from the data*/
+	TArray<TSubclassOf<AUDEnemy>> KnightsOutOfPlay;
+
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
 	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
 
@@ -174,9 +177,9 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerCharacter> PlayerCharacter;
 
-	/** This should contain a data table of all of the game's non-Squire tier (Knight/Champion) enemies and any other information for spawning them.*/
+	/** This should contain a data table of all of the game's Knight tier enemies and any other information for spawning them.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
-		TObjectPtr<UDataTable> EnemySpawnDataTable;
+		TObjectPtr<UDataTable> KnightSpawnDataTable;
 
 protected:
 	/** Generates the given round and populates the CurrentRoundWaves value. The value stored RoundWaveCounts[RoundIndex] determines the number of waves generated. 

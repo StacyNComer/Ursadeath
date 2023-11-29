@@ -11,8 +11,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
 
-
 #define ECC_PLAYER ECC_GameTraceChannel2
+#define ECC_ENEMY ECC_GameTraceChannel4
 
 void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 {
@@ -34,7 +34,7 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 		
 		//THe explosion searches for Pawns (which all enemies are) and Players.
 		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
-		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_ENEMY));
 		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PLAYER));
 
 		//The actor directly hit by the explosive projectile is not affected by the explosion.

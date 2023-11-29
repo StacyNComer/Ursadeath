@@ -7,7 +7,10 @@
 #include "UDPlayerAttackData.h"
 #include "UDEnemyController.h"
 #include "UDPlayerCharacter.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 // Sets default values
 AUDEnemy::AUDEnemy()
@@ -21,15 +24,33 @@ AUDEnemy::AUDEnemy()
 		AutoPossessAI = EAutoPossessAI::Disabled;
 	}
 
-	//Set the default spawning material
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> SpawningMaterialFinder(TEXT("/Game/Ursadeath/Enemies/Core/M_SpawningEnemy"));
+	//Create a root component for this actors components to be attached to.
+	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+
+	//Set the default spawning material.
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> SpawningMaterialFinder(TEXT("/Game/Ursadeath/Enemies/Core/Materials/M_SpawningEnemy"));
 	SpawningMaterial = SpawningMaterialFinder.Object;
+
+	//Create the stun particle system component.
+	StunParticleComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("StunParticles"));
+	StunParticleComponent->SetupAttachment(SceneRoot);
+	
+	//Set the enemy stun particle system to its default value.
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> StunParticleSystemFinder(TEXT("/Game/Ursadeath/Enemies/Core/ParticleFX/NS_EnemyStun"));
+	StunParticleComponent->SetAsset(StunParticleSystemFinder.Object);
+
+	//Set the stun particles to start deactivated.
+	StunParticleComponent->bAutoActivate = false;
 }
 
 // Called when the game starts or when spawned
 void AUDEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Set the default size for the stun particles.
+	StunParticleComponent->SetFloatParameter(TEXT("User.SpawnRadius"), StunParticleRadius);
+
 
 	if (bSpawnInstantly)
 	{
@@ -65,6 +86,10 @@ void AUDEnemy::Tick(float DeltaTime)
 		if (StunTime <= 0)
 		{
 			EnemyController->ResumeAI();
+
+			//Turn off the stun particle FX.
+			StunParticleComponent->Deactivate();
+
 		}
 	}
 }
@@ -72,13 +97,18 @@ void AUDEnemy::Tick(float DeltaTime)
 void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource)
 {
 	//Call the attack recieved event.
-	if(OnAttackRecieved.IsBound())
+	if (OnAttackRecieved.IsBound())
 	{
 		OnAttackRecieved.Broadcast(AttackData);
 	}
 
-	//Reduce the enemy's health
-	health -= AttackData->AttackStats.Damage;
+	//If the attack deals damage, damage the enemy and play a hit sound.
+	if (AttackData->AttackStats.Damage > 0)
+	{
+		health -= AttackData->AttackStats.Damage;
+
+		UGameplayStatics::PlaySound2D(GetWorld(), DamageSound);
+	}
 
 	//Stun the enemy if the attack should stun them.
 	float AttackStunTime = AttackData->AttackStats.StunTime; 
@@ -123,18 +153,25 @@ void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
 
 void AUDEnemy::ApplyStun(float TimeStunned)
 {
+	//Notify the blueprint that this enemy was stunned.
+	OnStunned(IsStunned());
+
 	//If the player was not stunned before stun them. If they were already stunned, only apply the stun if it would be longer.
 	if (!IsStunned())
 	{
 		StunTime = TimeStunned;
 
+		//Pause the enemy AI and cancel any active movement.
 		EnemyController->StopAI();
 		GetMovementComponent()->StopActiveMovement();
+		
+		//Turn on the stun particle FX.
+		StunParticleComponent->Activate();
 	}
 	else if (TimeStunned > StunTime)
 	{
 		StunTime = TimeStunned;
-	}
+	}	
 }
 
 void AUDEnemy::PossessedBy(AController* NewController)

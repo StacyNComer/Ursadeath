@@ -35,13 +35,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = RoundDisplay)
 		TSubclassOf<UUDWaveEntryWidget> WaveEntryClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = RoundDisplay, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, Category = RoundDisplay, meta = (BindWidget))
 		TObjectPtr<UButton> RoundStartButton;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionTitleUI;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionBodyUI;
 
 	/** The wave entry widgets used to display the contents of each enemy wave within the round.*/

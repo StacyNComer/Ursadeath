@@ -222,4 +222,10 @@ public:
 	
 	/** Update the player's Round Screen to show the current round's waves.*/
 	void UpdateRoundScreen();
+
+	/** Returns the current wave the game is on. This value is zero-based (round 0 is actually round 1)*/
+	int GetCurrentRound();
+
+	/** Returns the wave that the game is on. This value is not reset between rounds, instead continuing to count up. This value is also zero-based (wave 0 is actually wave 1)*/
+	int GetAbsoluteWave();
 };

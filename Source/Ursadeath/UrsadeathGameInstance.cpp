@@ -210,6 +210,16 @@ void UUrsadeathGameInstance::UpdateRoundScreen()
 	PlayerCharacter->GetRoundScreenWidget()->DisplayRound(RoundNumber + 1, CurrentRoundWaves);
 }
 
+int UUrsadeathGameInstance::GetCurrentRound()
+{
+	return RoundNumber;
+}
+
+int UUrsadeathGameInstance::GetAbsoluteWave()
+{
+	return AbsoluteWaveNumber;
+}
+
 #undef LOCTEXT_NAMESPACE
 
 

@@ -16,14 +16,14 @@ struct FUIDescription;
 * 
 * Description Widgets don't typically have visual designs of their own and are meant to act as a "wrapper" for other User Widgets, which should typically be a visual representation whatever the description's subject is. Child widgets may be added via the ContentPanel value. 
 */
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API UUDDescriptionSourceWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
 protected:
 	/** A panel widget meant to hold this classes child widget(s). Widgets set as this panel's child shoul typically be a visual representation of the description's subject.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		TObjectPtr<UPanelWidget> ContentPanel;
 
 	FUIDescription Description;

@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -19,9 +18,12 @@ class AUDPlayerAttack;
 class AUDPlayerController;
 class UUDPlayerHUDWidget;
 class UUDRoundScreenWidget;
+class UUDGameOverWidget;
 class UUDPlayerCooldownAbility;
 class UUDPlayerEnergyAbility;
 class AUDEnemy;
+class UUrsadeathGameInstance;
+class UEnhancedInputLocalPlayerSubsystem;
 struct FEnemyWave;
 enum class EEnemyTier;
 
@@ -56,9 +58,14 @@ class AUDPlayerCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
 
+	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem;
+
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputMappingContext* GameOverMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* RoundMenuMappingContext;
@@ -121,6 +128,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = UI)
 		TSubclassOf<UUDRoundScreenWidget> RoundScreenWidgetClass;
 
+	/**The class the game over screen will be created as.*/
+	UPROPERTY(EditAnywhere, Category = UI)
+		TSubclassOf<UUDGameOverWidget> GameOverWidgetClass;
+
 	/** The player's HUD.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUDPlayerHUDWidget> HUDWidget;
@@ -129,7 +140,11 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUDRoundScreenWidget> RoundScreenWidget;
 
-	/** The player controller casted to UDPlayerController. */
+	/** The widget that appears when the player completes the game. Or dies.*/
+	UPROPERTY(BlueprintReadOnly)
+		TObjectPtr<UUDGameOverWidget> GameOverWidget;
+
+	/** The player controller casted to UDPlayerController.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDPlayerController> UDPlayerController;
 
@@ -144,6 +159,8 @@ protected:
 	/** If true, energy is never expended and the player is always considered to have max energy (this won't change the UI to reflect this)*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
 		bool bInfiniteEnergy;
+
+	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 public:
 	AUDPlayerCharacter();

@@ -1,3 +1,24 @@
+ === Update 13 "Finally Fixed UI of Doom!" ===
+
+	> General
+
+* Added a Game Over screen that appears when the player runs out of health.
+	# Currently, the play mode must be exited and reopened to reset the game. There are a few things I need
+	  to figure out before I can make the game properly reset itself!
+
+* Added more sounds to the player including:
+	* A "hurt" sound
+	* A sound that plays when the player tries to use an ability without enough energy.
+
+* Tweaked the size of the Round Screen UI button.
+
+	> Bugfixes
+	
+* The Round Screen no longer needs to be clicked before the Round Start button can be pressed.
+
+* The screen no longer needs to be clicked to aim after the player leaves the round screen.
+
+
  === Update 12 "QoL of Doom!" ===
 
 	> General

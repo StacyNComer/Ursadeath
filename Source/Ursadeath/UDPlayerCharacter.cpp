@@ -18,6 +18,7 @@
 #include "UDArena.h"
 #include "Components/Button.h"
 #include "UDRoundScreenWidget.h"
+#include "UDGameOverWidget.h"
 #include "Sound/SoundBase.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
@@ -73,8 +74,10 @@ void AUDPlayerCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	//Get the game instance.
+	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 	//Set this as the game instance's player.
-	GetGameInstance<UUrsadeathGameInstance>()->PlayerCharacter = this;
+	UrsadeathGameInstance->PlayerCharacter = this;
 
 	// Set the UDPlayerController.
 	UDPlayerController = GetController<AUDPlayerController>();
@@ -95,11 +98,17 @@ void AUDPlayerCharacter::BeginPlay()
 	//When the player starts the round from the round menu, the round menu should close.
 	RoundScreenWidget->GetRoundStartButton()->OnClicked.AddDynamic(this, &AUDPlayerCharacter::ToggleRoundMenu);
 
+	//Create the game over widget.
+	GameOverWidget = CreateWidget<UUDGameOverWidget>(UDPlayerController, GameOverWidgetClass);
+	GameOverWidget->AddToViewport();
+	//Make sure the player is shown the game over screen the moment they load in!
+	GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
+	
+	//Set the input subsystem
+	InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer());
+		
 	//Add Input Mapping Context
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	}
+	InputSubsystem->AddMappingContext(DefaultMappingContext, 0);
 }
 
 void AUDPlayerCharacter::Tick(float deltaTime)
@@ -179,11 +188,19 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	//Pause the game if the round screen is being opened. Unpause if it is being closed.
 	UGameplayStatics::SetGamePaused(GetWorld(), RoundScreenOpening);
 
+	//Show/Hide the cursor based on whether or not the menu is being shown/hidden.
 	UDPlayerController->bShowMouseCursor = RoundScreenOpening;
-
+	
 	if (RoundScreenOpening)
 	{
+		//Swap the controller to the UI input mode. No more clicking the screen to get the UI to work. It's over. It's dead.
+		UDPlayerController->SetInputMode(FInputModeGameAndUI());
+
+		//Set the round screent to the focus widget.
 		RoundScreenWidget->SetFocus();
+	} else
+	{
+		UDPlayerController->SetInputMode(FInputModeGameOnly());
 	}
 }
 
@@ -286,6 +303,18 @@ void AUDPlayerCharacter::DamagePlayer(int Damage)
 	if (DamageSound)
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), DamageSound);
+	}
+
+	if (CurrentHealth <= 0)
+	{
+		//Show the game over widget and update it with the player's score.
+		GameOverWidget->SetVisibility(ESlateVisibility::Visible);
+		GameOverWidget->DisplayScore(UrsadeathGameInstance->GetCurrentRound(), UrsadeathGameInstance->GetAbsoluteWave());
+
+		//Turn of the player's game controls because they are dead now.
+		InputSubsystem->RemoveMappingContext(DefaultMappingContext);
+
+		UDPlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 }
 

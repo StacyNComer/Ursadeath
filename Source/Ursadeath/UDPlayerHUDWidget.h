@@ -71,8 +71,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void UpdateEnergy(float PlayerEnergy, float EnergyChange, bool EnergyBarGained);
 
-	/** Displays the given text to the player as an announcement for the given amount of time. Note that this will overrite any previously displayed announcement as well as its DisplayTime.*/
-	void DisplayAnnouncement(const FText& Message, float DisplayTime);
+	UFUNCTION(BlueprintCallable)
+		/** Displays the given text to the player as an announcement for the given amount of time. Note that this will overrite any previously displayed announcement as well as its DisplayTime.*/
+		void DisplayAnnouncement(const FText& Message, float DisplayTime);
 
 	/** Decrement the count of the indicator for the given enemy type.*/
 	void DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier);

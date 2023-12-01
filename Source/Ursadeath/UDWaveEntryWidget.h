@@ -30,7 +30,7 @@ struct EnemyEntry
 /**
  * A Widget for showing the enemies the player will face in a wave from within the Round Screen
  */
-UCLASS()
+UCLASS(Abstract)
 class URSADEATH_API UUDWaveEntryWidget : public UUserWidget
 {
 	GENERATED_BODY()
@@ -58,6 +58,8 @@ protected:
 
 protected:
 	virtual void NativeOnInitialized() override;
+
+	virtual void NativeDestruct() override;
 
 	/** Creates and returns an Enemy Entry meant to hold an Enemy Counter and Description Source for this widget.*/
 	EnemyEntry* CreateEnemyEntry();

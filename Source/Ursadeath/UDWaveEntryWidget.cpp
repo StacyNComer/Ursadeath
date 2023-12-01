@@ -26,6 +26,18 @@ void UUDWaveEntryWidget::NativeOnInitialized()
 	}
 }
 
+void UUDWaveEntryWidget::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	//When the widget is destroyed, free the memory allocated for its WaveEntries.
+	delete SquireEnemyEntry;
+	for (int i = 0; i < NonSquireEnemyEntries.Num(); i++)
+	{
+		delete NonSquireEnemyEntries[i];
+	}
+}
+
 void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 {
 	//Display the number of squires in the wave

@@ -27,6 +27,8 @@ struct FEnemySpawnData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		FUIDescription Description;
+
+	bool operator==(FEnemySpawnData const& Other);
 };
 
 /** Holds the data shared between the EnemyWaveScheme and the actual EnemyWave.*/
@@ -56,7 +58,7 @@ struct FEnemyWaveCommonData
 		int32 MaxKnights;
 };
 
-/** A structure meant to act as a blueprint (not the Unreal ones diploid!) for how an enemy wave should behave. The Enemy Waves themselve, and what enemy types spawn in them, are generated at runtime.*/
+/** A structure meant to act as a blueprint (not the Unreal ones diploid!) for how an enemy wave should behave. The Enemy Waves themselves, and what enemy types spawn in them, are generated at runtime.*/
 USTRUCT(BlueprintType)
 struct FEnemyWaveScheme : public FTableRowBase
 {
@@ -108,11 +110,6 @@ private:
 		bool bLevelSetupBound = false;
 
 protected:
-	FRandomStream RandomStream;
-
-	/** Maps the classes of non-Squire tier enemies in play to their entry in the data table so that they are easy for other parts of the program to get.*/
-	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData*> EnemyDataMap;
-
 	/** The name used to generate the game's random seed.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		FName GameSeedName;
@@ -137,20 +134,27 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
 		TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;
 
-	/** The last Knight Type to be added to the spawn pool. Used for waves generated with "UseNewKnight" set to true.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
-		TSubclassOf<AUDEnemy> NewKnightType;
-
 	/** The data table of FWaveSchemes used to generate waves during gameplay. The waves should be set in chronological order, starting with the first wave.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SpawnData)
 		UDataTable* WaveSchemeDataTable;
 
-	/** The icon used for squires in their spawn counter.*/
+	/** The data used to control how squire enemies appear in UI. This spawn data does not have a class, as squires are multiple classes.*/
 	UPROPERTY(EditAnywhere, Category = EnemyData)
 		FEnemySpawnData SquireSpawnData;
 
-	/** The Knight enemy types that are out of play due to not yet being selected to be in the spawn pool by the player. Initialized from the data*/
-	TArray<TSubclassOf<AUDEnemy>> KnightsOutOfPlay;
+	/** The spawn data for when a knight enemy type has yet to be chosen for the upcoming round.*/
+	UPROPERTY(EditAnywhere, Category = EnemyData)
+		FEnemySpawnData UnchosenKnightSpawnData;
+
+	TArray<FEnemySpawnData> KnightRewardOptions;
+
+	FRandomStream RandomStream;
+
+	/** Maps the classes of non-Squire tier enemies in play to their entry in the data table so that they are easy for other parts of the program to get.*/
+	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData*> EnemyDataMap;
+
+	/** The data for the knight types which may be offer to the player to be added into play. Initialized from the Knight Spawn Data.*/
+	TArray<FEnemySpawnData> KnightRewardPool;
 
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
 	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
@@ -196,10 +200,17 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		FEnemyWave GenerateEnemyWave(FEnemyWaveScheme WaveScheme);
 
+	/** Replaces all instance of the UnchosenKnight in the current round with the given enemy type.*/
+	UFUNCTION(BlueprintCallable)
+		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType);
+
 	virtual void Init() override;
 
-	/** Called after the player and arena have been set up. */
+	/** Called after the player and arena have been set up.*/
 	void OnLevelSetup();
+
+	/** Sets the KnightTypeRewards that the player may choose from and updates their UI to show these options.*/
+	void PopulateRoundRewards();
 
 	/** Announces a new wave to the player and displays the enemy counts to their HUD. After the GameInstance's WaveStartDelay expires, StartWaveInstant is called and the wave's start sequence is complete.*/
 	void StartWave(FEnemyWave Wave);
@@ -217,6 +228,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ProcessEndWave();
 
+	/** Sets the round and wave back to 0 and regenerates round 0.*/
+	UFUNCTION(BlueprintCallable)
+		void ResetGame();
+
+	/** Adds the knight type that the player has chosen from their Round Rewards into the spawn pool. The Unchosen Knight instances in the round are also replaced with this new enemy type.*/
+	UFUNCTION()
+		void AddKnightReward();
+
+	/** Shuffles the given TArray. Note that this uses the Game Instance's RandomStream.*/
+	template<typename T>
+	void ShuffleArray(TArray<T> &Array);
+
 	/** Returns the spawn data used for Ursadeath's squire enemy types. Note that the EnemyClass within this data will always be null.*/
 	FEnemySpawnData GetSquireSpawnData();
 	
@@ -228,4 +251,7 @@ public:
 
 	/** Returns the wave that the game is on. This value is not reset between rounds, instead continuing to count up. This value is also zero-based (wave 0 is actually wave 1)*/
 	int GetAbsoluteWave();
+
+	/** Meant to be called when the player's Begin Play initialization is complete. Performs first-time updates to the player's UI and sets them as the Player Character in play.*/
+	void FinalizePlayerSetup(AUDPlayerCharacter* Player);
 };

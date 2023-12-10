@@ -1,3 +1,50 @@
+ 
+=== Update 14 "Foe Choices Doom!" ===
+
+# We got accepted into Playtest Planet!
+
+	> General
+
+* Once per round, the player can now choose a Knight enemy type to appear in the current and future waves. Until an enemy
+  type is chosen, they show up in the game's wave listings as an "Unchosen Foe".
+	* An enemy type must be chosen before the player can start the round, unless all enemy types have been choosen.
+	* The available enemies are taken from the Knight Spawn Data Table.
+	* The appearance of the "Unchosen Foe" in the game's UI can be set from the UrsadeathGameInstance blueprint.
+
+* Altered the enemy waves to introduce the second round's new enemy type better.
+
+
+ === Update 13 "Night City Releas of Doom!" ===
+
+	> General
+
+* The player can now restart the game when they die.
+
+* Adjusted the Lazer Knight:
+	* Halved the distance they aim ahead of the player.
+		# They have a comedic tendency to point their lasers way away from the player, often blocking some 
+		  corner that the player hadn't planned on moving into anyway.
+	* Halve the laser's warning period before it fires. (1s => 0.5s)
+		# So that if that if the player decides to walk through the laser despite being warned of it, it comes
+		  online just fast enough to hit them.
+
+* Increased the damage Melee Knights deal (20 => 35).
+
+* Increased the self damage Rockets deal to the player (10 => 20).
+
+* Adjusted Health Pickups:
+	* They take a slightly shorter time to respawn (35s => 30s).
+	* They heal for slightly more (35 -> 40).
+
+* A sound now plays whenever the player gains a bar of energy.
+
+	> Bugfixes
+
+* Ranged and Lazer enemies no longer freeze in place until something blocks their view of the player.
+
+* The player now properly collides with enemies.
+
+
  === Update 13 "Finally Fixed UI of Doom!" ===
 
 	> General

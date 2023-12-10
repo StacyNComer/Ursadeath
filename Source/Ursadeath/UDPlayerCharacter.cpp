@@ -76,8 +76,6 @@ void AUDPlayerCharacter::BeginPlay()
 
 	//Get the game instance.
 	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
-	//Set this as the game instance's player.
-	UrsadeathGameInstance->PlayerCharacter = this;
 
 	// Set the UDPlayerController.
 	UDPlayerController = GetController<AUDPlayerController>();
@@ -109,6 +107,8 @@ void AUDPlayerCharacter::BeginPlay()
 		
 	//Add Input Mapping Context
 	InputSubsystem->AddMappingContext(DefaultMappingContext, 0);
+
+	UrsadeathGameInstance->FinalizePlayerSetup(this);
 }
 
 void AUDPlayerCharacter::Tick(float deltaTime)
@@ -230,6 +230,11 @@ void AUDPlayerCharacter::SetEnergy(float Value)
 	
 	CurrentEnergy = Value;
 
+	if (EnergyBarGained && EnergyBarGainedSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), EnergyBarGainedSound);
+	}
+
 	//Update the UI
 	HUDWidget->UpdateEnergy(CurrentEnergy, DeltaEnergy, EnergyBarGained);
 }
@@ -315,12 +320,14 @@ void AUDPlayerCharacter::DamagePlayer(int Damage)
 		InputSubsystem->RemoveMappingContext(DefaultMappingContext);
 
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
+
+		UDPlayerController->bShowMouseCursor = true;
 	}
 }
 
 void AUDPlayerCharacter::NotifyOnHealthPickupUsed()
 {
-	RestoreHealth(35);
+	RestoreHealth(40);
 }
 
 void AUDPlayerCharacter::RestoreHealth(int ToRestore)
@@ -350,7 +357,6 @@ UUDRoundScreenWidget* const AUDPlayerCharacter::GetRoundScreenWidget()
 {
 	return RoundScreenWidget;
 }
-
 
 void AUDPlayerCharacter::UsePrimaryAbility()
 {

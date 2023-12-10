@@ -37,9 +37,14 @@ public:
 protected:
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
 public:
 	/** Set the description that this widget send to be displayed.*/
 	void SetDescription(FUIDescription NewDescription);
+
+	/** Returns the description used by this description source.*/
+	FUIDescription GetDescription();
 
 	/** Returns a panel widget which can be used to parent this widget to other widgets.*/
 	UPanelWidget* const GetContentPanel();

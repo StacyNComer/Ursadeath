@@ -38,4 +38,7 @@ class URSADEATH_API IUDUIDescriptionReceiver
 public:
 	/** Called when new description text is sent for the widget to somehow display.*/
 	virtual void ReceiveDescription(FUIDescription Description);
+
+	/** Called when a description source is no longer moused over. Override to create behavior for when no description source is being moused over.*/
+	virtual void SetDefaultDescription();
 };

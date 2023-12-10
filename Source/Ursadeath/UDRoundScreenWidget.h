@@ -9,10 +9,10 @@
 
 class UUDWaveEntryWidget;
 class UUrsadeathGameInstance;
+class UUDRoundRewardMenu;
 class UButton;
 class UTextBlock;
 struct FEnemyWave;
-struct FUIDescription;
 
 /**
  * A widget used for the player's round menu, where they can see the upcoming waves in the game as well as their upgrades.
@@ -44,12 +44,23 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionBodyUI;
 
+	/** The description shown when a description source for this UI is no longer being moused over.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI)
+		FUIDescription DefaultDescription;
+
+	/** The "Reward" menu for viewing or adding to the Knight enemy types in play.*/
+	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
+		TObjectPtr<UUDRoundRewardMenu> KnightRewardMenu;
+
 	/** The wave entry widgets used to display the contents of each enemy wave within the round.*/
 	TArray<TObjectPtr<UUDWaveEntryWidget>> WaveEntries;
 
 private:
 	UFUNCTION()
 		void OnRoundStartPressed();
+
+	/** Sets the round's description text. Used by the Description Reciever interface.*/
+	void SetDescriptionText(FUIDescription Description);
 
 protected:
 	/** Sets the UI to display the given Round Number.*/
@@ -63,14 +74,23 @@ public:
 	UFUNCTION(BlueprintCallable, Category = RoundDisplay)
 		void DisplayRound(int RoundNumber, TArray<FEnemyWave> RoundWaves);
 
+	/** Allow the player to start the round by enabling the round button. Used for delegates.*/
+	UFUNCTION()
+		void EnableRoundStart();
+
 	UButton* const GetRoundStartButton();
 
+	/** Returns the "reward" menus for view or adding Knight enemy types in play.*/
+	UUDRoundRewardMenu* const GetKnightRewardMenu();
+
 	/** Upgrades are not in the game, so currently this simply enables the Round Start button.*/
-		void SetRoundRewards();
+	void SetRoundRewards();
 	
 	// Begin UIDescriptionReciever Interface
 		/** Sets the title and body text for the Round Screen's description.*/
 		void ReceiveDescription(FUIDescription Description) override;
+
+		void SetDefaultDescription() override;
 	// End UIDescriptionReciever Interface
 
 };

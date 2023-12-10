@@ -3,6 +3,7 @@
 
 #include "UDRoundScreenWidget.h"
 #include "UrsadeathGameInstance.h"
+#include "UDRoundRewardMenu.h"
 #include "Blueprint/WidgetTree.h"
 #include "UDWaveEntryWidget.h"
 #include "Components/Button.h"
@@ -15,6 +16,8 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	SetIsFocusable(true);
 
 	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
+
+	KnightRewardMenu->InitDescriptionReceiver(this);
 
 	//Create the Wave Entry widgets.
 	for (int i = 0; i < UrsadeathGameInstance->MaxWavesPerRound; i++)
@@ -34,6 +37,12 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 
 	//Bind the round Start Button.
 	RoundStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::OnRoundStartPressed);
+
+	//Bind the confirm button for knight rewards so that it adds the chosen enemy type.
+	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddKnightReward);
+
+	//Allow the player to start the round after they choose the round's new knight type.
+	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::EnableRoundStart);
 }
 
 void UUDRoundScreenWidget::OnRoundStartPressed()
@@ -41,6 +50,13 @@ void UUDRoundScreenWidget::OnRoundStartPressed()
 	RoundStartButton->SetIsEnabled(false);
 	
 	UrsadeathGameInstance->StartRound();
+}
+
+void UUDRoundScreenWidget::SetDescriptionText(FUIDescription Description)
+{
+	DescriptionTitleUI->SetText(Description.Title);
+
+	DescriptionBodyUI->SetText(Description.Body);
 }
 
 void UUDRoundScreenWidget::DisplayRound(int RoundNumber, TArray<FEnemyWave> RoundWaves)
@@ -74,7 +90,7 @@ void UUDRoundScreenWidget::DisplayRound(int RoundNumber, TArray<FEnemyWave> Roun
 	}
 }
 
-void UUDRoundScreenWidget::SetRoundRewards()
+void UUDRoundScreenWidget::EnableRoundStart()
 {
 	RoundStartButton->SetIsEnabled(true);
 }
@@ -84,10 +100,18 @@ UButton* const UUDRoundScreenWidget::GetRoundStartButton()
 	return RoundStartButton;
 }
 
+UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu()
+{
+	return KnightRewardMenu;
+}
+
 void UUDRoundScreenWidget::ReceiveDescription(FUIDescription Description)
 {
-	DescriptionTitleUI->SetText(Description.Title);
+	SetDescriptionText(Description);
+}
 
-	DescriptionBodyUI->SetText(Description.Body);
+void UUDRoundScreenWidget::SetDefaultDescription()
+{
+	SetDescriptionText(DefaultDescription);
 }
 

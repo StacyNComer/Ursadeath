@@ -1,1 +1,1 @@
-Just drag the two folders into the project folder and you should. Once you've done that, the project should open!
+Just drag and drop the two folders into the project folder. Once you've done that, the project should open!

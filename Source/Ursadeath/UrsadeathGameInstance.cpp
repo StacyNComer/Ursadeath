@@ -7,39 +7,46 @@
 #include "UDPlayerCharacter.h"
 #include "UDPlayerHUDWidget.h"
 #include "UDRoundScreenWidget.h"
+#include "Components/Button.h"
 #include "Subsystems/WorldSubsystem.h"
+#include "UDRoundRewardMenu.h"
 
 #define LOCTEXT_NAMESPACE "PlayerHUD"
 
+bool FEnemySpawnData::operator==(FEnemySpawnData const& Other)
+{
+	return EnemyClass == Other.EnemyClass;
+}
+
 void UUrsadeathGameInstance::Init()
 {
+	//Initialize the game's random seed.
+	RandomStream.Initialize(GameSeedName);
+
 	//Generate an array of the EnemySpawnData structures.
 	TArray<FEnemySpawnData*> KnightSpawnData;
 	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
 
-	//Populate the EnemyDataMap with the spawn data of each enemy.
+	//Populate the EnemyDataMap and KnightReward pool with the spawn data of each enemy.
 	for (int i = 0; i < KnightSpawnData.Num(); i++)
 	{
 		FEnemySpawnData* SpawnDataEntry = KnightSpawnData[i];
 		EnemyDataMap.Add(SpawnDataEntry->EnemyClass, SpawnDataEntry);
+
+		KnightRewardPool.Add(*SpawnDataEntry);
 	}
+	
+	//Shuffle the Knight rewards.
+	ShuffleArray<FEnemySpawnData>(KnightRewardPool);
 
 	//Populate the enemy wave scheme array.
 	WaveSchemeDataTable->GetAllRows("GameInstanceEnemyWaveSchemeArrayInit", EnemyWaveSchemes);
 
-	//Initialize the game's random seed.
-	RandomStream.Initialize(GameSeedName);
+	//Add the UnchosenKnight to the spawn pool.
+	KnightSpawnPool.Add(UnchosenKnightSpawnData.EnemyClass);
 
 	//Generate the game's first round.
 	GenerateRound(RoundNumber);
-
-	//TODO: When a main menu is added or if there are ever multiple maps, this will likely need to be changed.
-	if (!bLevelSetupBound)
-	{
-		GetWorld()->OnWorldBeginPlay.AddUObject(this, &UUrsadeathGameInstance::OnLevelSetup);
-
-		bLevelSetupBound = true;
-	}
 }
 
 void UUrsadeathGameInstance::OnLevelSetup()
@@ -47,10 +54,40 @@ void UUrsadeathGameInstance::OnLevelSetup()
 	UpdateRoundScreen();
 }
 
+void UUrsadeathGameInstance::PopulateRoundRewards()
+{
+	//Make sure the reward options are cleared out.
+	KnightRewardOptions.Empty();
+
+	//Set the options for the Knight Type reward.
+	for (int i = 0; i < KnightRewardPool.Num() && i < 3; i++)
+	{
+		KnightRewardOptions.Add(KnightRewardPool[i]);
+	}
+
+	TArray<FRewardInfo> KnightRewardInfo;
+
+	//Generate reward info for displaying the Knight Type Rewards
+	for (int i = 0; i < KnightRewardOptions.Num(); i++)
+	{
+		FEnemySpawnData KnightTypeData = KnightRewardOptions[i];
+
+		FRewardInfo KnightInfo;
+
+		KnightInfo.RewardDescription = KnightTypeData.Description;
+		KnightInfo.RewardImage = KnightTypeData.EnemyIcon;
+
+		KnightRewardInfo.Add(KnightInfo);
+	}
+
+	//Display the Knight Type Rewards to the player's UI.
+	PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu()->SetRewardOptions(KnightRewardInfo);
+}
+
 void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
 {
 	//Show the wave that's about to spawn to the player
-	UUDPlayerHUDWidget* const PlayerHUDWidget = PlayerCharacter->GetHUDWidget();
+	UUDPlayerHUDWidget* PlayerHUDWidget = PlayerCharacter->GetHUDWidget();
 	PlayerHUDWidget->DisplayEnemyWave(Wave);
 	PlayerHUDWidget->DisplayAnnouncement(FText::Format(LOCTEXT("EnemyWaveNumberAnnouncement", "Wave {0}"), RoundWaveNumber+1), WaveStartDelay);
 
@@ -100,15 +137,15 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	//An array of the Knight Types that will be in the wave we are generating. This is used to help us set the actual amount of a Knight Type that will be in the wave.
 	TArray<TSubclassOf<AUDEnemy>> WaveKnightTypes;
 
-	//If UseNewKnight is set to true, add the NewKnightType to the wave. 
+	//If UseNewKnight is set to true, forcibly add the UnchosenKnight to the wave. 
 	if (WaveScheme.bUseNewKnight)
 	{
-		EnemyWave.KnightCounts.Add(NewKnightType, 1);
+		EnemyWave.KnightCounts.Add(UnchosenKnightSpawnData.EnemyClass, 1);
 
 		//Record that the Knight Type is in the wave for later use.
-		WaveKnightTypes.Add(NewKnightType);
+		WaveKnightTypes.Add(UnchosenKnightSpawnData.EnemyClass);
 
-		KnightPool.Remove(NewKnightType);
+		KnightPool.Remove(UnchosenKnightSpawnData.EnemyClass);
 	}
 
 	//Add a random Knight Type to the wave's KnightCount map until the map as as many entries as the Wave Scheme's Knight Types. Also populate WaveKnightTypes for later use.
@@ -153,9 +190,35 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	return EnemyWave;
 }
 
+void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType)
+{
+	for (int i = 0; i < CurrentRoundWaves.Num(); i++)
+	{
+		//Get a pointer to the wave being modified this iteration.
+		FEnemyWave* Wave = &CurrentRoundWaves[i];
+
+		//Set what the enemy count for our new enemy type will be from the count of the UnchosenKnight. Then, remove the UnchosenKnight from the listing of enemy counts.
+		int32 EnemyCount;
+		Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData.EnemyClass, EnemyCount);
+
+		//Add the new enemy type to the wave.
+		Wave->KnightCounts.Add(NewKnightType, EnemyCount);
+	}
+
+	//Update the round screen so that it shows the new enemy.
+	UpdateRoundScreen();
+}
+
 FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass)
 {
-	return *EnemyDataMap[EnemyClass];
+	if (EnemyClass == UnchosenKnightSpawnData.EnemyClass)
+	{
+		return UnchosenKnightSpawnData;
+	}
+	else
+	{
+		return *EnemyDataMap[EnemyClass];
+	}	
 }
 
 void UUrsadeathGameInstance::StartRound()
@@ -185,18 +248,47 @@ void UUrsadeathGameInstance::ProcessEndWave()
 	{
 		RoundWaveNumber = 0;
 
+		PopulateRoundRewards();
+
 		//Generate the game's next round, if one exists. The game will wait for StartRound() to be called before spawning anything.
 		if(RoundWaveCounts.IsValidIndex(RoundNumber + 1))
 		{
 			RoundNumber++;
 			GenerateRound(RoundNumber);
-			PlayerCharacter->GetRoundScreenWidget()->SetRoundRewards();
+
+			//If there are no KnightRewards to cho
+			if (KnightRewardOptions.Num() == 0)
+			{
+				PlayerCharacter->GetRoundScreenWidget()->EnableRoundStart();
+			}
+
 			UpdateRoundScreen();
+
+			//Announce to the player that the round has been completed.
+			PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("EnemyWaveStartAnnouncement", "Round Complete!"), 2);
+		}
+		else
+		{
+			//If there are no more rounds and the player has completed the demo, congratulate them!
+			PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("GameCompleteAnnouncement", "That's all Folks! Thanks for playing!"), 0);
 		}
 
-		//Announce to the player that the round has been completed.
-		PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("EnemyWaveStartAnnouncement", "Round Complete!"), 2);
+		//Restore the player to full health when they complete a round.
+		PlayerCharacter->RestoreHealth(999);
 	}
+}
+
+void UUrsadeathGameInstance::ResetGame()
+{
+	RoundNumber = 0;
+
+	RoundWaveNumber = 0;
+	AbsoluteWaveNumber = 0;
+
+	//Reset the game seed.
+	RandomStream.Initialize(GameSeedName);
+
+	GenerateRound(RoundNumber);
 }
 
 FEnemySpawnData UUrsadeathGameInstance::GetSquireSpawnData()
@@ -218,6 +310,53 @@ int UUrsadeathGameInstance::GetCurrentRound()
 int UUrsadeathGameInstance::GetAbsoluteWave()
 {
 	return AbsoluteWaveNumber;
+}
+
+template<typename T>
+void UUrsadeathGameInstance::ShuffleArray(TArray<T> &Array)
+{
+	int NumShuffles = Array.Num() - 1;
+	for (int i = 0; i < NumShuffles; i++)
+	{
+		int SwapIndex = RandomStream.RandRange(i, NumShuffles);
+		Array.Swap(i, SwapIndex);
+	}
+}
+
+void UUrsadeathGameInstance::AddKnightReward()
+{
+	UUDRoundRewardMenu* KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
+	int32 KnightRewardIndex = KnightRewardMenu->GetRewardSelected();
+
+	//Get the knight reward spawn data
+	FEnemySpawnData RewardData = KnightRewardOptions[KnightRewardIndex];
+
+	//Get the knight type the player chose from their round rewards.
+	TSubclassOf<AUDEnemy> KnightRewardClass = RewardData.EnemyClass;
+
+	//Add the new knight to the spawn pool.
+	KnightSpawnPool.Add(KnightRewardClass);
+
+	//Set the "Unchosen" Knight instances in our round to the new knight type.
+	SetUnchosenKnight(KnightRewardClass);
+
+	//Remove the chosen Knight from the Knight reward pool.
+	KnightRewardPool.Remove(RewardData);
+
+	//If there are no more knight rewards to be given, remove the unchosen knight from the spawn pool.
+	if (KnightRewardPool.Num() == 0)
+	{
+		KnightSpawnPool.Remove(UnchosenKnightSpawnData.EnemyClass);
+	}
+}
+
+void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
+{
+	PlayerCharacter = Player;
+
+	UpdateRoundScreen();
+
+	PopulateRoundRewards();
 }
 
 #undef LOCTEXT_NAMESPACE

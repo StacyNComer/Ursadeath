@@ -152,6 +152,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Audio)
 		TObjectPtr<USoundBase> NoEnergySound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Audio)
+		TObjectPtr<USoundBase> EnergyBarGainedSound;
+
 	/** The audio that plays when the player takes damage.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Audio)
 		TObjectPtr<USoundBase> DamageSound;
@@ -172,7 +175,7 @@ protected:
 
 public:
 	/** A global method for getting the current active player character.*/
-	UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (WorldContext = "WorldContextObject"))
 		static AUDPlayerCharacter* GetCharacterInPlay(UObject* WorldContextObject);
 
 	/** Look Input Action */

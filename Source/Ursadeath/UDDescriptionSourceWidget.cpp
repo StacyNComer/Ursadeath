@@ -13,9 +13,25 @@ void UUDDescriptionSourceWidget::NativeOnMouseEnter(const FGeometry& InGeometry,
 	}
 }
 
+void UUDDescriptionSourceWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+
+	if (DescriptionReceiver)
+	{
+		DescriptionReceiver->SetDefaultDescription();
+	}
+}
+
+
 void UUDDescriptionSourceWidget::SetDescription(FUIDescription NewDescription)
 {
 	Description = NewDescription;
+}
+
+FUIDescription UUDDescriptionSourceWidget::GetDescription()
+{
+	return Description;
 }
 
 UPanelWidget* const UUDDescriptionSourceWidget::GetContentPanel()

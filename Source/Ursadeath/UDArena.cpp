@@ -102,7 +102,7 @@ void AUDArena::Tick(float DeltaTime)
 		}
 	}
 
-	//Decrement the Slow Squire Spawn Cooldown, but only if the Squire Slow Spawn is active and only if a Squire is otherwise qualified to spawn in those circumstances
+	//Decrement the Slow Squire Spawn Cooldown, but only if the Squire Slow Spawn is active and only if a Squire is otherwise qualified to spawn in those circumstances.
 	if (GetSquireSlowSpawnActive() && SquiresInPlay < CurrentWave.WaveData.MaxSlowSpawnSquires && SquireSlowSpawnCooldownTracker > 0)
 	{
 		SquireSlowSpawnCooldownTracker -= DeltaTime;
@@ -114,17 +114,47 @@ void AUDArena::Tick(float DeltaTime)
 		//Spawning knight class enemies. The game spawns all the knights it possible can before trying to spawn Squires.
 		if (CanSpawnKnight())
 		{
+			//Infinite loop prevention, just in case all Knight Types have a spawn scalar greater than 1 and there is only 1 free spawn point.
+			int32 SpawnAttempts = 0;
+
 			do
 			{
-				//Choose a random enemy class from the spawn pool to spawn.
-				int EnemyClassIndex = FMath::RandRange(0, KnightSpawnPool.Num() - 1);
-				TSubclassOf<AUDEnemy> EnemyClass = KnightSpawnPool[EnemyClassIndex];
+				int32 EnemySpawnScalar;
+
+				int32 EnemyClassIndex;
+				TSubclassOf<AUDEnemy> EnemyClass;
+				
+				//Choose a random enemy class from the spawn pool to spawn. The game will
+				do
+				{
+					EnemyClassIndex = FMath::RandRange(0, KnightSpawnPool.Num() - 1);
+					EnemyClass = KnightSpawnPool[EnemyClassIndex];
+
+					EnemySpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass).SpawnScalar;
+					
+					SpawnAttempts++;
+				} while (EnemySpawnScalar > FreeEnemySpawnPoints.Num() && SpawnAttempts < MaxKnightSpawnAttempts);
+
+				//Give up on spawning a knight if it is the last spawn attempt and a Knight that there is room enough to spawn still hasn't been found.
+				if (SpawnAttempts == MaxKnightSpawnAttempts && EnemySpawnScalar > FreeEnemySpawnPoints.Num())
+					break;
+
+				//How much the enemy counts as for the purposes of determining the number of knights in play. A weight of 1 represents the enemy counting as a single enemy.
+				float EnemyCountWeight = 1.0f / EnemySpawnScalar;
 
 				//Spawn the enemy
-				AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass);
-				
-				//Set the enemy to be a Knight. ARISE A KNIGHT!
-				EnemySpawned->SetEnemyTier(EEnemyTier::KNIGHT);
+				for (int i = 0; i < EnemySpawnScalar; i++)
+				{
+					AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass);
+
+					//Set the enemy to be a Knight. ARISE A KNIGHT!
+					EnemySpawned->SetEnemyTier(EEnemyTier::KNIGHT);
+
+					EnemySpawned->EnemyCountWeight = EnemyCountWeight;
+
+					//Tell the enemy to signal the arena when it dies.
+					EnemySpawned->OnDestroyed.AddDynamic(this, &AUDArena::DecrementKnightsInPlay);
+				}
 
 				//Decrement the amount of the spawned enemy type in the wave. If that enemy type is depleted, remove it from the wave and spawn pool so it is not chosen anymore.
 				if (--CurrentWave.KnightCounts[EnemyClass] == 0)
@@ -134,9 +164,6 @@ void AUDArena::Tick(float DeltaTime)
 				}
 
 				KnightsInPlay++;
-
-				//Tell the enemy to signal the arena when it dies.
-				EnemySpawned->OnDestroyed.AddDynamic(this, &AUDArena::DecrementKnightsInPlay);
 
 			} while (CanSpawnKnight() && FreeEnemySpawnPoints.Num() > 0);
 		}
@@ -236,7 +263,8 @@ bool AUDArena::SpawnPointFree()
 
 bool AUDArena::CanSpawnKnight()
 {
-	return CurrentWave.KnightCounts.Num() > 0 && KnightsInPlay < CurrentWave.WaveData.MaxKnights;
+	//We round up the decimal when comparing the knights in play to the max knight count: Otherwise, killing a single Knight type that spawns in pairs could spawn enemies above the Max Knights!
+	return CurrentWave.KnightCounts.Num() > 0 && FMath::CeilToInt(KnightsInPlay) < CurrentWave.WaveData.MaxKnights;
 }
 
 bool AUDArena::CanSpawnSquire()
@@ -254,7 +282,7 @@ bool AUDArena::CanSpawnSquire()
 
 void AUDArena::DecrementKnightsInPlay(AActor* EnemyDestroyed)
 {
-	KnightsInPlay--;
+	KnightsInPlay -= CastChecked<AUDEnemy>(EnemyDestroyed)->EnemyCountWeight;
 
 	CheckWaveDepletion();
 }

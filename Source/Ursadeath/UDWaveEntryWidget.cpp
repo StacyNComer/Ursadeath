@@ -65,7 +65,10 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 
 		//Display the enemy's icon and count for the wave.
 		SpawnIndicator->SetEnemyImage(SpawnDataEntry.EnemyIcon);
-		SpawnIndicator->SetEnemyCount(Wave.KnightCounts[EnemyClass]);
+
+		//Set the spawn count. The count shown is multiplied by that enemy's spawn scalar.
+		int32 EnemySpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass).SpawnScalar;
+		SpawnIndicator->SetEnemyCount(Wave.KnightCounts[EnemyClass] * EnemySpawnScalar);
 
 		//Set the enemy's description from their Spawn Data.
 		EnemyEntry->DescriptionSourceWidget->SetDescription(SpawnDataEntry.Description);

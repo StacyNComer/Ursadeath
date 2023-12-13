@@ -1,3 +1,15 @@
+
+=== Update 15 "Legionnaires of Doom!" ===
+
+	> General
+
+* Added Legionnaire Archers to the enemy pool. They fire projectiles in threes, spawn in pairs, and take 1000 damage
+  (enough to kill them in 1 hit) when stunned.
+
+	> Bugfixes
+
+* The spawn pool of enemies as well the pool of enemy "rewards" now properly reset when the player respawns.
+
  
 === Update 14 "Foe Choices Doom!" ===
 

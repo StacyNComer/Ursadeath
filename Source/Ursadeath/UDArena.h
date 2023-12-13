@@ -75,9 +75,12 @@ protected:
 	/** The amount of seconds left before a Squire spawns when SquireSlowSpawnActive returns true.*/
 		float SquireSlowSpawnCooldownTracker;
 
-	int SquiresInPlay = 0;
+	int32 SquiresInPlay = 0;
 
-	int KnightsInPlay = 0;
+	float KnightsInPlay = 0;
+
+	//The maximum amount of times the game should attempt to choose a knight type whose spawn scalar is <= to the remain free spawn points.
+	int32 MaxKnightSpawnAttempts = 10;
 
 #if WITH_EDITORONLY_DATA
 	/** Spawns whatever the current wave is set to on Begin Play.*/

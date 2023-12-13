@@ -42,6 +42,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
 		bool bUndieable;
 
+	float EnemyCountWeight;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<USceneComponent> SceneRoot;

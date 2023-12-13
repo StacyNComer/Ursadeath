@@ -11,6 +11,7 @@ class AUDEnemy;
 class UHorizontalBox;
 class UUDEnemySpawnIndicator;
 class UDataTable;
+class UUrsadeathGameInstance;
 struct FEnemyWave;
 enum class EEnemyTier;
 
@@ -38,6 +39,8 @@ protected:
 	/** Tracks the seconds until an announcement being shown is hidden.*/
 	UPROPERTY(BlueprintReadOnly)
 		float AnnouncementTimeTracker;
+
+	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 	/** An indicator showing how many Squire tier enemies are left in a wave. All enemies types in the Squire tier share a single indicator.*/
 	UUDEnemySpawnIndicator* SquireSpawnIndicator;

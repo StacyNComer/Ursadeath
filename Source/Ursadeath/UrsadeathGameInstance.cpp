@@ -20,30 +20,21 @@ bool FEnemySpawnData::operator==(FEnemySpawnData const& Other)
 
 void UUrsadeathGameInstance::Init()
 {
-	//Initialize the game's random seed.
-	RandomStream.Initialize(GameSeedName);
-
 	//Generate an array of the EnemySpawnData structures.
 	TArray<FEnemySpawnData*> KnightSpawnData;
 	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
 
-	//Populate the EnemyDataMap and KnightReward pool with the spawn data of each enemy.
+	//Populate the EnemyDataMap with the spawn data of each enemy.
 	for (int i = 0; i < KnightSpawnData.Num(); i++)
 	{
 		FEnemySpawnData* SpawnDataEntry = KnightSpawnData[i];
 		EnemyDataMap.Add(SpawnDataEntry->EnemyClass, SpawnDataEntry);
-
-		KnightRewardPool.Add(*SpawnDataEntry);
 	}
-	
-	//Shuffle the Knight rewards.
-	ShuffleArray<FEnemySpawnData>(KnightRewardPool);
 
 	//Populate the enemy wave scheme array.
 	WaveSchemeDataTable->GetAllRows("GameInstanceEnemyWaveSchemeArrayInit", EnemyWaveSchemes);
 
-	//Add the UnchosenKnight to the spawn pool.
-	KnightSpawnPool.Add(UnchosenKnightSpawnData.EnemyClass);
+	SetupGame();
 
 	//Generate the game's first round.
 	GenerateRound(RoundNumber);
@@ -196,20 +187,24 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 	{
 		//Get a pointer to the wave being modified this iteration.
 		FEnemyWave* Wave = &CurrentRoundWaves[i];
+		
+		//Make sure wave contains an unchosen knight.
+		if (Wave->KnightCounts.Contains(UnchosenKnightSpawnData.EnemyClass))
+		{
+			//Set what the enemy count for our new enemy type will be from the count of the UnchosenKnight. Then, remove the UnchosenKnight from the listing of enemy counts.
+			int32 EnemyCount;
+			Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData.EnemyClass, EnemyCount);
 
-		//Set what the enemy count for our new enemy type will be from the count of the UnchosenKnight. Then, remove the UnchosenKnight from the listing of enemy counts.
-		int32 EnemyCount;
-		Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData.EnemyClass, EnemyCount);
-
-		//Add the new enemy type to the wave.
-		Wave->KnightCounts.Add(NewKnightType, EnemyCount);
+			//Add the new enemy type to the wave.
+			Wave->KnightCounts.Add(NewKnightType, EnemyCount);
+		}	
 	}
 
 	//Update the round screen so that it shows the new enemy.
 	UpdateRoundScreen();
 }
 
-FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass)
+const FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass)
 {
 	if (EnemyClass == UnchosenKnightSpawnData.EnemyClass)
 	{
@@ -285,8 +280,10 @@ void UUrsadeathGameInstance::ResetGame()
 	RoundWaveNumber = 0;
 	AbsoluteWaveNumber = 0;
 
-	//Reset the game seed.
-	RandomStream.Initialize(GameSeedName);
+	//Reset the Knight spawn pool
+	KnightSpawnPool.Empty(1);
+
+	SetupGame();
 
 	GenerateRound(RoundNumber);
 }
@@ -348,6 +345,31 @@ void UUrsadeathGameInstance::AddKnightReward()
 	{
 		KnightSpawnPool.Remove(UnchosenKnightSpawnData.EnemyClass);
 	}
+}
+
+void UUrsadeathGameInstance::SetupGame()
+{
+	//Initialize the game's random seed.
+	RandomStream.Initialize(GameSeedName);
+
+	//Get the spawn data from the data table.
+	TArray<FEnemySpawnData*> KnightSpawnData;
+	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
+
+	//Populate the KnightReward pool with the spawn data of each enemy.
+	KnightRewardPool.Empty(KnightSpawnData.Num());
+	for (int i = 0; i < KnightSpawnData.Num(); i++)
+	{
+		FEnemySpawnData* SpawnDataEntry = KnightSpawnData[i];
+
+		KnightRewardPool.Add(*SpawnDataEntry);
+	}
+
+	//Shuffle the Knight rewards.
+	ShuffleArray<FEnemySpawnData>(KnightRewardPool);
+
+	//Add the UnchosenKnight to the spawn pool.
+	KnightSpawnPool.Add(UnchosenKnightSpawnData.EnemyClass);
 }
 
 void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)

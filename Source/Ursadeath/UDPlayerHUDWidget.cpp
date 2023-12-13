@@ -12,7 +12,7 @@ void UUDPlayerHUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	UUrsadeathGameInstance* UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
+	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 
 	//Get the spawning data from the game instance.
 	KnightSpawnDataTable = UrsadeathGameInstance->KnightSpawnDataTable;
@@ -112,7 +112,9 @@ void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 
 		if (Wave.KnightCounts.Contains(KnightClass))
 		{
-			SpawnIndicator->SetEnemyCount(Wave.KnightCounts[KnightClass]);
+			int32 KnightSpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(KnightClass).SpawnScalar;
+
+			SpawnIndicator->SetEnemyCount(Wave.KnightCounts[KnightClass] * KnightSpawnScalar);
 			SpawnIndicator->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else

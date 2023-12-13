@@ -28,6 +28,10 @@ struct FEnemySpawnData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		FUIDescription Description;
 
+	/** How many enemies per count in a wave should spawn. (e.g. if this is set to 2, the enemy will spawn in pairs)*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		int32 SpawnScalar = 1;
+
 	bool operator==(FEnemySpawnData const& Other);
 };
 
@@ -218,7 +222,7 @@ protected:
 public:
 	/** Returns the Spawn Data for a given class of enemy from the SpawnDataTable.*/
 	UFUNCTION(BlueprintCallable)
-		FEnemySpawnData GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass);
+		const FEnemySpawnData GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass);
 
 	/** Tell the game to start spawning the CurrentRoundWaves.*/
 	UFUNCTION(BlueprintCallable)
@@ -235,6 +239,9 @@ public:
 	/** Adds the knight type that the player has chosen from their Round Rewards into the spawn pool. The Unchosen Knight instances in the round are also replaced with this new enemy type.*/
 	UFUNCTION()
 		void AddKnightReward();
+
+	/** Performs the games initial setup. If the game is being restarted (e.g. due to the player dying), ResetGame() should be called instead.*/
+	void SetupGame();
 
 	/** Shuffles the given TArray. Note that this uses the Game Instance's RandomStream.*/
 	template<typename T>

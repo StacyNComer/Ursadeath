@@ -30,5 +30,6 @@ public:
 	void SetDamage(int32 value);
 
 	/** Sets the StunTime value of this instance's AttackStats. Makes it easier to edit the struct in blueprints.*/
+	UFUNCTION(Blueprintcallable)
 	void SetStunTime(float value);
 };

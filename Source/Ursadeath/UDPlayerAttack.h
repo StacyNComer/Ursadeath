@@ -12,7 +12,7 @@ class AUDPlayerCharacter;
 
 /** An enum representing the general source of an attack.*/
 UENUM(BlueprintType)
-enum class EPlayerAttackType
+enum class EPlayerAttackType : uint8
 {
 	PRIMARY_FIRE = 0,
 	MELEE = 1,
@@ -28,13 +28,13 @@ struct FPlayerAttackStats
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EPlayerAttackType AttackType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 Damage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float StunTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		EPlayerAttackType AttackType;
 };
 
 /* An actor meant to deliver a player attack to an enemy (e.g. a projectile). UDEnemy derived actors take damage when overlapping actors of this class.*/
@@ -79,4 +79,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	/** The enum is bugged and I really need to get upgrades done.*/
+	UFUNCTION(Blueprintcallable)
+		EPlayerAttackType GetAttackType();
 };

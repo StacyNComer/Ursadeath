@@ -19,6 +19,8 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 
 	KnightRewardMenu->InitDescriptionReceiver(this);
 
+	UpgradeRewardMenu->InitDescriptionReceiver(this);
+
 	//Create the Wave Entry widgets.
 	for (int i = 0; i < UrsadeathGameInstance->MaxWavesPerRound; i++)
 	{
@@ -40,6 +42,9 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 
 	//Bind the confirm button for knight rewards so that it adds the chosen enemy type.
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddKnightReward);
+
+	//Bind the confirm button for the Upgrade Rewards so that it gives the player their chosen upgrade.
+	UpgradeRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddUpgradeReward);
 
 	//Allow the player to start the round after they choose the round's new knight type.
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::EnableRoundStart);
@@ -103,6 +108,11 @@ UButton* const UUDRoundScreenWidget::GetRoundStartButton()
 UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu()
 {
 	return KnightRewardMenu;
+}
+
+UUDRoundRewardMenu* const UUDRoundScreenWidget::GetUpgradeRewardMenu()
+{
+	return UpgradeRewardMenu;
 }
 
 void UUDRoundScreenWidget::ReceiveDescription(FUIDescription Description)

@@ -52,6 +52,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
 		TObjectPtr<UUDRoundRewardMenu> KnightRewardMenu;
 
+	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
+		TObjectPtr<UUDRoundRewardMenu> UpgradeRewardMenu;
+
 	/** The wave entry widgets used to display the contents of each enemy wave within the round.*/
 	TArray<TObjectPtr<UUDWaveEntryWidget>> WaveEntries;
 
@@ -82,6 +85,8 @@ public:
 
 	/** Returns the "reward" menus for view or adding Knight enemy types in play.*/
 	UUDRoundRewardMenu* const GetKnightRewardMenu();
+
+	UUDRoundRewardMenu* const GetUpgradeRewardMenu();
 
 	/** Upgrades are not in the game, so currently this simply enables the Round Start button.*/
 	void SetRoundRewards();

@@ -12,6 +12,7 @@ class AUDEnemy;
 class AUDArena;
 class AUDPlayerCharacter;
 class UDataTable;
+class UUDPlayerUpgrade;
 
 /** Holds information about spawning a given type of enemy. Ony one entry should exist on the data table per class of enemy. Squire tier enemies do not currentlt get spawn data.*/
 USTRUCT(BlueprintType)
@@ -33,6 +34,22 @@ struct FEnemySpawnData : public FTableRowBase
 		int32 SpawnScalar = 1;
 
 	bool operator==(FEnemySpawnData const& Other);
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerUpgradeData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf<UUDPlayerUpgrade> UpgradeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UTexture2D> UIIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		FUIDescription Description;
+
 };
 
 /** Holds the data shared between the EnemyWaveScheme and the actual EnemyWave.*/
@@ -109,10 +126,6 @@ class URSADEATH_API UUrsadeathGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-private:
-	/** If true, OnLevelSetup has been bound the UWorld's begin play and shouldn't be bound again.*/
-		bool bLevelSetupBound = false;
-
 protected:
 	/** The name used to generate the game's random seed.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
@@ -143,14 +156,25 @@ protected:
 		UDataTable* WaveSchemeDataTable;
 
 	/** The data used to control how squire enemies appear in UI. This spawn data does not have a class, as squires are multiple classes.*/
-	UPROPERTY(EditAnywhere, Category = EnemyData)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
 		FEnemySpawnData SquireSpawnData;
 
 	/** The spawn data for when a knight enemy type has yet to be chosen for the upcoming round.*/
-	UPROPERTY(EditAnywhere, Category = EnemyData)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
 		FEnemySpawnData UnchosenKnightSpawnData;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		UDataTable* UpgradeDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		int32 MaxRewardOptions = 3;
+
+	/** Copied from the UpgradesInPlay whenever the game is set up.*/
+	TArray<FPlayerUpgradeData*> UpgradeRewardPool;
+
 	TArray<FEnemySpawnData> KnightRewardOptions;
+
+	TArray<FPlayerUpgradeData*> UpgradeRewardOptions;
 
 	FRandomStream RandomStream;
 
@@ -210,11 +234,10 @@ protected:
 
 	virtual void Init() override;
 
-	/** Called after the player and arena have been set up.*/
-	void OnLevelSetup();
-
 	/** Sets the KnightTypeRewards that the player may choose from and updates their UI to show these options.*/
 	void PopulateRoundRewards();
+
+	void PopulateUpgradeRewards();
 
 	/** Announces a new wave to the player and displays the enemy counts to their HUD. After the GameInstance's WaveStartDelay expires, StartWaveInstant is called and the wave's start sequence is complete.*/
 	void StartWave(FEnemyWave Wave);
@@ -240,11 +263,15 @@ public:
 	UFUNCTION()
 		void AddKnightReward();
 
+	/** Grants to the player the upgrade selected from in the Upgrade Reward Menu.*/
+	UFUNCTION()
+		void AddUpgradeReward();
+
 	/** Performs the games initial setup. If the game is being restarted (e.g. due to the player dying), ResetGame() should be called instead.*/
 	void SetupGame();
 
 	/** Shuffles the given TArray. Note that this uses the Game Instance's RandomStream.*/
-	template<typename T>
+	template<class T>
 	void ShuffleArray(TArray<T> &Array);
 
 	/** Returns the spawn data used for Ursadeath's squire enemy types. Note that the EnemyClass within this data will always be null.*/

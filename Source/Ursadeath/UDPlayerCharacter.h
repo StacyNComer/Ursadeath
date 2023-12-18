@@ -205,6 +205,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DamagePlayer(int Damage);
 
+	/** Restore the given amount of helath to the player, but not beyond their max health.*/
+	UFUNCTION(BlueprintCallable)
+		void RestoreHealth(int Value);
+
 	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
 	void NotifyOnHealthPickupUsed();
 
@@ -231,9 +235,6 @@ public:
 
 	/** Sets the player's current health to the given value and update's their UI. All methods that modify the current health in some what must call this method to update the UI.*/
 	void SetHealth(int Value);
-
-	/** Restore the given amount of helath to the player, but not beyond their max health.*/
-	void RestoreHealth(int Value);
 
 	/** Reports that the given enemy has been killed by the given attack to the player, updating the player's UI and invoking the OnEnemyKill delegate.*/
 	void NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack);

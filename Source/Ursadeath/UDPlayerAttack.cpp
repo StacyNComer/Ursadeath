@@ -44,9 +44,14 @@ AUDPlayerCharacter* const AUDPlayerAttack::GetOwningPlayer()
 	//We set the ownng player here instead of in BeginPlay because the C++ begin play runs after blueprints; If the projectile hits an enemy the frame it spawns, OwningPlayer wouldn't have been set yet!
 	if (!OwningPlayer)
 	{
-		OwningPlayer = Cast<AUDPlayerCharacter>(Owner);
+		OwningPlayer = CastChecked<AUDPlayerCharacter>(Owner);
 	}
 
 	return OwningPlayer;
+}
+
+EPlayerAttackType AUDPlayerAttack::GetAttackType()
+{
+	return AttackStats.AttackType;
 }
 

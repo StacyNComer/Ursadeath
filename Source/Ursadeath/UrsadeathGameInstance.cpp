@@ -10,6 +10,7 @@
 #include "Components/Button.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "UDRoundRewardMenu.h"
+#include "UDPlayerUpgrade.h"
 
 #define LOCTEXT_NAMESPACE "PlayerHUD"
 
@@ -40,39 +41,52 @@ void UUrsadeathGameInstance::Init()
 	GenerateRound(RoundNumber);
 }
 
-void UUrsadeathGameInstance::OnLevelSetup()
-{
-	UpdateRoundScreen();
-}
-
 void UUrsadeathGameInstance::PopulateRoundRewards()
 {
 	//Make sure the reward options are cleared out.
 	KnightRewardOptions.Empty();
 
-	//Set the options for the Knight Type reward.
-	for (int i = 0; i < KnightRewardPool.Num() && i < 3; i++)
-	{
-		KnightRewardOptions.Add(KnightRewardPool[i]);
-	}
-
 	TArray<FRewardInfo> KnightRewardInfo;
 
-	//Generate reward info for displaying the Knight Type Rewards
-	for (int i = 0; i < KnightRewardOptions.Num(); i++)
+	//Set the options for the Knight Type reward.
+	for (int i = 0; i < KnightRewardPool.Num() && i < MaxRewardOptions; i++)
 	{
-		FEnemySpawnData KnightTypeData = KnightRewardOptions[i];
+		FEnemySpawnData KnightRewardData = KnightRewardPool[i];
+
+		KnightRewardOptions.Add(KnightRewardData);
 
 		FRewardInfo KnightInfo;
 
-		KnightInfo.RewardDescription = KnightTypeData.Description;
-		KnightInfo.RewardImage = KnightTypeData.EnemyIcon;
+		KnightInfo.RewardDescription = KnightRewardData.Description;
+		KnightInfo.RewardImage = KnightRewardData.EnemyIcon;
 
 		KnightRewardInfo.Add(KnightInfo);
 	}
 
 	//Display the Knight Type Rewards to the player's UI.
 	PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu()->SetRewardOptions(KnightRewardInfo);
+}
+
+void UUrsadeathGameInstance::PopulateUpgradeRewards()
+{
+	UpgradeRewardOptions.Empty();
+
+	TArray<FRewardInfo> UpgradeRewardInfo;
+
+	for (int i = 0; i < UpgradeRewardPool.Num() && i < MaxRewardOptions; i++)
+	{
+		FPlayerUpgradeData* UpgradeReward = UpgradeRewardPool[i];
+		UpgradeRewardOptions.Add(UpgradeReward);
+
+		FRewardInfo UpgradeInfo;
+
+		UpgradeInfo.RewardDescription = UpgradeReward->Description;
+		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
+
+		UpgradeRewardInfo.Add(UpgradeInfo);
+	}
+
+	PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu()->SetRewardOptions(UpgradeRewardInfo);
 }
 
 void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
@@ -280,8 +294,8 @@ void UUrsadeathGameInstance::ResetGame()
 	RoundWaveNumber = 0;
 	AbsoluteWaveNumber = 0;
 
-	//Reset the Knight spawn pool
-	KnightSpawnPool.Empty(1);
+	//Reset the Knight spawn pool.
+	KnightSpawnPool.Empty();
 
 	SetupGame();
 
@@ -309,7 +323,7 @@ int UUrsadeathGameInstance::GetAbsoluteWave()
 	return AbsoluteWaveNumber;
 }
 
-template<typename T>
+template<class T>
 void UUrsadeathGameInstance::ShuffleArray(TArray<T> &Array)
 {
 	int NumShuffles = Array.Num() - 1;
@@ -347,6 +361,18 @@ void UUrsadeathGameInstance::AddKnightReward()
 	}
 }
 
+void UUrsadeathGameInstance::AddUpgradeReward()
+{
+	UUDRoundRewardMenu* UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
+	int32 RewardIndex = UpgradeRewardMenu->GetRewardSelected();
+
+	FPlayerUpgradeData* UpgradeData = UpgradeRewardOptions[RewardIndex];
+
+	UUDPlayerUpgrade::CreatePlayerUpgrade(UpgradeData->UpgradeClass, PlayerCharacter);
+
+	UpgradeRewardPool.Remove(UpgradeData);
+}
+
 void UUrsadeathGameInstance::SetupGame()
 {
 	//Initialize the game's random seed.
@@ -365,8 +391,14 @@ void UUrsadeathGameInstance::SetupGame()
 		KnightRewardPool.Add(*SpawnDataEntry);
 	}
 
+	//Set the Player Upgrade Pool from the data table of Player Upgrades.
+	UpgradeDataTable->GetAllRows("GameInstancePlayerRewardInit", UpgradeRewardPool);
+
+	//Shuffle the player upgrades
+	ShuffleArray(UpgradeRewardPool);
+
 	//Shuffle the Knight rewards.
-	ShuffleArray<FEnemySpawnData>(KnightRewardPool);
+	ShuffleArray(KnightRewardPool);
 
 	//Add the UnchosenKnight to the spawn pool.
 	KnightSpawnPool.Add(UnchosenKnightSpawnData.EnemyClass);
@@ -379,6 +411,8 @@ void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 	UpdateRoundScreen();
 
 	PopulateRoundRewards();
+
+	PopulateUpgradeRewards();
 }
 
 #undef LOCTEXT_NAMESPACE

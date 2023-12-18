@@ -1,4 +1,21 @@
 
+=== Update 16 "Night City of Doom!" ===
+
+	> General
+
+* Enemies now have attack sounds.
+
+* Adjusted the Gladiator:
+	* They have more health 1500->2000.
+	* Bombs deal 50% more damage to them and stun them for 2 seconds.
+
+* Legionnaire Archers have reduced health 900->750.
+
+* Vigilant now take 3000 bonus damage from melee attacks.
+
+* The player's gun is now in the game!
+
+
 === Update 15 "Legionnaires of Doom!" ===
 
 	> General

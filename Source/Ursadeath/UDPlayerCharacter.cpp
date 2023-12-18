@@ -346,6 +346,16 @@ void AUDPlayerCharacter::RestoreHealth(int ToRestore)
 void AUDPlayerCharacter::NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack)
 {
 	HUDWidget->DecrementEnemyCount(EnemyKilled->GetClass(), EnemyKilled->GetEnemyTier());
+
+	if (OnEnemyDeath.IsBound())
+	{
+		FEnemyHitData EnemyHitData;
+		EnemyHitData.Enemy = EnemyKilled;
+		EnemyHitData.Attack = Attack;
+		EnemyHitData.EnemyTier = EnemyKilled->GetEnemyTier();
+
+		OnEnemyDeath.Broadcast(EnemyHitData);
+	}
 }
 
 UUDPlayerHUDWidget* const AUDPlayerCharacter::GetHUDWidget()

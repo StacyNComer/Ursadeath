@@ -61,7 +61,10 @@ void AUDArena::BeginPlay()
 		UArrowComponent* SpawnPoint = HealthPickupSpawnPoints[i];
 
 		//Spawn the pickup.
-		GetWorld()->SpawnActor<AUDHealthPickup>(HealthPickupClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
+		AUDHealthPickup* HealthPickup = GetWorld()->SpawnActor<AUDHealthPickup>(HealthPickupClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
+
+		//Add the health pickup to this arena's array of health pickups.
+		HealthPickups.Add(HealthPickup);
 	}
 
 #if WITH_EDITOR
@@ -292,4 +295,27 @@ void AUDArena::DecrementSquiresInPlay(AActor* EnemyDestroyed)
 	SquiresInPlay--;
 
 	CheckWaveDepletion();
+}
+
+int32 AUDArena::GetActiveHealthPickups()
+{
+	int32 ActivePickups = 0;
+
+	for (int i = 0; i < HealthPickups.Num(); i++)
+	{
+		if (HealthPickups[i]->GetPickupActive())
+		{
+			ActivePickups++;
+		}
+	}
+
+	return ActivePickups;
+}
+
+void AUDArena::ReactivateHealthPickups()
+{
+	for (int i = 0; i < HealthPickups.Num(); i++)
+	{
+		HealthPickups[i]->ReactivatePickup();
+	}
 }

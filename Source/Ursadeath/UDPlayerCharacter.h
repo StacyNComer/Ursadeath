@@ -24,8 +24,13 @@ class UUDPlayerEnergyAbility;
 class AUDEnemy;
 class UUrsadeathGameInstance;
 class UEnhancedInputLocalPlayerSubsystem;
+class UUDPlayerUpgrade;
+class UUDPlayerTickedUpgrade;
+class AUDHealthPickup;
+class AUDPlayerAttackProjectile;
+class UUDPlayerStatusIcon;
 struct FEnemyWave;
-enum class EEnemyTier;
+enum class EEnemyTier : uint8;
 
 /** Holds the data for events ocurring when an attack hits an enemy.*/
 USTRUCT(BlueprintType)
@@ -34,13 +39,30 @@ struct FEnemyHitData
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<AUDEnemy> Enemy;
+		TObjectPtr<AUDEnemy> Enemy;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EEnemyTier EnemyTier;
+		EEnemyTier EnemyTier;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<AUDPlayerAttack> Attack;
+		TObjectPtr<AUDPlayerAttack> Attack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool EnemyWasKilled;
+};
+
+USTRUCT(BlueprintType)
+struct FPlayerProjectileHitData
+{
+	GENERATED_BODY()  
+
+	/** The projectile involved in the interaction.*/
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AUDPlayerAttackProjectile> Projectile;
+
+	/** The actor that the projectile has hit. This is not necessarily an enemy.*/
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AActor> ActorHit;
 };
 
 UCLASS(Abstract, config = Game)
@@ -49,6 +71,13 @@ class AUDPlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyKillSignature, FEnemyHitData, HitData);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttackSpawnedSignature, AUDPlayerAttack*, AttackActor);
+
+	/** Called when a projectile hits something but before any secondary effects, such as explosions, occur.*/
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPlayerProjectileHitSignature, FPlayerProjectileHitData, ProjectileHitData);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthPickupUsedSignature, AUDHealthPickup*, HealthPickup);
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -96,9 +125,34 @@ class AUDPlayerCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UUDPlayerEnergyAbility> ShockwaveAbility;
 
+	/** Holds the player's upgrades so the Garbage Collection doesn't abduct them.*/
+	UPROPERTY()
+		TArray<TObjectPtr<UUDPlayerUpgrade>> Upgrades;
+
+	UPROPERTY()
+		TArray<TObjectPtr<UUDPlayerTickedUpgrade>> TickedUpgrades;
+
+	/** The time until the player ceases to be hasted.*/
+	float HasteTimeTracker = 0;
+
+	/** The status icon that shows when the player is hasted.*/
+	TObjectPtr<UUDPlayerStatusIcon> HasteStatusWidget;
+
+	/** The status icon that shows when the player is invulnerable.*/
+	TObjectPtr<UUDPlayerStatusIcon> InvulnerableStatusWidget;
+	
 protected:
 	UPROPERTY(BlueprintAssignable)
-		FOnEnemyKillSignature OnEnemyDeath;
+		FOnEnemyKillSignature OnEnemyHit;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnAttackSpawnedSignature OnAttackSpawned;
+
+	UPROPERTY(BlueprintAssignable)
+		FPlayerProjectileHitSignature OnPlayerProjectileHit;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnHealthPickupUsedSignature OnHealthPickupUsed;
 
 	/** The max amount of health a player may have.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
@@ -111,6 +165,9 @@ protected:
 	/** The max amount of energy a player may store.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 		float MaxEnergy;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float HasteSpeedMultiplier;
 
 	/** The current energy the player has stored. Use SetCurrentEnergy to modifiy this value.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
@@ -131,6 +188,12 @@ protected:
 	/**The class the game over screen will be created as.*/
 	UPROPERTY(EditAnywhere, Category = UI)
 		TSubclassOf<UUDGameOverWidget> GameOverWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category = UI)
+		UTexture2D* HasteStatusImage;
+
+	UPROPERTY(EditAnywhere, Category = UI)
+		UTexture2D* InvulnerableStatusImage;
 
 	/** The player's HUD.*/
 	UPROPERTY(BlueprintReadOnly)
@@ -160,8 +223,15 @@ protected:
 		TObjectPtr<USoundBase> DamageSound;
 
 	/** If true, energy is never expended and the player is always considered to have max energy (this won't change the UI to reflect this)*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 		bool bInfiniteEnergy;
+
+	/** The player is immune to damage while this is true.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
+		bool bPermanentInvulnerability;
+
+	/** How many seconds of invulnerability the player has left.*/
+	float InvulnerabilityTimeTracker = 0;
 
 	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
@@ -209,11 +279,32 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void RestoreHealth(int Value);
 
-	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
-	void NotifyOnHealthPickupUsed();
+	/** Gives the player the "Hasted" effect, increasing their movement speed for the given amount of seconds.*/
+	UFUNCTION(BlueprintCallable)
+		void ApplyHaste(float Time);
+
+	/** Makes the player immune to any and all damage for the given amount of seconds.*/
+	UFUNCTION(BlueprintCallable)
+		void ApplyInvulnerability(float Time);
+
+	/** Returns true while the player is invulnerable and shouldn't be effected by damage.*/
+	UFUNCTION(BlueprintCallable)
+		bool IsInvulnerable();
+
+	/** Spawns the given attack with the player as the owner.*/
+	UFUNCTION(BlueprintCallable)
+		void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass, FVector Location, FRotator Rotation);
 
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
-	void SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass);
+	UFUNCTION(BlueprintCallable)
+		void SpawnAttackFromPlayer(const TSubclassOf<AUDPlayerAttack> AttackClass);
+
+	void AddUpgrade(UUDPlayerUpgrade* Upgrade);
+
+	void AddTickedUpgrade(UUDPlayerTickedUpgrade* Upgrade);
+
+	/** Trigger the effects of a player using a health pickup. Additional effects beyond the default healing can be bound using the OnHealthPickupUsed delegate.*/
+	void NotifyOnHealthPickupUsed(AUDHealthPickup* HealthPickup);
 
 	/** Returns the player's current energy amount.*/
 	float GetCurrentEnergy();
@@ -236,8 +327,8 @@ public:
 	/** Sets the player's current health to the given value and update's their UI. All methods that modify the current health in some what must call this method to update the UI.*/
 	void SetHealth(int Value);
 
-	/** Reports that the given enemy has been killed by the given attack to the player, updating the player's UI and invoking the OnEnemyKill delegate.*/
-	void NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack);
+	/** Reports that the given enemy has been hit by the given attack to the player, invoking the OnEnemyHit delegate and updating the player's UI if the enemy was killed.*/
+	void NotifyOnEnemyHit(AUDEnemy* Enemy, AUDPlayerAttack* Attack, bool EnemyWasKilled);
 
 	/** Returns a reference to the player's HUD wudget.*/
 	UUDPlayerHUDWidget* const GetHUDWidget();
@@ -245,8 +336,9 @@ public:
 	/** Returns a reference to the player's round screen*/
 	UUDRoundScreenWidget* const GetRoundScreenWidget();
 
-protected:
+	void NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit);
 
+protected:
 	///////////////////////////////////////////////////////////////////////// Input Functions
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);

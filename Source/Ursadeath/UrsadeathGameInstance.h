@@ -185,7 +185,7 @@ protected:
 	TArray<FEnemySpawnData> KnightRewardPool;
 
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
-	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
+	TArray<FEnemyWaveScheme*> EnemyWaveSchemes; 
 
 	/** The current wave number in the current round that the player is fighting.*/
 	int RoundWaveNumber;

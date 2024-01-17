@@ -25,7 +25,7 @@ protected:
 
 	/** Audio played when the player picks this item up.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
-		TObjectPtr<USoundBase> PickupSound;
+		TObjectPtr<USoundBase> PickupSound;	
 
 public:	
 	// Sets default values for this actor's properties
@@ -35,12 +35,19 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
 public:
 	/** Causes the pickup to be used by the given player. The pickup then becomes intangable and invisible until its cooldown is expires.*/
 	UFUNCTION(BlueprintCallable)
 		void UsePickup(AUDPlayerCharacter* UsingPlayer);
 
+	/** Sets the pickup to being active and able to be used by the player.*/
+	UFUNCTION(BlueprintCallable)
+		void ReactivatePickup();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/** Returns true while the pickup is not on cooldown and can be grabbed by the player.*/
+	bool GetPickupActive();
 };

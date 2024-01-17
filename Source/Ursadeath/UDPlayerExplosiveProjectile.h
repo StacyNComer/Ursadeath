@@ -43,6 +43,6 @@ protected:
 #endif
 
 protected:
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	virtual void NotifyOnProjectileHit(AActor* ActorHit) override;
 	
 };

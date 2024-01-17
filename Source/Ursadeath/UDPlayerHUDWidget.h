@@ -12,8 +12,9 @@ class UHorizontalBox;
 class UUDEnemySpawnIndicator;
 class UDataTable;
 class UUrsadeathGameInstance;
+class UUDPlayerStatusIcon;
 struct FEnemyWave;
-enum class EEnemyTier;
+enum class EEnemyTier : uint8;
 
 /**
  * 
@@ -25,12 +26,20 @@ class URSADEATH_API UUDPlayerHUDWidget : public UUserWidget
 
 protected:
 	/** The widget used to contain the Enemy Spawn Indicators.*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TObjectPtr<UPanelWidget> SpawnIndicatorContainer;
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		TObjectPtr<UPanelWidget> SpawnIndicatorPanel;
 	
+	/** The UPanel for holding the player's status icons.*/
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		TObjectPtr<UPanelWidget> StatusIconPanel;
+
 	/** The blueprint class that will be used for enemy spawn indicators.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TSubclassOf<UUDEnemySpawnIndicator> EnemySpawnIndicatorClass;
+
+	/** The blueprint class that will be used for the player's status icons.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf<UUDPlayerStatusIcon> StatusIconClass;
 
 	/** A data table of all of the game's Knight tier enemies and any other information for spawning them. Cached from the game instance upon initialization.*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -74,9 +83,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void UpdateEnergy(float PlayerEnergy, float EnergyChange, bool EnergyBarGained);
 
+	/** Displays the given text to the player as an announcement for the given amount of time. Note that this will overrite any previously displayed announcement as well as its DisplayTime.*/
 	UFUNCTION(BlueprintCallable)
-		/** Displays the given text to the player as an announcement for the given amount of time. Note that this will overrite any previously displayed announcement as well as its DisplayTime.*/
 		void DisplayAnnouncement(const FText& Message, float DisplayTime);
+
+	/** Creates a Player Status Icon and adds it to the player's HUD. The Status Icon is returned so that it may be editted.*/
+	UFUNCTION(BlueprintCallable)
+		UUDPlayerStatusIcon* AddPlayerStatusIcon();
 
 	/** Decrement the count of the indicator for the given enemy type.*/
 	void DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier);

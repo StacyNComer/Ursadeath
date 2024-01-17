@@ -105,9 +105,10 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	//If the attack deals damage, damage the enemy and play a hit sound.
 	if (AttackData->AttackStats.Damage > 0)
 	{
-		health -= AttackData->AttackStats.Damage;
+		Health -= AttackData->AttackStats.Damage;
 
-		UGameplayStatics::PlaySound2D(GetWorld(), DamageSound);
+		//Play the damage sound.
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, GetActorLocation());
 	}
 
 	//Stun the enemy if the attack should stun them.
@@ -117,16 +118,17 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 		ApplyStun(AttackStunTime);
 	}
 
-	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
-	if (!bUndieable && health <= 0)
-	{
-		
-		//Report the kill to the attacking player, if they exist.
-		if (AttackSource)
-		{
-			AttackSource->GetOwningPlayer()->NotifyOnEnemyKill(this, AttackSource);
-		}
+	bool WasKilled = Health <= 0;
 
+	//Report that an enemy was hit to the attack's owning player.
+	if (AttackSource)
+	{
+		AttackSource->GetOwningPlayer()->NotifyOnEnemyHit(this, AttackSource, WasKilled);
+	}
+
+	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
+	if (!bUndieable && Health <= 0)
+	{
 		Destroy();
 	}
 }

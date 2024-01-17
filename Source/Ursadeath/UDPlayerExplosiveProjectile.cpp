@@ -14,8 +14,10 @@
 #define ECC_PLAYER ECC_GameTraceChannel2
 #define ECC_ENEMY ECC_GameTraceChannel4
 
-void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
+void AUDPlayerExplosiveProjectile::NotifyOnProjectileHit(AActor* ActorHit)
 {
+	Super::NotifyOnProjectileHit(ActorHit);
+
 	UWorld* const World = GetWorld();
 	if (World != nullptr)
 	{
@@ -39,9 +41,9 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 
 		//The actor directly hit by the explosive projectile is not affected by the explosion.
 		TArray<AActor*> ignoredActors;
-		ignoredActors.Init(OtherActor, 1);
+		ignoredActors.Init(ActorHit, 1);
 
-		//Holds the enemies hit by the explosion.
+		//Holds the enemies hit by the explosion. 
 		TArray<AActor*> OutActorsHit;
 
 		//Test for enemies in the explosion's radius.
@@ -52,7 +54,7 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 		{
 			if(AUDEnemy* EnemyHit = Cast<AUDEnemy>(OutActorsHit[i]))
 			{
-				ApplyAttackToEnemy(EnemyHit, ExplosionStats);
+				ApplyAttackExclusive(EnemyHit, ExplosionStats);
 			}
 			else if (AUDPlayerCharacter* PlayerHit = Cast<AUDPlayerCharacter>(OutActorsHit[i]))
 			{
@@ -72,6 +74,4 @@ void AUDPlayerExplosiveProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 			DrawDebugSphere(World, GetActorLocation(), ExplosionRadius, 12, FColor::Green, false, 1);
 #endif
 	}
-
-	Super::NotifyActorBeginOverlap(OtherActor);
 }

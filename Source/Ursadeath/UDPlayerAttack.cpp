@@ -38,6 +38,16 @@ void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackSta
 	GetOwningPlayer()->AddEnergy(EnergyGain);
 }
 
+void AUDPlayerAttack::ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct)
+{
+	if (!EnemiesHit.Contains(Enemy))
+	{
+		EnemiesHit.Add(Enemy);
+
+		ApplyAttackToEnemy(Enemy, AttackStatsStruct);
+	}
+}
+
 AUDPlayerCharacter* const AUDPlayerAttack::GetOwningPlayer()
 {
 	//Set the owning player if it hasn't been set yet. 
@@ -48,10 +58,5 @@ AUDPlayerCharacter* const AUDPlayerAttack::GetOwningPlayer()
 	}
 
 	return OwningPlayer;
-}
-
-EPlayerAttackType AUDPlayerAttack::GetAttackType()
-{
-	return AttackStats.AttackType;
-}
+} 
 

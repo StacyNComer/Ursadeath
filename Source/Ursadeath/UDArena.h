@@ -72,8 +72,11 @@ protected:
 	/** An array of Knight class enemies that the current wave can spawn.*/
 	TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;
 
+	/** The health pickups spawned by the arena.*/
+	TArray<AUDHealthPickup*> HealthPickups;
+
 	/** The amount of seconds left before a Squire spawns when SquireSlowSpawnActive returns true.*/
-		float SquireSlowSpawnCooldownTracker;
+	float SquireSlowSpawnCooldownTracker;
 
 	int32 SquiresInPlay = 0;
 
@@ -138,4 +141,12 @@ public:
 	/** Sets the current enemy wave and begins spawning it.*/
 	UFUNCTION(BlueprintCallable)
 		void SpawnEnemyWave(FEnemyWave Wave);
+
+	/** Returns the number of health pickups that are off cooldown and can be used by the player.*/
+	UFUNCTION(BlueprintCallable)
+		int32 GetActiveHealthPickups();
+
+	/** Respawn any health pickups in the arena that are on cooldown.*/
+	void ReactivateHealthPickups();
+
 };

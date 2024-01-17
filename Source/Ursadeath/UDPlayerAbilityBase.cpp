@@ -36,7 +36,7 @@ bool UUDPlayerAbilityBase::TryUseAbility()
 {
 	if (CanUseAbility())
 	{
-		OwningPlayer->SpawnAttack(AttackActorClass);
+		OwningPlayer->SpawnAttackFromPlayer(AttackActorClass);
 
 		//Spawn the abilities particles, if they exist.
 		if (ParticleSystem)

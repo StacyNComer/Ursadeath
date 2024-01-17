@@ -6,6 +6,7 @@
 #include "UDEnemySpawnIndicator.h"
 #include "Blueprint/WidgetTree.h"
 #include "UDEnemy.h"
+#include "UDPlayerStatusIcon.h"
 #include "UrsadeathGameInstance.h"
 
 void UUDPlayerHUDWidget::NativeOnInitialized()
@@ -64,7 +65,7 @@ UUDEnemySpawnIndicator* UUDPlayerHUDWidget::CreateSpawnIndicatorWidget(TObjectPt
 	SpawnIndicator->SetEnemyImage(IndicatorIcon);
 
 	//Add the indicator as a child of the widget panel meant to contain them.
-	SpawnIndicatorContainer->AddChild(SpawnIndicator);
+	SpawnIndicatorPanel->AddChild(SpawnIndicator);
 
 	return SpawnIndicator;
 }
@@ -78,6 +79,17 @@ void UUDPlayerHUDWidget::DisplayAnnouncement(const FText& Message, float Display
 
 	//Set the announcement to disappear after DisplayTime seconds.
 	AnnouncementTimeTracker = DisplayTime;
+}
+
+UUDPlayerStatusIcon* UUDPlayerHUDWidget::AddPlayerStatusIcon()
+{
+	UUDPlayerStatusIcon* PlayerStatusIcon = CreateWidget<UUDPlayerStatusIcon>(GetOwningPlayer(), StatusIconClass);
+
+	StatusIconPanel->AddChild(PlayerStatusIcon);
+	
+	PlayerStatusIcon->SetVisibility(ESlateVisibility::Collapsed);
+
+	return PlayerStatusIcon;
 }
 
 void UUDPlayerHUDWidget::DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier)

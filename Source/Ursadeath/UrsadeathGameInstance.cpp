@@ -259,6 +259,8 @@ void UUrsadeathGameInstance::ProcessEndWave()
 
 		PopulateRoundRewards();
 
+		PopulateUpgradeRewards();
+
 		//Generate the game's next round, if one exists. The game will wait for StartRound() to be called before spawning anything.
 		if(RoundWaveCounts.IsValidIndex(RoundNumber + 1))
 		{
@@ -284,6 +286,9 @@ void UUrsadeathGameInstance::ProcessEndWave()
 
 		//Restore the player to full health when they complete a round.
 		PlayerCharacter->RestoreHealth(999);
+
+		//Respawn the health pickups in the arena so the player doesn't have to wait for them to respawn.
+		GameArena->ReactivateHealthPickups();
 	}
 }
 

@@ -31,22 +31,26 @@ void AUDHealthPickup::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	//Decrement the pickup's cooldown.
-	if (CooldownTracker > 0)
+	if (!GetPickupActive())
 	{
 		CooldownTracker -= DeltaTime;
 
 		//The pickup becomes visible and tangable when the cooldown expires.
 		if (CooldownTracker <= 0)
-		{
-			SetActorHiddenInGame(false);
-			SetActorEnableCollision(true);
+		{ 
+			ReactivatePickup();
 		}
 	}
 }
 
+bool AUDHealthPickup::GetPickupActive()
+{
+	return CooldownTracker <= 0;
+}
+
 void AUDHealthPickup::UsePickup(AUDPlayerCharacter* UsingPlayer)
 {
-	UsingPlayer->NotifyOnHealthPickupUsed();
+	UsingPlayer->NotifyOnHealthPickupUsed(this);
 
 	//Make the pickup hidden and intangable.
 	SetActorHiddenInGame(true);
@@ -60,5 +64,14 @@ void AUDHealthPickup::UsePickup(AUDPlayerCharacter* UsingPlayer)
 	
 	//Put the pickup on cooldown.
 	CooldownTracker = Cooldown;
+}
+
+void AUDHealthPickup::ReactivatePickup()
+{
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+
+	//Make sure the cooldown is no longer active in case the pickup is being forcibly respawned.
+	CooldownTracker = 0;
 }
 

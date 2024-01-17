@@ -22,9 +22,16 @@ void AUDPlayerAttackProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 	AUDEnemy* EnemyHit = Cast<AUDEnemy>(OtherActor);
 	if (EnemyHit != nullptr)
 	{
-		ApplyAttackToEnemy(EnemyHit, AttackStats);
+		ApplyAttackExclusive(EnemyHit, AttackStats);
 	}
+
+	NotifyOnProjectileHit(OtherActor);
 
 	//Destroy the project whenever it hits something. The projectile's collision settings should prevent it from hitting anything other than an enemy or wall.
 	Destroy();
+}
+
+void AUDPlayerAttackProjectile::NotifyOnProjectileHit(AActor* ActorHit)
+{
+	GetOwningPlayer()->NotifyOnPlayerProjectileHit(this, ActorHit);
 }

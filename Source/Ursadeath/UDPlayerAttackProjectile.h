@@ -31,4 +31,7 @@ protected:
 	/** By default this destroys the projectile.*/
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
+	/** Called after the projectile hits something, enemy or otherwise.*/
+	virtual void NotifyOnProjectileHit(AActor* ActorHit);
+
 };

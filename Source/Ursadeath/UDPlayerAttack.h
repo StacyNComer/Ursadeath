@@ -51,13 +51,17 @@ protected:
 	/** The name of the collision profile used for player attacks.*/
 	const char* PlayerAttackCollisionProfile = "PlayerAttack";
 
-	/** The stats for this attack. This is not meant to change after being initialized: Used the PlayerCharacter's OnAttackHit or Enemy's OnAttackReceived to alter the attack's stats.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		FPlayerAttackStats AttackStats;
-
 	/** The energy that should be given to the player if the attack hits an enemy.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float EnergyGain;
+
+	/** Holds the enemies that were hit by the ApplyAttackExclusive.*/
+	TArray<AUDEnemy*> EnemiesHit;
+
+public:
+	/** The stats for this attack. This is not meant to change after being initialized: Used the PlayerCharacter's OnAttackHit or Enemy's OnAttackReceived to alter the attack's stats.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FPlayerAttackStats AttackStats;
 
 public:	
 	/** Returns the player that spawned this projectile.*/
@@ -74,13 +78,15 @@ protected:
 	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain. 
 	* Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable)
-	void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+		void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+
+	/** Applies the attack to the given enemy, but only if the PlayerAttack has never called this method on the enemy.  
+	
+	* Note that enemies are excluded even if this method was previously called with a different AttackStats struct.*/
+	UFUNCTION(BlueprintCallable)
+	void ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	/** The enum is bugged and I really need to get upgrades done.*/
-	UFUNCTION(Blueprintcallable)
-		EPlayerAttackType GetAttackType();
 };

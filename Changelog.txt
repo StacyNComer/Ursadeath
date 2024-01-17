@@ -1,3 +1,74 @@
+=== Update 17 "Upgrades of Doom!" ===
+
+	> General
+
+* Added upgrades! The menu for choosing them is in the Round Screen (open with "T"). Don't forget to pick a new one every
+  new round!
+	* I'm serious about that last part. For now, the game lets you start the round without choosing an upgrade and
+	  does not give so much as a warning when you do this. You can pick an upgrade mid-round if you forget, but once
+	  the round ends, you'll lose the chance to pick one!
+		# I'm probably just going to have an "Are you sure" message, since I like the idea of a player
+		  challenging themselves to beat the game with fewer/no upgrades.
+	* As for what upgrades have been added...
+		* One makes melees heal you and grant a speed boost for 2.5 seconds on a kill.
+		* Another causes Shockwaves to give the player invulnerability for 3 seconds.
+			# This needs to be nerfed/removed. Enjoy it while you can!
+		* And the last one (my favorite) causes bombs to fire a piercing beam when they explode. The beam
+		  deals the bomb's direct hit damage (2000) and (like all aoe effects) go through walls!
+			* An enemy directly hit by a bomb will not also be hit by the laser.
+
+	> Player Character
+
+* Health pickups now respawn when the round ends.
+
+* Lowered the damage of melee attacks: 1000 => 700.
+	# Not only did these do a crap ton of damage, but they also gave you a lot of energy! You could practically
+	  play the game only using melee attacks and bombs! This alongside the increased health and danger enemies
+	  have should curb Ursadeath's mighty claws while still making them want to get in close to gather energy.
+
+* Increased the explosion radius of bombs: 500 => 750.
+	# I mostly want it to be easier to hurt yourself with these.
+
+* Reduced the energy gain of the primary fire: 3 => 2.
+	# For perspective, the Energy/s of the player's primaryfire is decreased from 20 to ~13.
+	# I want to increase the likelyhood that the player is forced to fish for melee attacks to keep their energy
+	  up.
+
+	> Enemies
+
+* Adjusted the Gladiator enemy:
+	* Increased their health: 2000 => 3000
+	* They are faster: 500 => 750
+	* But they are slowed by 60% after being damaged or stunned for 2 seconds.
+	* Their attacks deal less damage: 35 => 20
+	* The hitbox size for their melee attack has been shrunk to 75% of its original size.
+	# Overall, they should be more threatening, but the player can mitigate their threat at the cost of
+	  giving other enemies more time to kill you!
+
+* Adjusted the Archer Legionarre enemy:
+	* Increased their health: 750 => 1000
+	* Increased their projectile speed: 1800 => 3000.
+	* Made their projectiles 33% larger; They are now the same size as Ranged Squire shots.
+
+* Adjusted the Vigilant enemy:
+	* Increased their health: 1500 => 2200.
+	* They no longer fire the moment they spawn (Thanks Travis!), instead waiting for 1 second.
+	* The player's melee attacks deal 50% more damage (1050) instead of having their damage set to 3000.
+
+* Adjusted the Ranged Squire enemy:
+	* Increased their health: 400 => 600
+	* Increase their projectile speed: 1800 => 3000.
+
+* Adjusted the Melee Squire enemy:
+	* Increased their health: 600 => 900.
+	* They are faster: 500 => 600
+
+	> Bugfixes
+
+* Fixes a bug in which the player's upgrades would cease to have any effect some time after they were chosen.
+
+* Fixed a bug where the Upgrade blueprints were unable to use many blueprint nodes (such as line traces).
+
 
 === Update 16 "Night City of Doom!" ===
 

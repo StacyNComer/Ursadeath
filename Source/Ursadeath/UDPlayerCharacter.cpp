@@ -20,6 +20,12 @@
 #include "UDRoundScreenWidget.h"
 #include "UDGameOverWidget.h"
 #include "Sound/SoundBase.h"
+#include "UDPlayerUpgrade.h"
+#include "UDPlayerTickedUpgrade.h"
+#include "UDPlayerStatusIcon.h"
+#include "Components/ProgressBar.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "UDHealthPickup.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -88,6 +94,13 @@ void AUDPlayerCharacter::BeginPlay()
 	HUDWidget->UpdateHealth(CurrentHealth, 0);
 	HUDWidget->UpdateEnergy(CurrentEnergy, 0, false);
 
+	//Create the status icons for being hasted and invulnerable.
+	HasteStatusWidget = HUDWidget->AddPlayerStatusIcon();
+	HasteStatusWidget->SetStatusImage(HasteStatusImage);
+
+	InvulnerableStatusWidget = HUDWidget->AddPlayerStatusIcon();
+	InvulnerableStatusWidget->SetStatusImage(InvulnerableStatusImage);
+
 	//Create the round screen.
 	RoundScreenWidget = CreateWidget<UUDRoundScreenWidget>(UDPlayerController, RoundScreenWidgetClass);
 	RoundScreenWidget->AddToViewport();
@@ -114,6 +127,29 @@ void AUDPlayerCharacter::BeginPlay()
 void AUDPlayerCharacter::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
+
+	//Decrement the player's haste time. Their haste ends if the time is depleted to 0.
+	if (HasteTimeTracker > 0)
+	{
+		HasteTimeTracker -= deltaTime;
+
+		if (HasteTimeTracker <= 0)
+		{
+			GetCharacterMovement()->MaxWalkSpeed /= HasteSpeedMultiplier;
+		}
+	}
+
+	//Decrement the player's invulnerability time.
+	if (InvulnerabilityTimeTracker > 0)
+	{
+		InvulnerabilityTimeTracker -= deltaTime;
+	}
+
+	//Tick any upgrades the player has that requires such.
+	for (UUDPlayerTickedUpgrade* TickedUpgrade : TickedUpgrades)
+	{
+		TickedUpgrade->TickUpgrade(deltaTime);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -204,21 +240,7 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	}
 }
 
-void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass)
-{
-	UWorld* const World = GetWorld();
-	if (World != nullptr)
-	{
-		FActorSpawnParameters ActorSpawnParams;
-		//Set Spawn Collision Handling Override
-		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		//Set the attack's owner.
-		ActorSpawnParams.Owner = this;
 
-		//Spawn the attack. Set the player spawning it as the attack's owner.
-		AUDPlayerAttack* AttackSpawned = World->SpawnActor<AUDPlayerAttack>(AttackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation(), ActorSpawnParams);
-	}
-}
 
 void AUDPlayerCharacter::SetEnergy(float Value)
 {
@@ -303,6 +325,12 @@ void AUDPlayerCharacter::SetHealth(int Value)
 
 void AUDPlayerCharacter::DamagePlayer(int Damage)
 {
+	//You can't hurt Ursadeath while he's invulnerable silly!
+	if (IsInvulnerable())
+	{
+		return;
+	}
+
 	SetHealth(CurrentHealth - Damage);
 
 	if (DamageSound)
@@ -325,9 +353,24 @@ void AUDPlayerCharacter::DamagePlayer(int Damage)
 	}
 }
 
-void AUDPlayerCharacter::NotifyOnHealthPickupUsed()
+void AUDPlayerCharacter::AddUpgrade(UUDPlayerUpgrade* Upgrade)
+{
+	Upgrades.Add(Upgrade);
+}
+
+void AUDPlayerCharacter::AddTickedUpgrade(UUDPlayerTickedUpgrade* Upgrade)
+{
+	TickedUpgrades.Add(Upgrade);
+}
+
+void AUDPlayerCharacter::NotifyOnHealthPickupUsed(AUDHealthPickup* HealthPickup)
 {
 	RestoreHealth(40);
+
+	if (OnHealthPickupUsed.IsBound())
+	{
+		OnHealthPickupUsed.Broadcast(HealthPickup);
+	}
 }
 
 void AUDPlayerCharacter::RestoreHealth(int ToRestore)
@@ -343,18 +386,77 @@ void AUDPlayerCharacter::RestoreHealth(int ToRestore)
 	SetHealth(NewHealth);
 }
 
-void AUDPlayerCharacter::NotifyOnEnemyKill(AUDEnemy* EnemyKilled, AUDPlayerAttack* Attack)
+void AUDPlayerCharacter::ApplyHaste(float Time)
 {
-	HUDWidget->DecrementEnemyCount(EnemyKilled->GetClass(), EnemyKilled->GetEnemyTier());
+	if (HasteTimeTracker <= 0)
+	{
+		GetCharacterMovement()->MaxWalkSpeed *= HasteSpeedMultiplier;
+	}
 
-	if (OnEnemyDeath.IsBound())
+	if (Time > HasteTimeTracker)
+	{
+		HasteTimeTracker = Time;
+
+		//Show in the player's HUD that they are Hasted for the given time.
+		HasteStatusWidget->SetStatusBarTime(Time);
+	}
+}
+
+void AUDPlayerCharacter::ApplyInvulnerability(float Time)
+{
+	if (InvulnerabilityTimeTracker < Time)
+	{
+		InvulnerabilityTimeTracker = Time;
+
+		//Show in the player's HUD that they are invuln for the given time.
+		InvulnerableStatusWidget->SetStatusBarTime(Time);
+	}
+}
+
+bool AUDPlayerCharacter::IsInvulnerable()
+{
+	return bPermanentInvulnerability || InvulnerabilityTimeTracker > 0;
+}
+
+void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass, FVector Location, FRotator Rotation)
+{
+	FActorSpawnParameters ActorSpawnParams;
+	//Set Spawn Collision Handling Override
+	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	//Set the attack's owner.
+	ActorSpawnParams.Owner = this;
+
+	//Spawn the attack. Set the player spawning it as the attack's owner.
+	AUDPlayerAttack* AttackSpawned = GetWorld()->SpawnActor<AUDPlayerAttack>(AttackClass, Location, Rotation, ActorSpawnParams);
+
+	if (OnAttackSpawned.IsBound())
+	{
+		OnAttackSpawned.Broadcast(AttackSpawned);
+	}
+}
+
+
+void AUDPlayerCharacter::SpawnAttackFromPlayer(const TSubclassOf<AUDPlayerAttack> AttackClass)
+{
+	SpawnAttack(AttackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation());
+}
+
+void AUDPlayerCharacter::NotifyOnEnemyHit(AUDEnemy* Enemy, AUDPlayerAttack* Attack, bool EnemyWasKilled)
+{
+	if (OnEnemyHit.IsBound())
 	{
 		FEnemyHitData EnemyHitData;
-		EnemyHitData.Enemy = EnemyKilled;
+		EnemyHitData.Enemy = Enemy;
 		EnemyHitData.Attack = Attack;
-		EnemyHitData.EnemyTier = EnemyKilled->GetEnemyTier();
+		EnemyHitData.EnemyTier = Enemy->GetEnemyTier();
+		EnemyHitData.EnemyWasKilled = EnemyWasKilled;
 
-		OnEnemyDeath.Broadcast(EnemyHitData);
+		OnEnemyHit.Broadcast(EnemyHitData);
+	}
+
+	if (EnemyWasKilled)
+	{
+		HUDWidget->DecrementEnemyCount(Enemy->GetClass(), Enemy->GetEnemyTier());
 	}
 }
 
@@ -366,6 +468,18 @@ UUDPlayerHUDWidget* const AUDPlayerCharacter::GetHUDWidget()
 UUDRoundScreenWidget* const AUDPlayerCharacter::GetRoundScreenWidget()
 {
 	return RoundScreenWidget;
+}
+
+void AUDPlayerCharacter::NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit)
+{
+	if (OnPlayerProjectileHit.IsBound())
+	{
+		FPlayerProjectileHitData ProjectileHitData;
+		ProjectileHitData.Projectile = Projectile;
+		ProjectileHitData.ActorHit = ActorHit;
+
+		OnPlayerProjectileHit.Broadcast(ProjectileHitData);
+	}
 }
 
 void AUDPlayerCharacter::UsePrimaryAbility()

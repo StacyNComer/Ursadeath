@@ -17,7 +17,7 @@ class USoundBase;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
-enum class EEnemyTier
+enum class EEnemyTier : uint8
 {
 	UNTIERED = 0,
 	SQUIRE = 1,
@@ -69,7 +69,7 @@ protected:
 		float SpawnTime = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
-		int32 health;
+		int32 Health;
 
 	/** The remaining seconds an enemy has until they are no longer stunned. An enemy is considered to be stunned while this is > 0.*/
 	UPROPERTY(BlueprintReadOnly, Category = Status)
@@ -111,11 +111,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Status)
 		bool IsStunned();
 
+	/** Returns the enemy's tier. Squires are "fodder" enemies, */
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		EEnemyTier GetEnemyTier();
+
 	/** Returns the amount of time this enemy should spend "spawning in"*/
 	float GetSpawnTime();
-
-	/** Returns the enemy's tier.*/
-	EEnemyTier GetEnemyTier();
 
 	/** Sets the enemy tier. This should be used when an enemy first spawns.*/
 	void SetEnemyTier(EEnemyTier Tier);

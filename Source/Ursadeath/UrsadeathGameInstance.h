@@ -50,6 +50,9 @@ struct FPlayerUpgradeData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		FUIDescription Description;
 
+	/** If false, the upgrade will be excluded from the pool.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		bool bEnabled = true;
 };
 
 /** Holds the data shared between the EnemyWaveScheme and the actual EnemyWave.*/

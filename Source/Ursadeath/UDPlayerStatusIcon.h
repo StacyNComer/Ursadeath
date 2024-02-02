@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bDisappearWhenStatusDepleted = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bHideCounterWhenStatusDepleted = false;
+
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
@@ -47,11 +50,11 @@ public:
 		void SetStatusBarTime(float StatusTime);
 
 	/** Returns the status icon's progress bar.*/
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 		UProgressBar* const GetStatusBar();
 
 	/** Returns the text block */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 		UTextBlock* const GetStatusCounter();
 
 	/** Sets the image shown by the status icon widget,*/

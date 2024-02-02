@@ -165,7 +165,12 @@ void AUDEnemy::ApplyStun(float TimeStunned)
 
 		//Pause the enemy AI and cancel any active movement.
 		EnemyController->StopAI();
-		GetMovementComponent()->StopActiveMovement();
+
+		if (UPawnMovementComponent* MoveComponent = GetMovementComponent())
+		{
+			GetMovementComponent()->StopActiveMovement();
+		}
+		
 		
 		//Turn on the stun particle FX.
 		StunParticleComponent->Activate();

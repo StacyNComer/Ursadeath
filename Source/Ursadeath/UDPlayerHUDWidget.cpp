@@ -7,6 +7,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "UDEnemy.h"
 #include "UDPlayerStatusIcon.h"
+#include "Components/TextBlock.h"
 #include "UrsadeathGameInstance.h"
 
 void UUDPlayerHUDWidget::NativeOnInitialized()

@@ -24,6 +24,10 @@ void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 			{
 				SetVisibility(ESlateVisibility::Collapsed);
 			}
+			else if (bCounterDisplaysStatusTime)
+			{
+				StatusCounter->SetVisibility(ESlateVisibility::Collapsed);
+			}
 
 			if (bCounterDisplaysStatusTime)
 			{
@@ -40,10 +44,14 @@ void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 
 void UUDPlayerStatusIcon::SetStatusBarTime(float StatusTime)
 {
-	//Make sure that the widget is visible if it was set to disappear.
+	//Make sure that the widget/statusCounter is visible if it was set to disappear.
 	if (bDisappearWhenStatusDepleted)
 	{
 		SetVisibility(ESlateVisibility::Visible);
+	}
+	else if (bCounterDisplaysStatusTime)
+	{
+		StatusCounter->SetVisibility(ESlateVisibility::Visible);
 	}
 
 	StatusBar->SetPercent(1);

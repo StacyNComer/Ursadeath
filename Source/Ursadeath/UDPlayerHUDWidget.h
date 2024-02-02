@@ -10,6 +10,7 @@
 class AUDEnemy;
 class UHorizontalBox;
 class UUDEnemySpawnIndicator;
+class UTextBlock;
 class UDataTable;
 class UUrsadeathGameInstance;
 class UUDPlayerStatusIcon;
@@ -90,6 +91,10 @@ public:
 	/** Creates a Player Status Icon and adds it to the player's HUD. The Status Icon is returned so that it may be editted.*/
 	UFUNCTION(BlueprintCallable)
 		UUDPlayerStatusIcon* AddPlayerStatusIcon();
+
+	/** Displays the given text as the game's random seed.*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void SetGameSeedText(const FText& GameSeed);
 
 	/** Decrement the count of the indicator for the given enemy type.*/
 	void DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier);

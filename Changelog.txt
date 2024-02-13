@@ -1,3 +1,32 @@
+=== Update 18 "Seeds of Doom!" ===
+
+	> General
+
+* If the Game Instance's "Game Seed Name" is omitted, the game will now randomly generate a seed.
+	
+* The Game Seed is now diplayed at the bottom of the player's HUD.
+	* Randomly generated seeds will be a sequence of numbers. If a word or phrase was input manually as the seed, 
+	  than that will be shown instead.
+
+	> Upgrades
+
+* Upgrades can now be "disabled" from their data table, allowing them to be removed to help test other upgrades.
+
+* Added the "Exhileration" upgrade, which Haste's the player for 8 seconds after they use their Shockwave.
+
+* Added the "Shatter" upgrade, which causes a massive burst whenever the player collects a Health Pickup. The burst deals
+  1500, stuns for 4 seconds, and has a radius of 1500 units.
+
+* Added the "Blood Claw" upgrade, which doubles melee attack damage and causes the attack to stun. This upgrade has a
+  5 second cooldown, which is displayed by an icon above the player's Energy Bar.
+
+* Removed the "Tyranny" upgrade that gave invulnerability after using the Shockwave ability.
+
+	> Enemies
+
+* Gladiator's now have a visual effect while slowed.
+
+
 === Update 17 "Upgrades of Doom!" ===
 
 	> General

@@ -7,6 +7,7 @@
 #include "UDPlayerCharacter.h"
 #include "UDPlayerHUDWidget.h"
 #include "UDRoundScreenWidget.h"
+#include "Components/TextBlock.h"
 #include "Components/Button.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "UDRoundRewardMenu.h"
@@ -381,7 +382,17 @@ void UUrsadeathGameInstance::AddUpgradeReward()
 void UUrsadeathGameInstance::SetupGame()
 {
 	//Initialize the game's random seed.
-	RandomStream.Initialize(GameSeedName);
+	if (GameSeedName == "")
+	{
+		RandomStream.GenerateNewSeed();
+
+		GameSeedName = FName(FString::FromInt(RandomStream.GetCurrentSeed()));
+	}
+	else
+	{
+		RandomStream.Initialize(GameSeedName);
+	}
+	
 
 	//Get the spawn data from the data table.
 	TArray<FEnemySpawnData*> KnightSpawnData;
@@ -398,6 +409,21 @@ void UUrsadeathGameInstance::SetupGame()
 
 	//Set the Player Upgrade Pool from the data table of Player Upgrades.
 	UpgradeDataTable->GetAllRows("GameInstancePlayerRewardInit", UpgradeRewardPool);
+
+	//Remove any disabled upgrades.
+	for(int i = 0; i < UpgradeRewardPool.Num();)
+	{
+		FPlayerUpgradeData* UpgradeData = UpgradeRewardPool[i];
+
+		if (!UpgradeData->bEnabled)
+		{
+			UpgradeRewardPool.Remove(UpgradeData);
+		}
+		else
+		{
+			i++;
+		}
+	}
 
 	//Shuffle the player upgrades
 	ShuffleArray(UpgradeRewardPool);
@@ -418,6 +444,8 @@ void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 	PopulateRoundRewards();
 
 	PopulateUpgradeRewards();
+
+	Player->GetHUDWidget()->SetGameSeedText(FText::FromName(GameSeedName));
 }
 
 #undef LOCTEXT_NAMESPACE

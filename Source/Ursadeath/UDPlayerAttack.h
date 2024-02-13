@@ -89,4 +89,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	/** If the attack is hitscan or should otherwise performs collision casts upon spawning, it should perform them with this event instead of Begin Play. This event called after the spawning player has completed any post-spawn modifications to the attack (i.e. from upgrades).*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnAttackFinalized();
 };

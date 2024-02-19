@@ -1,3 +1,6 @@
+
+The source code can be found in the "Source" folder in the project's root directory.
+
 	= Credits =
 
 Kelly Addison - UI Design and UI blueprints. Found and implemented audio.

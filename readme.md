@@ -1,5 +1,6 @@
+# Source Code
 
-The source code can be found in the "Source" folder in the project's root directory.
+The source code can be found in the Source/Ursadeath folder.
 
 # Credits
 

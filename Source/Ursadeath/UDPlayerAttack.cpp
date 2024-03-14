@@ -60,3 +60,13 @@ AUDPlayerCharacter* const AUDPlayerAttack::GetOwningPlayer()
 	return OwningPlayer;
 } 
 
+void AUDPlayerAttack::FinalizeAttack()
+{
+	RecieveFinalizeAttack();
+
+	if (OnAttackFinalized.IsBound())
+	{
+		OnAttackFinalized.Broadcast(this);
+	}
+}
+

@@ -1,3 +1,91 @@
+=== Update 19 "Big Waves of Doom!" ===
+
+	> General
+
+* The game now generates a new random seed whenever the game is reset after player death. If a custom
+   seed was manually input into the GameInstance, the seed will instead remain the same.
+
+	> Player Character
+
+* Increased the player's base movement speed: 900 => 1000.
+	* Because the Haste effect is a mulitplier (* 150%) on the player's base speed, the Hasted speed 
+          is also faster.
+	   
+* Reduced the energy gained from melee attacks: 40 => 25.
+	# I'm hoping to make the Shockwave/Melee combo less self sustaining: It should be harder to simply
+	   stunlock every enemy using this combo without something getting close and smacking you.
+	# For perspective, Rockets/Shockwaves cost 100 energy to use.
+
+* Both the direct hit and explosion damage of Rockets is increased by 500.
+	* Direct hit damage: 2000 => 2500
+	* Explosion damage: 1000 => 1500
+	# Direct hits now one-shot Viligants. Explosions now one-shot Legionnaire Archers.
+
+* Doubled the player's acceleration. (2048 => 4096)
+	# This is to make the player's movement feel smoother while they have the Haste effect.
+
+	> Upgrades
+
+* Reworked the SuperPunch "Blood Claw" upgrade:
+	* The Blood Claw now creates a 1000 radius explosion around the player that deals the same damage of the
+	   melee attack.
+	* Increased the Blood Claw's cooldown: 5s => 9s.
+
+* Reduced the haste time of the ShockwaveHaste "Exhileration": 8s => 5s.
+	# The Haste effect is at least a little stronger than I anticipated.
+
+* Nerfed the MeleeHeal "Siphon Soul" upgrade:
+	* Reduced the healing values:
+		* Squire heal: 8% => 5%
+		* Champion heal: 16% => 10%
+
+* Adjusted the PickupBomb "Shatter" upgrade:
+	* It's radius is larger: 1000 => 2000.
+	* It deals more damage: 1500 => 2000.
+	* It stuns enemies longer: 4s => 5s.
+		# This also means their description, which was previously wrong, is now correct about the
+		   stun time.
+
+* Increased the beam radius of the BombBeam (Piercing Blast) upgrade: 50 => 100.
+
+	> Enemies
+
+* Rebalanced the game to spawn more enemies at once on the second and third round.
+
+* Adjusted the Vigilant enemy:
+	* Reduced the damage of the Vigilant: 15 => 11.
+		* This lowers the Vigilant's DPS to the player from 60%/s to 44%/s.
+
+* Adjusted Legionnaire Archers
+	* Increased the Health of Legionnaire Archers 1000 => 1400.
+	* Reduced their damage: 10 => 8.
+		* The damage of all 3 projectiles hitting is now: 30 => 24.
+	* Decreased the range at which they no longer walk closer to the player while their attack is on
+	  cooldown: 1000 => 500. 
+		# Thanks Travis!
+	* Being stunned no longer instantly kills them and instead deals 1100 damage to them.
+	* They are now stunned for twice as long.
+
+* Reduced the damage of Ranged Squires: 15 => 10.
+	# Since there are a lot of enemies, I wanted to reduce the damage the player takes from stray
+	  projectiles.
+
+* Reduced the damage of Melee Squires: 20 => 15.
+	# 20 is way too much for how many there can be now, even if the player shouldn't really be taking
+	  hits from them.
+
+	> Bugfixes
+
+* The game no longer crashes if one of the player's projectiles hit an enemy the moment that it spawns.
+
+* Upgrades no longer occur more than once if the game is reset while they are in the pool.
+
+	# Technical
+
+* All enemies can now have the damage that they take printed to the screen as if they were test dummies. This
+  can be enabled via the "PrintDamageTaken" property under the Actor's "Debug" category.
+
+
 === Update 18 "Seeds of Doom!" ===
 
 	> General
@@ -6,7 +94,7 @@
 	
 * The Game Seed is now diplayed at the bottom of the player's HUD.
 	* Randomly generated seeds will be a sequence of numbers. If a word or phrase was input manually as the seed, 
-	  than that will be shown instead.
+	  then that will be shown instead.
 
 	> Upgrades
 

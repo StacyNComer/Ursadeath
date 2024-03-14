@@ -7,9 +7,10 @@
 
 AUDPlayerAttackProjectile::AUDPlayerAttackProjectile()
 {
-	//Initialize the sphere component and its overlap event.
+	//Initialize the sphere component. This collision starts disableed so that the projectile has time to be initialized.
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
 	SphereComponent->SetCollisionProfileName(PlayerAttackCollisionProfile);
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 }
@@ -34,4 +35,9 @@ void AUDPlayerAttackProjectile::NotifyActorBeginOverlap(AActor* OtherActor)
 void AUDPlayerAttackProjectile::NotifyOnProjectileHit(AActor* ActorHit)
 {
 	GetOwningPlayer()->NotifyOnPlayerProjectileHit(this, ActorHit);
+}
+
+void AUDPlayerAttackProjectile::FinalizeAttack()
+{
+	SphereComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }

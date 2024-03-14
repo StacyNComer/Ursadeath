@@ -130,7 +130,7 @@ class URSADEATH_API UUrsadeathGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 protected:
-	/** The name used to generate the game's random seed.*/
+	/** The name used to generate the game's random seed. If this is omitted, a seed will be randomly generated whenever the game starts or is reset.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		FName GameSeedName;
 
@@ -169,9 +169,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UDataTable* UpgradeDataTable;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
-		int32 MaxRewardOptions = 3;
-
 	/** Copied from the UpgradesInPlay whenever the game is set up.*/
 	TArray<FPlayerUpgradeData*> UpgradeRewardPool;
 
@@ -195,6 +192,9 @@ protected:
 
 	/** The current wave the player is fighting. This values does not get reset to 0 after the last wave in a round is completed (like CurrentRoundWave does) and instead continues to increment. Used to tell the game which wave to generate yet.*/
 	int AbsoluteWaveNumber;
+
+	/** If true, the game's seed was randomly generated and will be randomly generated again if the player diesd and restarts.*/
+	bool SeedWasRandomized = false;
 
 public:
 	/** The maximum different classes of Non-Squire tier enemy that should ever be in a single wave.*/
@@ -238,7 +238,7 @@ protected:
 	virtual void Init() override;
 
 	/** Sets the KnightTypeRewards that the player may choose from and updates their UI to show these options.*/
-	void PopulateRoundRewards();
+	void PopulateKnightRewards();
 
 	void PopulateUpgradeRewards();
 

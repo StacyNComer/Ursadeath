@@ -34,4 +34,7 @@ protected:
 	/** Called after the projectile hits something, enemy or otherwise.*/
 	virtual void NotifyOnProjectileHit(AActor* ActorHit);
 
+public:
+	virtual void FinalizeAttack() override;
+
 };

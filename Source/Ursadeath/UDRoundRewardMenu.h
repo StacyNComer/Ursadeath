@@ -147,4 +147,7 @@ public:
 
 	/** Returns the button that confirms the player's reward choice when pressed.*/
 	UButton* const GetConfirmButton();
+
+	/** Returns the naximum number of reward options that this widget is meant to have available at once.*/
+	int32 GetMaxRewardOptions();
 };

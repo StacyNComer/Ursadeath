@@ -132,7 +132,7 @@ void UUDRoundRewardMenu::SetRewardOptions(TArray<FRewardInfo> Rewards)
 		//Display a message prompting the player to select a reward.
 		PromptText->SetText(SelectionPromptMessage);
 
-		while (i < Rewards.Num())
+		while (i < Rewards.Num() && i < MaxRewardOptions)
 		{
 			//Get the Reward Option Entry that we will be setting.
 			FRewardOptionEntry RewardEntry = RewardOptionEntries[i];
@@ -198,6 +198,11 @@ void UUDRoundRewardMenu::UpdateRewardOptionSelected(UUDRoundRewardOptionWidget* 
 UButton* const UUDRoundRewardMenu::GetConfirmButton()
 {
 	return ConfirmRewardButton;
+}
+
+int32 UUDRoundRewardMenu::GetMaxRewardOptions()
+{
+	return MaxRewardOptions; 
 }
 
 #undef LOCTEXT_NAMESPACE

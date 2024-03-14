@@ -434,7 +434,7 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackCl
 		OnAttackSpawned.Broadcast(AttackSpawned);
 	}
 
-	AttackSpawned->OnAttackFinalized();
+	AttackSpawned->FinalizeAttack();
 }
 
 

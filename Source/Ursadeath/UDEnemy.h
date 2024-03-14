@@ -42,6 +42,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
 		bool bUndieable;
 
+#if WITH_EDITORONLY_DATA
+	/** If true, print any damage/stun that the enemy takes and their remaining health. Useful for if the damage/stun values of the player's attacks are acting funny.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
+		bool PrintDamageTaken;
+#endif
+
 	float EnemyCountWeight;
 
 protected:

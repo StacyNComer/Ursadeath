@@ -102,6 +102,7 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 		OnAttackRecieved.Broadcast(AttackData);
 	}
 
+
 	//If the attack deals damage, damage the enemy and play a hit sound.
 	if (AttackData->AttackStats.Damage > 0)
 	{
@@ -118,6 +119,16 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 		ApplyStun(AttackStunTime);
 	}
 
+#if WITH_EDITOR
+	//If PrintDamageTaken is enabled, print the damage/stun that an enemy has taken and their remaining health.
+	if (PrintDamageTaken)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Damage: ") + FString::SanitizeFloat(AttackData->AttackStats.Damage));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("StunTime: ") + FString::SanitizeFloat(AttackData->AttackStats.StunTime));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Remaining Health: ") + FString::SanitizeFloat(Health));
+	}
+#endif
+	
 	bool WasKilled = Health <= 0;
 
 	//Report that an enemy was hit to the attack's owning player.

@@ -42,15 +42,17 @@ void UUrsadeathGameInstance::Init()
 	GenerateRound(RoundNumber);
 }
 
-void UUrsadeathGameInstance::PopulateRoundRewards()
+void UUrsadeathGameInstance::PopulateKnightRewards()
 {
 	//Make sure the reward options are cleared out.
 	KnightRewardOptions.Empty();
 
 	TArray<FRewardInfo> KnightRewardInfo;
 
+	UUDRoundRewardMenu* KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
+
 	//Set the options for the Knight Type reward.
-	for (int i = 0; i < KnightRewardPool.Num() && i < MaxRewardOptions; i++)
+	for (int i = 0; i < KnightRewardPool.Num() && i < KnightRewardMenu->GetMaxRewardOptions(); i++)
 	{
 		FEnemySpawnData KnightRewardData = KnightRewardPool[i];
 
@@ -65,7 +67,7 @@ void UUrsadeathGameInstance::PopulateRoundRewards()
 	}
 
 	//Display the Knight Type Rewards to the player's UI.
-	PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu()->SetRewardOptions(KnightRewardInfo);
+	KnightRewardMenu->SetRewardOptions(KnightRewardInfo);
 }
 
 void UUrsadeathGameInstance::PopulateUpgradeRewards()
@@ -74,7 +76,9 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 
 	TArray<FRewardInfo> UpgradeRewardInfo;
 
-	for (int i = 0; i < UpgradeRewardPool.Num() && i < MaxRewardOptions; i++)
+	UUDRoundRewardMenu* UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
+
+	for (int i = 0; i < UpgradeRewardPool.Num() && i < UpgradeRewardMenu->GetMaxRewardOptions(); i++)
 	{
 		FPlayerUpgradeData* UpgradeReward = UpgradeRewardPool[i];
 		UpgradeRewardOptions.Add(UpgradeReward);
@@ -87,7 +91,7 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 		UpgradeRewardInfo.Add(UpgradeInfo);
 	}
 
-	PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu()->SetRewardOptions(UpgradeRewardInfo);
+	UpgradeRewardMenu->SetRewardOptions(UpgradeRewardInfo);
 }
 
 void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
@@ -258,7 +262,7 @@ void UUrsadeathGameInstance::ProcessEndWave()
 	{
 		RoundWaveNumber = 0;
 
-		PopulateRoundRewards();
+		PopulateKnightRewards();
 
 		PopulateUpgradeRewards();
 
@@ -302,6 +306,9 @@ void UUrsadeathGameInstance::ResetGame()
 
 	//Reset the Knight spawn pool.
 	KnightSpawnPool.Empty();
+
+	//Reset the Upgrade pool
+	UpgradeRewardPool.Empty();
 
 	SetupGame();
 
@@ -381,19 +388,24 @@ void UUrsadeathGameInstance::AddUpgradeReward()
 
 void UUrsadeathGameInstance::SetupGame()
 {
-	//Initialize the game's random seed.
-	if (GameSeedName == "")
+	//Initialize the game's random seed unless a seed was already input.
+	if (GameSeedName == "" || SeedWasRandomized == true)
 	{
+		//Randomly generate the game's seed.
 		RandomStream.GenerateNewSeed();
 
+		//Set the displayed seed name to the randomly generated seed.
 		GameSeedName = FName(FString::FromInt(RandomStream.GetCurrentSeed()));
+
+		//Tell the game that the given seed was randomly generated. This causes a new random seed to be generated if the game is reset from the player dying.
+		SeedWasRandomized = true;
 	}
 	else
 	{
+		//Initialize the game seed with the seed input by the player.
 		RandomStream.Initialize(GameSeedName);
 	}
 	
-
 	//Get the spawn data from the data table.
 	TArray<FEnemySpawnData*> KnightSpawnData;
 	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
@@ -441,7 +453,7 @@ void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 
 	UpdateRoundScreen();
 
-	PopulateRoundRewards();
+	PopulateKnightRewards();
 
 	PopulateUpgradeRewards();
 

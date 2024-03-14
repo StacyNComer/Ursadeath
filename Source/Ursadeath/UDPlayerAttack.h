@@ -43,11 +43,16 @@ class URSADEATH_API AUDPlayerAttack : public AActor
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttackFinalizedSignature, AUDPlayerAttack*, AttackActor);
+
 private:
 	/** The player chracter that spawned this attack. This value is not set until it is needed the for first time: To get this value safely, use GetOwningPlayer()*/
 	TObjectPtr<AUDPlayerCharacter> OwningPlayer;
 
 protected:
+	UPROPERTY(BlueprintAssignable)
+		FOnAttackFinalizedSignature OnAttackFinalized;
+
 	/** The name of the collision profile used for player attacks.*/
 	const char* PlayerAttackCollisionProfile = "PlayerAttack";
 
@@ -72,7 +77,7 @@ public:
 	AUDPlayerAttack();
 
 protected:
-	// Called when the game starts or when spawned
+	// Called when the game starts or when spawned. If an attack need to perform casts upon spawning (e.g. for an explosion or hitscan attack), FinalizeAttack should be used instead.
 	virtual void BeginPlay() override;
 
 	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain. 
@@ -86,11 +91,14 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
 
+	/** Called after any post spawn modifications to an attack (such as from upgrades) are applied. If an attack needs to perfom any collision checks a effect enemies (e.g. a hitscan attack), the check should be performed with this function instead of Begin Play.*/
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnAttackFinalized"))
+		void RecieveFinalizeAttack();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/** If the attack is hitscan or should otherwise performs collision casts upon spawning, it should perform them with this event instead of Begin Play. This event called after the spawning player has completed any post-spawn modifications to the attack (i.e. from upgrades).*/
-	UFUNCTION(BlueprintImplementableEvent)
-		void OnAttackFinalized();
+	/** If the attack is hitscan or should otherwise performs collision casts upon spawning (like from an explosion), it should perform them with this event instead of Begin Play. This event called by the spawning player after they have completed any post-spawn modifications to the attack (i.e. from upgrades).*/
+	virtual void FinalizeAttack();
 };

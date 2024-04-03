@@ -106,8 +106,6 @@ void AUDPlayerCharacter::BeginPlay()
 	RoundScreenWidget->AddToViewport();
 	//The round screen should be closed by default.
 	RoundScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
-	//When the player starts the round from the round menu, the round menu should close.
-	RoundScreenWidget->GetRoundStartButton()->OnClicked.AddDynamic(this, &AUDPlayerCharacter::ToggleRoundMenu);
 
 	//Create the game over widget.
 	GameOverWidget = CreateWidget<UUDGameOverWidget>(UDPlayerController, GameOverWidgetClass);

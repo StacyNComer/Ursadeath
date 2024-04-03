@@ -338,6 +338,9 @@ public:
 
 	void NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit);
 
+	/** Swaps whether the round menu is on or off. */
+	void ToggleRoundMenu();
+
 protected:
 	///////////////////////////////////////////////////////////////////////// Input Functions
 	/** Called for movement input */
@@ -345,11 +348,6 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
-	/** Swaps whether the round menu is on or off. 
-	* This is a UFUNCTION so that it may be bound to the Round Screen's round start button.*/
-	UFUNCTION()
-		void ToggleRoundMenu();
 
 	/** Uses the primary fire ability. Used for Input.*/
 	void UsePrimaryAbility();

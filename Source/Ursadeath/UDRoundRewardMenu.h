@@ -43,12 +43,16 @@ struct FRewardOptionEntry
 };
 
 /**
- * 
+ * The base class for menus for choosing rewards and displaying already chosen rewards.
  */
 UCLASS(Abstract)
 class URSADEATH_API UUDRoundRewardMenu : public UUserWidget
 {
 	GENERATED_BODY()
+
+private:
+	/** True if the menu has reward options to be chosen and the player has yet to choose one.*/
+	bool bMenuActive;
 
 protected:
 	/** The class that this menu's description sources will be created as.*/
@@ -150,4 +154,7 @@ public:
 
 	/** Returns the naximum number of reward options that this widget is meant to have available at once.*/
 	int32 GetMaxRewardOptions();
+
+	/** Returns true if the menu has at least one reward option to choose from and the player has yet to choose one.*/
+	bool GetMenuActive();
 };

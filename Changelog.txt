@@ -1,3 +1,16 @@
+=== Update 20 "Veinte of Doom!" ===
+
+	> General
+
+* The Round Menu's "Start Button" now changes its text when disabled based on why the round cannot
+   be started. For instance, it says "Round In Progress" if the current round has yet to be
+   completed.
+
+* There is now a confirmation message when the player attempts to start a round without an
+  upgrade choosen. If a particularly bold player wishes to simply not have upgrades, there
+  is a checkbox to stop showing the warning. 
+
+
 === Update 19 "Big Waves of Doom!" ===
 
 	> General

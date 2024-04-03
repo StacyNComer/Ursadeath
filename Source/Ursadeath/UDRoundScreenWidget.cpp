@@ -8,10 +8,16 @@
 #include "UDWaveEntryWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/CheckBox.h"
+#include "UDPlayerCharacter.h"
+
+#define LOCTEXT_NAMESPACE "PlayerHUD"
 
 void UUDRoundScreenWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	OwningPlayer = GetOwningPlayerPawn<AUDPlayerCharacter>();
 
 	SetIsFocusable(true);
 
@@ -38,7 +44,13 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	}
 
 	//Bind the round Start Button.
-	RoundStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::OnRoundStartPressed);
+	RoundStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::TryRoundStart);
+
+	//Bind the round start confirmation button.
+	ConfirmStartButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::ConfirmRoundStart);
+
+	//Bind the Start COnfirmation Menu's back button
+	ConfirmBackButton->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::CloseStartConfirmationMenu);
 
 	//Bind the confirm button for knight rewards so that it adds the chosen enemy type.
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddKnightReward);
@@ -50,11 +62,40 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::EnableRoundStart);
 }
 
-void UUDRoundScreenWidget::OnRoundStartPressed()
+bool UUDRoundScreenWidget::GetHideConfirmationMenu()
+{
+	//If the hide confirmation checkbox was checked, the confirmation menu should not be shown until the game is reset.
+	return HideConfirmationCheckbox->IsChecked();
+}
+
+void UUDRoundScreenWidget::ConfirmRoundStart()
 {
 	RoundStartButton->SetIsEnabled(false);
+
+	OwningPlayer->ToggleRoundMenu();
+
+	StartConfirmationWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
+	StartButtonText->SetText(LOCTEXT("StartButtonRoundInProgress", "Round In Progress"));
+
 	UrsadeathGameInstance->StartRound();
+}
+
+void UUDRoundScreenWidget::TryRoundStart()
+{
+	if (!GetHideConfirmationMenu() && UpgradeRewardMenu->GetMenuActive())
+	{
+		StartConfirmationWidget->SetVisibility(ESlateVisibility::Visible);
+		
+		return;
+	}
+
+	ConfirmRoundStart();
+}
+
+void UUDRoundScreenWidget::CloseStartConfirmationMenu()
+{
+	StartConfirmationWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UUDRoundScreenWidget::SetDescriptionText(FUIDescription Description)
@@ -98,11 +139,18 @@ void UUDRoundScreenWidget::DisplayRound(int RoundNumber, TArray<FEnemyWave> Roun
 void UUDRoundScreenWidget::EnableRoundStart()
 {
 	RoundStartButton->SetIsEnabled(true);
+
+	StartButtonText->SetText(LOCTEXT("StartButtonCanStartRound", "Start Round"));
 }
 
 UButton* const UUDRoundScreenWidget::GetRoundStartButton()
 {
 	return RoundStartButton;
+}
+
+UTextBlock* const UUDRoundScreenWidget::GetStartButtonText()
+{
+	return StartButtonText;
 }
 
 UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu()
@@ -125,3 +173,5 @@ void UUDRoundScreenWidget::SetDefaultDescription()
 	SetDescriptionText(DefaultDescription);
 }
 
+
+#undef LOCTEXT_NAMESPACE

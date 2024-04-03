@@ -53,6 +53,8 @@ void UUDRoundRewardMenu::ConfirmReward()
 {
 	ConfirmRewardButton->SetIsEnabled(false);
 
+	bMenuActive = false;
+
 	//Prevent the reward options from being selected now that they are accepted.
 	SetRewardOptionsEnabled(false);
 
@@ -129,8 +131,13 @@ void UUDRoundRewardMenu::SetRewardOptions(TArray<FRewardInfo> Rewards)
 	//If there are rewards to be displayed, iterate through them and display them to the reward option entries. Otherwise, tell the player that there are no rewards!
 	if (Rewards.Num() > 0)
 	{
+		bMenuActive = true;
+
 		//Display a message prompting the player to select a reward.
 		PromptText->SetText(SelectionPromptMessage);
+
+		//Make sure the reward options are "enabled" so that the player can actually select them.
+		SetRewardOptionsEnabled(true);
 
 		while (i < Rewards.Num() && i < MaxRewardOptions)
 		{
@@ -167,9 +174,6 @@ void UUDRoundRewardMenu::SetRewardOptions(TArray<FRewardInfo> Rewards)
 
 		i++;
 	}
-
-	//Make sure the reward options are "enabled" so that the player can actually select them.
-	SetRewardOptionsEnabled(true);
 }
 
 void UUDRoundRewardMenu::UpdateRewardOptionSelected(UUDRoundRewardOptionWidget* RewardOption)
@@ -203,6 +207,11 @@ UButton* const UUDRoundRewardMenu::GetConfirmButton()
 int32 UUDRoundRewardMenu::GetMaxRewardOptions()
 {
 	return MaxRewardOptions; 
+}
+
+bool UUDRoundRewardMenu::GetMenuActive()
+{
+	return bMenuActive;
 }
 
 #undef LOCTEXT_NAMESPACE

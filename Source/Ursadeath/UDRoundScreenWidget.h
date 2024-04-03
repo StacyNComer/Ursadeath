@@ -7,11 +7,13 @@
 #include "UDUIDescriptionReceiver.h"
 #include "UDRoundScreenWidget.generated.h"
 
+class AUDPlayerCharacter;
 class UUDWaveEntryWidget;
 class UUrsadeathGameInstance;
 class UUDRoundRewardMenu;
 class UButton;
 class UTextBlock;
+class UCheckBox;
 struct FEnemyWave;
 
 /**
@@ -29,6 +31,9 @@ private:
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
+		TObjectPtr<AUDPlayerCharacter> OwningPlayer;
+
+	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 	/** The subclass used for the Round Display's wave entry.*/
@@ -39,10 +44,26 @@ protected:
 		TObjectPtr<UButton> RoundStartButton;
 
 	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
+		TObjectPtr<UTextBlock> StartButtonText;
+
+	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionTitleUI;
 	
 	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionBodyUI;
+
+	/** The root widget for the Round Start Confirmation screen that appears when the player tries to start a round without an upgrade chosen.*/
+	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
+		TObjectPtr<UWidget> StartConfirmationWidget;
+
+	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
+		TObjectPtr<UButton> ConfirmStartButton;
+
+	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
+		TObjectPtr<UButton> ConfirmBackButton;
+
+	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
+		TObjectPtr<UCheckBox> HideConfirmationCheckbox;
 
 	/** The description shown when a description source for this UI is no longer being moused over.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = DescriptionUI)
@@ -59,8 +80,17 @@ protected:
 	TArray<TObjectPtr<UUDWaveEntryWidget>> WaveEntries;
 
 private:
+	/** Tells the game to start the next round, ignoring anything that would normally trigger a confirmation message.*/
 	UFUNCTION()
-		void OnRoundStartPressed();
+		void ConfirmRoundStart();
+
+	/** Starts the next round of the game. If the player has not selected an upgrade (and there was an upgrade to be selected), a confirmation message is shown instead.*/
+	UFUNCTION()
+		void TryRoundStart();
+
+	/** Hides the Start Confirmation Menu. Meant to be bound to the confirmation menu's back button.*/
+	UFUNCTION()
+		void CloseStartConfirmationMenu();
 
 	/** Sets the round's description text. Used by the Description Reciever interface.*/
 	void SetDescriptionText(FUIDescription Description);
@@ -70,6 +100,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = RoundDisplay)
 		void SetRoundNumber(int RoundNumber);
 
+	/** Returns true if the menu should show a confirmation message when the player attempts to start a round without an upgrade chosen.*/
+	bool GetHideConfirmationMenu();
+
 	virtual void NativeOnInitialized() override;
 
 public:
@@ -77,11 +110,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = RoundDisplay)
 		void DisplayRound(int RoundNumber, TArray<FEnemyWave> RoundWaves);
 
-	/** Allow the player to start the round by enabling the round button. Used for delegates.*/
+	/** Allow the player to start the round by enabling the round button. The button's text is also changed to "Start Round"*/
 	UFUNCTION()
 		void EnableRoundStart();
 
 	UButton* const GetRoundStartButton();
+
+	UTextBlock* const GetStartButtonText();
 
 	/** Returns the "reward" menus for view or adding Knight enemy types in play.*/
 	UUDRoundRewardMenu* const GetKnightRewardMenu();

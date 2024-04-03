@@ -272,10 +272,14 @@ void UUrsadeathGameInstance::ProcessEndWave()
 			RoundNumber++;
 			GenerateRound(RoundNumber);
 
-			//If there are no KnightRewards to cho
+			//If there are no KnightRewards to choose from, enable the Round Start Button (Normally the button is disabled until the player selects a new Knight for that round). Otherwise, set the start button text to tell the player to select an enemy type.
 			if (KnightRewardOptions.Num() == 0)
 			{
 				PlayerCharacter->GetRoundScreenWidget()->EnableRoundStart();
+			}
+			else
+			{
+				PlayerCharacter->GetRoundScreenWidget()->GetStartButtonText()->SetText(LOCTEXT("StartButtonChooseEnemy", "You must choose a foe!"));
 			}
 
 			UpdateRoundScreen();
@@ -287,6 +291,8 @@ void UUrsadeathGameInstance::ProcessEndWave()
 		{
 			//If there are no more rounds and the player has completed the demo, congratulate them!
 			PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("GameCompleteAnnouncement", "That's all Folks! Thanks for playing!"), 0);
+
+			PlayerCharacter->GetRoundScreenWidget()->GetStartButtonText()->SetText(LOCTEXT("StartButtonGameComplete", "They are all defeated!"));
 		}
 
 		//Restore the player to full health when they complete a round.

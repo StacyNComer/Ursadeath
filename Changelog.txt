@@ -1,3 +1,21 @@
+
+=== Update 21 "Arena of Doom!" ===
+
+	> General
+
+* Increased the size of health pickups by 25%. They also now float 5 units higher off the ground.
+
+* Health Pickups now have a progress icon below them while respawning.
+
+	> Bugfixes
+
+* Moved old arena BSP to a separate level and deleted it from the main level.
+
+* Deleted the "Dummy" enemies which were below the arena.
+
+* The spinning heart within health pickups no longer have collision.
+
+
 === Update 20 "Veinte of Doom!" ===
 
 	> General

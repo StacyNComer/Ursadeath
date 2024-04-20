@@ -19,7 +19,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float Cooldown;
 
-	/** The amount of seconds remaining before the pickup may be used by the player again*/
+	/** The amount of seconds remaining before the pickup may be used by the player again. This should be set via the SetCooldownTracker method.*/
 	UPROPERTY(BlueprintReadOnly)
 		float CooldownTracker;
 
@@ -35,6 +35,20 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/*Called when the player collects the pickup. The pickup is collected with the player's melee attack.*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnPickupUsed();
+
+	/*Called when the pickup is respawned. Note the pickups are not destroyed when used; Instead they are meant to become invisible and intangable until respawning.*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnPickupRespawned();
+
+	/* Called whenever the pickup's cooldowntracker is set.*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void OnCooldownTick(float CooldownMax, float CooldownRemaining);
+
+	/*Sets the cooldown tracker to the given value and calls OnCooldownTicked to update the game's visuals.*/
+		void SetCooldownTracker(float value);
 
 public:
 	/** Causes the pickup to be used by the given player. The pickup then becomes intangable and invisible until its cooldown is expires.*/

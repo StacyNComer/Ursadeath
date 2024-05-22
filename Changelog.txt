@@ -1,4 +1,42 @@
 
+=== Update 22 "Storm of Doom!" ===
+
+	> General
+
+* Any unchosen upgrades are now shuffled to the end of the upgrade pool at the end of the round.
+	* Basically, you won't see upgrades you have had the option of choosing until every
+	   upgrade has been an option.
+	# While this will make it harder a achieve specific builds unless the player is lucky,
+	  I hope this will encourage the player to learn a variety of builds and strategies even
+	  after a winning combo is found. This change will be most noticable when there are more
+	  upgrades and rounds.
+
+* Added the ThunderBomb upgrade (known in game as "Thunderstorm"). Causes lightning to strike all
+  enemies within 700 units of the player whenever they fire a rocket, dealing the rocket's
+  explosion damage to them (1500).
+	* The thunder "blast" counts as a separate attack from the rocket and its explosion,
+	   meaning that a brave player can attempt to "stack" the two by firing at an enemy
+	   close to them, at the cost of damaging themselves.
+
+* The explosion from the Blood Claw upgrade no longer grants energy.
+	# This ability did everything you could ever want it to while costing no energy. Now
+	   it has at least a small tradeoff
+
+* Legionnaire Archers being stunned no longer causes them to take damage.
+	# This will make it harder to stun large swathes of enemies, kill half of them, and
+	  escape with enough energy to do it again.
+
+	> Bugfixes
+
+* Health pickups no longer block the Vigilant's laser attack.
+
+* The lava walls now correctly block the Vigilant's laser attack.
+
+* The Viligant's laser attack no longer appears extra short if the player blocks it before moving
+  away and now correctly lengthens until a wall is hit when the player is no longer in front of
+  the laser.
+
+
 === Update 21 "Arena of Doom!" ===
 
 	> General

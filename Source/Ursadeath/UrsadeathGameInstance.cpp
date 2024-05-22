@@ -78,7 +78,23 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 
 	UUDRoundRewardMenu* UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
 
-	for (int i = 0; i < UpgradeRewardPool.Num() && i < UpgradeRewardMenu->GetMaxRewardOptions(); i++)
+	//Take upgrades from the beginning of the UpgradeRewardPool until either the pool is exhausted or the UpgradeMenu's max rewards is reached.
+	while (UpgradeRewardPool.Num() > 0 && UpgradeRewardOptions.Num() < UpgradeRewardMenu->GetMaxRewardOptions())
+	{
+		FPlayerUpgradeData* UpgradeReward = UpgradeRewardPool[0];
+		UpgradeRewardOptions.Add(UpgradeReward);
+
+		//Create and set the struct for displaying the upgrade's icon, name, and description.
+		FRewardInfo UpgradeInfo;
+		UpgradeInfo.RewardDescription = UpgradeReward->Description;
+		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
+
+		UpgradeRewardInfo.Add(UpgradeInfo);
+
+		UpgradeRewardPool.Remove(UpgradeReward);
+	}
+
+	/*for (int i = 0; i < UpgradeRewardPool.Num() && i < UpgradeRewardMenu->GetMaxRewardOptions(); i++)
 	{
 		FPlayerUpgradeData* UpgradeReward = UpgradeRewardPool[i];
 		UpgradeRewardOptions.Add(UpgradeReward);
@@ -89,9 +105,27 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
 
 		UpgradeRewardInfo.Add(UpgradeInfo);
-	}
+	}*/
 
 	UpgradeRewardMenu->SetRewardOptions(UpgradeRewardInfo);
+}
+
+template<class T>
+void UUrsadeathGameInstance::DiscardIntoPool(TArray<T>& PoolArray, TArray<T>& SourceArray)
+{
+	while (SourceArray.Num() > 0)
+	{
+		//Get a random index from the source array.
+		int index = RandomStream.RandRange(0, SourceArray.Num() - 1);
+		//The get element at the randomly chosen index.
+		auto element = SourceArray[index];
+
+		//Append the element at the end of the pool array (it is assumed that the element was removed from the pool before being added to the source).
+		PoolArray.Add(element);
+
+		//Remove the element from the source array.
+		SourceArray.Remove(element);
+	}
 }
 
 void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
@@ -262,8 +296,12 @@ void UUrsadeathGameInstance::ProcessEndWave()
 	{
 		RoundWaveNumber = 0;
 
-		PopulateKnightRewards();
+		//Discard the unchosen reward options back into their pools.
+		//DiscardIntoPool(KnightRewardPool, KnightRewardOptions);
+		DiscardIntoPool(UpgradeRewardPool, UpgradeRewardOptions);
 
+		//Populate the rewards.
+		PopulateKnightRewards();
 		PopulateUpgradeRewards();
 
 		//Generate the game's next round, if one exists. The game will wait for StartRound() to be called before spawning anything.
@@ -345,10 +383,11 @@ int UUrsadeathGameInstance::GetAbsoluteWave()
 template<class T>
 void UUrsadeathGameInstance::ShuffleArray(TArray<T> &Array)
 {
-	int NumShuffles = Array.Num() - 1;
-	for (int i = 0; i < NumShuffles; i++)
+	//Iterate through each index, swapping its element with that of another random index. I.e. A Fisher-Yates shuffle.
+	int NumSwaps = Array.Num() - 1;
+	for (int i = 0; i < NumSwaps; i++)
 	{
-		int SwapIndex = RandomStream.RandRange(i, NumShuffles);
+		int SwapIndex = RandomStream.RandRange(i, NumSwaps);
 		Array.Swap(i, SwapIndex);
 	}
 }
@@ -389,7 +428,7 @@ void UUrsadeathGameInstance::AddUpgradeReward()
 
 	UUDPlayerUpgrade::CreatePlayerUpgrade(UpgradeData->UpgradeClass, PlayerCharacter);
 
-	UpgradeRewardPool.Remove(UpgradeData);
+	UpgradeRewardOptions.Remove(UpgradeData);
 }
 
 void UUrsadeathGameInstance::SetupGame()

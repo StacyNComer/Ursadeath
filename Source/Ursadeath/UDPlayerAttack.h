@@ -83,13 +83,13 @@ protected:
 	/** Creates AttackData from this the given Attack stats struct and applies the attack to the enemy. When an enemy is attacked, the player owning the attack also gains the attacks EnergyGain. 
 	* Returns true if the attack killed the enemy.*/
 	UFUNCTION(BlueprintCallable)
-		void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+		void ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct, float EnergyGainScale = 1);
 
 	/** Applies the attack to the given enemy, but only if the PlayerAttack has never called this method on the enemy.  
 	
 	* Note that enemies are excluded even if this method was previously called with a different AttackStats struct.*/
 	UFUNCTION(BlueprintCallable)
-	void ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct);
+	void ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct, float EnergyGainScale = 1);
 
 	/** Called after any post spawn modifications to an attack (such as from upgrades) are applied. If an attack needs to perfom any collision checks a effect enemies (e.g. a hitscan attack), the check should be performed with this function instead of Begin Play.*/
 	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnAttackFinalized"))

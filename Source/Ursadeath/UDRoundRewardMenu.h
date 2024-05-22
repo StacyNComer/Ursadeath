@@ -14,6 +14,9 @@ class UUDRoundRewardOptionWidget;
 class UUDDescriptionSourceWidget;
 class IUDUIDescriptionReceiver;
 
+/**
+* A struct for holding the icon, title, and descrtiption of the rewards to be displayed in the menu. 
+*/
 USTRUCT(BlueprintType)
 struct FRewardInfo
 {

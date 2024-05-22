@@ -26,7 +26,7 @@ void AUDPlayerAttack::Tick(float DeltaTime)
 
 }
 
-void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct)
+void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct, float EnergyGainScale)
 {
 	UUDPlayerAttackData* AttackData = UUDPlayerAttackData::CreatePlayerAttackData(AttackStatsStruct);
 
@@ -35,16 +35,16 @@ void AUDPlayerAttack::ApplyAttackToEnemy(AUDEnemy* Enemy, const FPlayerAttackSta
 	//Tell UE to delete the AttackData now that we are done with it.
 	AttackData->ConditionalBeginDestroy();
 
-	GetOwningPlayer()->AddEnergy(EnergyGain);
+	GetOwningPlayer()->AddEnergy(EnergyGain * EnergyGainScale);
 }
 
-void AUDPlayerAttack::ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct)
+void AUDPlayerAttack::ApplyAttackExclusive(AUDEnemy* Enemy, const FPlayerAttackStats AttackStatsStruct, float EnergyGainScale)
 {
 	if (!EnemiesHit.Contains(Enemy))
 	{
 		EnemiesHit.Add(Enemy);
 
-		ApplyAttackToEnemy(Enemy, AttackStatsStruct);
+		ApplyAttackToEnemy(Enemy, AttackStatsStruct, EnergyGainScale);
 	}
 }
 

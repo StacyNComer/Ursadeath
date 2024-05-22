@@ -236,6 +236,12 @@ protected:
 		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType);
 
 	virtual void Init() override;
+	
+	/** Append the elements of the source array to the Pool array in a random order, leaving the source array emptied. Used to discard reward options such that they do not reappear until every reward has been an option for the player.
+	* If SourceArray is empty, nothing should happen.
+	*/
+	template<class T>
+	void DiscardIntoPool(TArray<T>& PoolArray, TArray<T>& SourceArray);
 
 	/** Sets the KnightTypeRewards that the player may choose from and updates their UI to show these options.*/
 	void PopulateKnightRewards();

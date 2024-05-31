@@ -11,6 +11,8 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "GameFramework/FloatingPawnMovement.h"
+
 
 // Sets default values
 AUDEnemy::AUDEnemy()
@@ -34,19 +36,45 @@ AUDEnemy::AUDEnemy()
 	//Create the stun particle system component.
 	StunParticleComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("StunParticles"));
 	StunParticleComponent->SetupAttachment(SceneRoot);
-	
 	//Set the enemy stun particle system to its default value.
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> StunParticleSystemFinder(TEXT("/Game/Ursadeath/Enemies/Core/ParticleFX/NS_EnemyStun"));
 	StunParticleComponent->SetAsset(StunParticleSystemFinder.Object);
-
 	//Set the stun particles to start deactivated.
 	StunParticleComponent->bAutoActivate = false;
+
+	//Create the slow particle system component.
+	SlowParticleComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("SlowParticles"));
+	SlowParticleComponent->SetupAttachment(SceneRoot);
+	//Set the enemy slow particle system to its default value.
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> SlowParticleSystemFinder(TEXT("/Game/Ursadeath/Enemies/Core/ParticleFX/NS_EnemySlow"));
+	SlowParticleComponent->SetAsset(SlowParticleSystemFinder.Object);
+	//Set the slow particles to start deactivated.
+	SlowParticleComponent->bAutoActivate = false;
+
+	SlowedSpeedScalar = 0.6f;
 }
 
 // Called when the game starts or when spawned
 void AUDEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//Cache the pawn's floating movement component if it has one.
+	//Since the base pawn movement component cannot have its max speed change (at least as far as I know) we simply assume that any enemy that can move has a floating pawn movement component.
+	if (GetMovementComponent())
+	{
+		FloatingPawnMovement = Cast<UFloatingPawnMovement>(GetMovementComponent());
+		
+		if (!FloatingPawnMovement)
+		{
+			//Print a message incase a different movement component is eventually used. 	
+			//TODO: Remove this message and perhaps edit the code when all of the movement components being used are finalized.
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("This pawn has a movement component other than the Floating Pawn Movement. Tell Stacy so that he can adjust the source code for this. The enemy should work fine, except it can't recieve the 'Slow' effect."));
+			}
+		}
+	}
 
 	//Set the default size for the stun particles.
 	StunParticleComponent->SetFloatParameter(TEXT("User.SpawnRadius"), StunParticleRadius);
@@ -90,6 +118,21 @@ void AUDEnemy::Tick(float DeltaTime)
 			//Turn off the stun particle FX.
 			StunParticleComponent->Deactivate();
 
+		}
+	}
+
+	//Decrement the enemy's slow time.
+	if (IsSlowed())
+	{
+		SlowTime -= DeltaTime;
+
+		//The enemy's speed returns to normal once the slow time is depleted.
+		if (SlowTime <= 0)
+		{
+			FloatingPawnMovement->MaxSpeed /= SlowedSpeedScalar;
+
+			//Turn off the slow particle FX.
+			SlowParticleComponent->Deactivate();
 		}
 	}
 }
@@ -144,12 +187,41 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	}
 }
 
-bool AUDEnemy::IsStunned()
+const bool AUDEnemy::IsStunned()
 {
 	return StunTime > 0;
 }
 
-float AUDEnemy::GetSpawnTime()
+void AUDEnemy::ApplySlow(float TimeSlowed)
+{
+	//The enemy can only be slowed for now if it has a floating pawn movement component. This value is obtained in Begin Play.
+	if (FloatingPawnMovement)
+	{
+		//Slow the enemy's movement for the given time. If the enemy is already slowed, it's remaining time slowed is still set to Time Slowed if it is higher than the remaining time.
+		if (!IsSlowed())
+		{
+			//Set how long the enemy should be slowed for.
+			SlowTime = TimeSlowed;
+
+			//Slow the enemy's movement
+			FloatingPawnMovement->MaxSpeed *= SlowedSpeedScalar;
+
+			SlowParticleComponent->Activate();
+
+		}
+		else if (TimeSlowed > SlowTime)
+		{
+			SlowTime = TimeSlowed;
+		}
+	}
+}
+
+const bool AUDEnemy::IsSlowed()
+{
+	return SlowTime > 0;
+}
+
+const float AUDEnemy::GetSpawnTime()
 {
 	return SpawnTime;
 }

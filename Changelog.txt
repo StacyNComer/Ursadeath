@@ -1,4 +1,17 @@
 
+=== Update 23 "Claw of Doom!" ===
+
+	> General
+
+* The Blood Claw upgrade now has a new and fancy particle effect and icon.
+
+* Enemies other than the Gladiator can now be slowed via the Apply Slow function.
+
+* Reworked the "Tyranny" upgrade to instead slow enemies for 16 seconds.
+	* The slow effect (which lasts 4 seconds) starts at the same time as the stun effect, 
+	   so enemies will be slowed for 12 seconds after the stun ends and they can move.
+ 
+
 === Update 22 "Storm of Doom!" ===
 
 	> General

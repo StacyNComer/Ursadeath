@@ -14,6 +14,7 @@ class AUDEnemy;
 class AUDPlayerCharacter;
 class UNiagaraComponent;
 class USoundBase;
+class UFloatingPawnMovement;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -58,6 +59,9 @@ protected:
 		TObjectPtr<UNiagaraComponent> StunParticleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<UNiagaraComponent> SlowParticleComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
 		TObjectPtr<USoundBase> DamageSound;
 
 	/** The spawn radius of the stun particle effect. 
@@ -81,6 +85,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = Status)
 		float StunTime;
 
+	/** The remaining seconds an enemy has untile they are no longer slowed. An enemy is considered to be slowed while this is > 0*/
+	UPROPERTY(BlueprintReadOnly, Category = Status)
+		float SlowTime;
+
+	/** The scalar applied to the enemy's movement speed while they are slowed
+	    Not that slowing will not function properly if this value is 0.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float SlowedSpeedScalar;
+
 	/** Controls the altered appearence enemies have while "spawning in".*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Spawning)
 		TObjectPtr<UMaterialInterface> SpawningMaterial;
@@ -95,6 +108,9 @@ protected:
 private:
 	/** Stores this enemy's meshes for altering their materials when they spawn or finish spawning.*/
 	TInlineComponentArray<UMeshComponent*> EnemyMeshes;
+
+	/** Holds the enemy's floating movement component, if it has one.*/
+	UFloatingPawnMovement* FloatingPawnMovement;
 
 public:
 	// Sets default values for this pawn's properties.
@@ -113,16 +129,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category=Status)
 		void ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource);
 
-	/** Returns true if the enemy is currently stunned*/
+	/** Returns true if the enemy is currently stunned.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Status)
-		bool IsStunned();
+		const bool IsStunned();
+
+	/** Slow the enemy's movement speed by the enemy's Slow Speed Scalar for the given amount of time. 
+	If the enemy is already slowed, then it's remaining time slowed is set to the given time if the given time is longer than the remaining slow time.*/
+	UFUNCTION(BlueprintCallable, Category = Status)
+		void ApplySlow(float Time);
+
+	/** Returns true if the enemy is currently slowed.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = Status)
+		const bool IsSlowed();
 
 	/** Returns the enemy's tier. Squires are "fodder" enemies, */
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		EEnemyTier GetEnemyTier();
 
 	/** Returns the amount of time this enemy should spend "spawning in"*/
-	float GetSpawnTime();
+	const float GetSpawnTime();
 
 	/** Sets the enemy tier. This should be used when an enemy first spawns.*/
 	void SetEnemyTier(EEnemyTier Tier);

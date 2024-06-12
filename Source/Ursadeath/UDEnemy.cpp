@@ -112,12 +112,11 @@ void AUDEnemy::Tick(float DeltaTime)
 
 		//The enemy's AI resumes once their stun time reaches 0.
 		if (StunTime <= 0)
-		{
+		{ 
 			EnemyController->ResumeAI();
 
 			//Turn off the stun particle FX.
 			StunParticleComponent->Deactivate();
-
 		}
 	}
 

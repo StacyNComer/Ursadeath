@@ -1,4 +1,33 @@
 
+=== Update 24 "Laser Fist of Doom!" ===
+
+* Added the "Flick of a Wrist" upgrade (named "MeleeBeamUpgrade" in the code). This upgrade
+  makes it so that after the player uses a Shockwave, their next melee attack fires as a
+  laser, deals 30% more damage (910), and stuns for 8 seconds. The laser pierces walls but 
+  not enemies.
+	* To help with the "feel" of this upgrade, firing a Shockwave also resets the
+	   0.5s cooldown that the melee attack normally has.
+	* This upgrade stacks with Blood Claw in a few of interesting ways: 
+		* It allows Blood Claw's explosion to be spawned at a distant enemy.
+		* It stacks with Blood Claw's damage increase, resulting in x2.6 (1820)
+		  damage.
+		* It stacks with Blood Claw's stun, resulting in a total stun time of
+		   9 seconds.
+
+* Tweaked the "Blood Claw" upgrade:
+	* The explosion now only spawns when an enemy is hit.
+	* The explosion is now centered on the enemy hit instead of the player.
+
+* Removed the "Tyranny" upgrade.
+
+* Increased the self damage of the player's rockets: 20 => 30.
+
+	> Bugfixes
+
+* The attack spawned by the "Thunderstorm" upgrade no longer causes errors when the player
+  has upgrades that test for a certain type of attack.
+
+
 === Update 23 "Claw of Doom!" ===
 
 	> General

@@ -32,6 +32,7 @@ protected:
 
 public:
 	/** Force the ability to be on cooldown for the set amount of time. Note that this will override whatever the ability's remaining cooldown currently is.*/
+	UFUNCTION(BlueprintCallable)
 	void ForceCooldown(float CooldownTime);
 
 public:

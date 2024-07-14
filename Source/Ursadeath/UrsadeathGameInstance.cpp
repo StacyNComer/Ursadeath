@@ -143,6 +143,9 @@ void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
 
 void UUrsadeathGameInstance::StartWaveInstant(FEnemyWave Wave)
 {
+	//Clear corpses at the start of each wave.
+	GameArena->ClearCorpses();
+
 	PlayerCharacter->GetHUDWidget()->DisplayAnnouncement(LOCTEXT("EnemyWaveStartAnnouncement", "Begin!"), 2);
 
 	GameArena->SpawnEnemyWave(Wave);

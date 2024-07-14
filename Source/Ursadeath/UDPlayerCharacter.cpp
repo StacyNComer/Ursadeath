@@ -238,8 +238,6 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	}
 }
 
-
-
 void AUDPlayerCharacter::SetEnergy(float Value)
 {
 	//Record the change in energy for the UI update.

@@ -1,4 +1,11 @@
 
+=== Update 25 "Corpses of Doom!" ===
+
+* All enemies now have death animations and leave behind corpses.
+	* Corpses are cleared when the next wave of enemies begins spawning.
+	# I'm thinking of having a setting that controls how often corpses get deleted.
+
+
 === Update 24 "Laser Fist of Doom!" ===
 
 * Added the "Flick of a Wrist" upgrade (named "MeleeBeamUpgrade" in the code). This upgrade

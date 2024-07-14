@@ -64,6 +64,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		bool bSpawningWave;
 
+	/** An array of enemies that have died and remain on the ground as corpses.*/
+	TArray<TObjectPtr<AUDEnemy>> EnemyCorpses;
+
 	/** A casted reference to the game instance.*/
 	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
@@ -95,9 +98,6 @@ public:
 	// Sets default values for this actor's properties
 	AUDArena();
 
-private:
-	
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -126,13 +126,17 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		bool CanSpawnSquire();
 
+	/** Add the given enemy to the array of corpses.*/
+	UFUNCTION()
+		void AddEnemyCorpse(AUDEnemy* Corpse);
+
 	/** Signal to the arena that a knight class enemy has died.*/
 	UFUNCTION()
-		void DecrementKnightsInPlay(AActor* EnemyDestroyed);
+		void DecrementKnightsInPlay(AUDEnemy* EnemyDestroyed);
 
 	/** Signal to the arena that a squire class enemy has died.*/
 	UFUNCTION()
-		void DecrementSquiresInPlay(AActor* EnemyDestroyed);
+		void DecrementSquiresInPlay(AUDEnemy* EnemyDestroyed);
 
 public:	
 	// Called every frame
@@ -145,6 +149,10 @@ public:
 	/** Returns the number of health pickups that are off cooldown and can be used by the player.*/
 	UFUNCTION(BlueprintCallable)
 		int32 GetActiveHealthPickups();
+
+	/** Clears all of the corpses in game by deleting their*/
+	UFUNCTION(BlueprintCallable)
+		void ClearCorpses();
 
 	/** Respawn any health pickups in the arena that are on cooldown.*/
 	void ReactivateHealthPickups();

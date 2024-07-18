@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
 
+//Alias the collision channels so that us humans know what is (or at least should) be tested.
 #define ECC_PLAYER ECC_GameTraceChannel2
 #define ECC_ENEMY ECC_GameTraceChannel4
 

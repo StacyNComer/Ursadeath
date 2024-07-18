@@ -12,6 +12,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "UDEnemyAnimInstance.h"
+#include "Components/CapsuleComponent.h"
 
 
 // Sets default values
@@ -28,6 +31,10 @@ AUDEnemy::AUDEnemy()
 
 	//Create a root component for this actors components to be attached to.
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+
+	EnemyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Enemy Collision"));
+	EnemyCollision->SetupAttachment(SceneRoot);
+	EnemyCollision->SetCollisionProfileName("EnemyPawn");
 
 	//Set the default spawning material.
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> SpawningMaterialFinder(TEXT("/Game/Ursadeath/Enemies/Core/Materials/M_SpawningEnemy"));
@@ -59,6 +66,9 @@ void AUDEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Set the default size for the stun particles.
+	StunParticleComponent->SetFloatParameter(TEXT("User.SpawnRadius"), StunParticleRadius);
+
 	//Cache the pawn's floating movement component if it has one.
 	//Since the base pawn movement component cannot have its max speed change (at least as far as I know) we simply assume that any enemy that can move has a floating pawn movement component.
 	if (GetMovementComponent())
@@ -76,10 +86,14 @@ void AUDEnemy::BeginPlay()
 		}
 	}
 
-	//Set the default size for the stun particles.
-	StunParticleComponent->SetFloatParameter(TEXT("User.SpawnRadius"), StunParticleRadius);
+	//Get the enemy's anim instance if it has one so that it can recieve any relevant changes in state from the enemy.
+	USkeletalMeshComponent* SkeletonComp = GetComponentByClass<USkeletalMeshComponent>();
+	if (SkeletonComp)
+	{
+		EnemyAnimInstance = Cast<UUDEnemyAnimInstance>(SkeletonComp->GetAnimInstance());
+	}
 
-
+	//If the enemy is set to spawn instantly, give it's controller/AI. Otherwise, the enemy will take a moment to "spawn in", during which it has niether collision nor an AI/Controller.
 	if (bSpawnInstantly)
 	{
 		//If SpawnInstantly is set, spawn the controller on begin play.
@@ -87,9 +101,9 @@ void AUDEnemy::BeginPlay()
 	}
 	else
 	{
-		GetComponents(EnemyMeshes);
-
 		SetActorEnableCollision(false);
+
+		GetComponents(EnemyMeshes);
 
 		//Set the enemy meshes to have the spawning material.
 		SetEnemyMaterials(SpawningMaterial);
@@ -105,33 +119,38 @@ void AUDEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Decrement the enemy's stun time.
-	if (IsStunned())
+	//What to do each tick that the enemy is alive. 
+	// Note that if any enemy is set to be "immune to "Undieable", then these will still occur even if the enemy's health is below 0.
+	if (!IsDead())
 	{
-		StunTime -= DeltaTime;
-
-		//The enemy's AI resumes once their stun time reaches 0.
-		if (StunTime <= 0)
-		{ 
-			EnemyController->ResumeAI();
-
-			//Turn off the stun particle FX.
-			StunParticleComponent->Deactivate();
-		}
-	}
-
-	//Decrement the enemy's slow time.
-	if (IsSlowed())
-	{
-		SlowTime -= DeltaTime;
-
-		//The enemy's speed returns to normal once the slow time is depleted.
-		if (SlowTime <= 0)
+		//Decrement the enemy's stun time.
+		if (IsStunned())
 		{
-			FloatingPawnMovement->MaxSpeed /= SlowedSpeedScalar;
+			StunTime -= DeltaTime;
 
-			//Turn off the slow particle FX.
-			SlowParticleComponent->Deactivate();
+			//The enemy's AI resumes once their stun time reaches 0.
+			if (StunTime <= 0)
+			{
+				EnemyController->ResumeAI();
+
+				//Turn off the stun particle FX.
+				StunParticleComponent->Deactivate();
+			}
+		}
+
+		//Decrement the enemy's slow time.
+		if (IsSlowed())
+		{
+			SlowTime -= DeltaTime;
+
+			//The enemy's speed returns to normal once the slow time is depleted.
+			if (SlowTime <= 0)
+			{
+				FloatingPawnMovement->MaxSpeed /= SlowedSpeedScalar;
+
+				//Turn off the slow particle FX.
+				SlowParticleComponent->Deactivate();
+			}
 		}
 	}
 }
@@ -143,7 +162,6 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	{
 		OnAttackRecieved.Broadcast(AttackData);
 	}
-
 
 	//If the attack deals damage, damage the enemy and play a hit sound.
 	if (AttackData->AttackStats.Damage > 0)
@@ -182,7 +200,34 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
 	if (!bUndieable && Health <= 0)
 	{
-		Destroy();
+		//Make it so that the enemy no longer collides with pawns or attacks.
+		EnemyCollision->SetCollisionProfileName("DeadEnemyPawn");
+
+		//Stop the enemy's AI and movement.
+		EnemyController->StopAI();
+		if(UPawnMovementComponent* MoveComponent = GetMovementComponent())
+		{
+			GetMovementComponent()->StopActiveMovement();
+		}
+
+		//Tell the enemy's animation script that its owner has died.
+		if (EnemyAnimInstance)
+		{
+			EnemyAnimInstance->bEnemyDead = true;
+		}
+
+		//Disable any status effect related particles when the enemy dies.
+		StunParticleComponent->Deactivate();
+		SlowParticleComponent->Deactivate();
+
+		//Interrupt the enemy as if they were stunned. This should cause any ongoing attacks no reliant on the AI to end, assuming this event is implemented correctly.
+		OnInterrupted(IsStunned());
+
+		//Broadcast the OnEnemyKilled event.
+		if (OnEnemyKilled.IsBound())
+		{
+			OnEnemyKilled.Broadcast(this);
+		}
 	}
 }
 
@@ -230,6 +275,11 @@ EEnemyTier AUDEnemy::GetEnemyTier()
 	return EnemyTier;
 }
 
+const bool AUDEnemy::IsDead()
+{
+	return Health <= 0 && !bUndieable;
+}
+
 void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
 {
 	EnemyTier = Tier;
@@ -238,7 +288,7 @@ void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
 void AUDEnemy::ApplyStun(float TimeStunned)
 {
 	//Notify the blueprint that this enemy was stunned.
-	OnStunned(IsStunned());
+	OnInterrupted(IsStunned());
 
 	//If the player was not stunned before stun them. If they were already stunned, only apply the stun if it would be longer.
 	if (!IsStunned())
@@ -252,7 +302,6 @@ void AUDEnemy::ApplyStun(float TimeStunned)
 		{
 			GetMovementComponent()->StopActiveMovement();
 		}
-		
 		
 		//Turn on the stun particle FX.
 		StunParticleComponent->Activate();
@@ -281,14 +330,15 @@ void AUDEnemy::EndSpawnSequence()
 	//Reset the enemy's mesh materials.
 	SetEnemyMaterials(NULL);
 
+	//Tell the blueprint side of the script that the enemy has spawned.
 	OnSpawnSequenceEnd();
-
 }
 
 void AUDEnemy::SetEnemyMaterials(UMaterialInterface* newMaterial)
 {	
 	for (int i = 0; i < EnemyMeshes.Num(); i++)
 	{
+		//We iterate throught the meshes materials in case it has more than one material.
 		for (int j = 0; j < EnemyMeshes[i]->GetMaterials().Num(); j++)
 		{
 			EnemyMeshes[i]->SetMaterial(j, newMaterial);

@@ -156,7 +156,7 @@ void AUDArena::Tick(float DeltaTime)
 					EnemySpawned->EnemyCountWeight = EnemyCountWeight;
 
 					//Tell the enemy to signal the arena when it dies.
-					EnemySpawned->OnDestroyed.AddDynamic(this, &AUDArena::DecrementKnightsInPlay);
+					EnemySpawned->OnEnemyKilled.AddDynamic(this, &AUDArena::DecrementKnightsInPlay);
 				}
 
 				//Decrement the amount of the spawned enemy type in the wave. If that enemy type is depleted, remove it from the wave and spawn pool so it is not chosen anymore.
@@ -198,7 +198,7 @@ void AUDArena::Tick(float DeltaTime)
 				SquiresInPlay++;
 
 				//Tell the enemy to signal the arena when it dies.
-				EnemySpawned->OnDestroyed.AddDynamic(this, &AUDArena::DecrementSquiresInPlay);
+				EnemySpawned->OnEnemyKilled.AddDynamic(this, &AUDArena::DecrementSquiresInPlay);
 
 			} while (CanSpawnSquire() && FreeEnemySpawnPoints.Num() > 0);
 		}
@@ -241,8 +241,13 @@ AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass)
 	//Remove the used spawn point from the list of free enemy spawn points.
 	FreeEnemySpawnPoints.RemoveAtSwap(SpawnIndex);
 
+	AUDEnemy* EnemySpawned = World->SpawnActor<AUDEnemy>(EnemyClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
+
+	//Add the enemy to the corpse array when it dies.
+	EnemySpawned->OnEnemyKilled.AddDynamic(this, &AUDArena::AddEnemyCorpse);
+
 	//Spawn and return the enemy. Enemies automatically go through a "spawn sequence" when created.
-	return World->SpawnActor<AUDEnemy>(EnemyClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
+	return EnemySpawned;
 }
 
 void AUDArena::SpawnEnemyWave(FEnemyWave Wave)
@@ -283,14 +288,19 @@ bool AUDArena::CanSpawnSquire()
 	
 }
 
-void AUDArena::DecrementKnightsInPlay(AActor* EnemyDestroyed)
+void AUDArena::AddEnemyCorpse(AUDEnemy* Corpse)
 {
-	KnightsInPlay -= CastChecked<AUDEnemy>(EnemyDestroyed)->EnemyCountWeight;
+	EnemyCorpses.Add(Corpse);
+}
+
+void AUDArena::DecrementKnightsInPlay(AUDEnemy* EnemyDestroyed)
+{
+	KnightsInPlay -= EnemyDestroyed->EnemyCountWeight;
 
 	CheckWaveDepletion();
 }
 
-void AUDArena::DecrementSquiresInPlay(AActor* EnemyDestroyed)
+void AUDArena::DecrementSquiresInPlay(AUDEnemy* EnemyDestroyed)
 {
 	SquiresInPlay--;
 
@@ -310,6 +320,24 @@ int32 AUDArena::GetActiveHealthPickups()
 	}
 
 	return ActivePickups;
+}
+
+void AUDArena::ClearCorpses()
+{
+	int32 i = 0;
+
+	//Iterate through the enemy corpses until the array is empty
+	while (EnemyCorpses.Num() > 0)
+	{
+		//If the index does not point to a null reference, destroy whatever enemy it is referencing.
+		if (AUDEnemy* Corpse = EnemyCorpses[i])
+		{
+			Corpse->Destroy();
+		}
+
+		//Remove the reference from the array. This should also clear any nullptrs.
+		EnemyCorpses.RemoveAt(i);
+	}
 }
 
 void AUDArena::ReactivateHealthPickups()

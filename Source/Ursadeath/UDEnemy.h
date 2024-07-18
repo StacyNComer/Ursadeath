@@ -15,6 +15,9 @@ class AUDPlayerCharacter;
 class UNiagaraComponent;
 class USoundBase;
 class UFloatingPawnMovement;
+class UUDEnemyAnimInstance; 
+class UPrimitiveComponent;
+class UCapsuleComponent;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -34,10 +37,16 @@ class URSADEATH_API AUDEnemy : public APawn
 	/*A delegate type for when the enemy is damaged.*/
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAttackReceivedSignature, UUDPlayerAttackData*, DamageData);
 
+	/*A delegate type used for when the enemy is killed. Because we allow the enemy's corpse to remain, OnDestroyed is not suitable for tracking enemy deaths.*/
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnemyKilledSignature, AUDEnemy*, EnemyKilled);
+
 public:
 	/** A delegate invoked before an enemy is affected by an attack during ReceiveAttack. This delegate is used to modify the attack based on an enemy's strength/weakness toward it.*/
 	UPROPERTY(BlueprintAssignable)
 		FAttackReceivedSignature OnAttackRecieved;
+
+	UPROPERTY(BlueprintAssignable)
+		FEnemyKilledSignature OnEnemyKilled;
 
 	/** If true, the enemy is immune to dying.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
@@ -54,6 +63,10 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<USceneComponent> SceneRoot;
+
+	/** The default collision capsule enemies have.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UCapsuleComponent> EnemyCollision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
 		TObjectPtr<UNiagaraComponent> StunParticleComponent;
@@ -102,6 +115,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<AUDEnemyController> EnemyController;
 
+	/** The enemy's animation instance. This may be null if either the enemy either lacks a skeletal mesh or if the skeletal mesh's animation blueprint isn't a child of the UDEnemyAnimInstance class.*/
+	UPROPERTY(BlueprintReadOnly)
+		UUDEnemyAnimInstance* EnemyAnimInstance;
+
 	/** This enemy's tier. Enemies do not have a hard coded tier.*/
 	EEnemyTier EnemyTier;
 
@@ -146,6 +163,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		EEnemyTier GetEnemyTier();
 
+	/** Return's true if the enemy has no health and isn't immune to dying.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		const bool IsDead();
+
 	/** Returns the amount of time this enemy should spend "spawning in"*/
 	const float GetSpawnTime();
 
@@ -157,11 +178,11 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnSpawnSequenceEnd();
 
-	/** Called whenever the enemy is hit by an attack that stuns them. Implement this event whenever the enemy being stunned requires additional behavior (such as interupting an ongoing attack).
+	/** Called whenever the enemy's actions are disrupted, such as by them being stunned or dying. Implement this event whenever the enemy being stunned/killed requires additional behavior (such as interupting an ongoing attack).
 	* WasAlreadyStunned returns true if the enemy was already under the effects of a stun from a different effect.
 	*/
 	UFUNCTION(BlueprintImplementableEvent)
-		void OnStunned(bool WasAlreadyStunned);
+		void OnInterrupted(bool WasAlreadyStunned);
 
 	/** Stuns the enemy for the given time. If the enemy is already stunned, the remaining time stunned will be set to TimeStunned if it is higher.*/
 	void ApplyStun(float TimeStunned);

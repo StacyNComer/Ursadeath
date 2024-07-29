@@ -135,6 +135,12 @@ void AUDEnemy::Tick(float DeltaTime)
 
 				//Turn off the stun particle FX.
 				StunParticleComponent->Deactivate();
+
+				//If the enemy has animations, turn off its "Stunned" state.
+				if (EnemyAnimInstance)
+				{
+					EnemyAnimInstance->bEnemyStunned = false;
+				}
 			}
 		}
 
@@ -295,12 +301,19 @@ void AUDEnemy::ApplyStun(float TimeStunned)
 	{
 		StunTime = TimeStunned;
 
-		//Pause the enemy AI and cancel any active movement.
+		//Pause the enemy AI.
 		EnemyController->StopAI();
 
+		//Cancel any active movement
 		if (UPawnMovementComponent* MoveComponent = GetMovementComponent())
 		{
 			GetMovementComponent()->StopActiveMovement();
+		}
+
+		//If the enemy has animations, turn on its "Stunned" state.
+		if (EnemyAnimInstance)
+		{
+			EnemyAnimInstance->bEnemyStunned = true;
 		}
 		
 		//Turn on the stun particle FX.

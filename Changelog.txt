@@ -1,3 +1,23 @@
+TODO: Make animation controller recognize when enemy is stunned.
+Maybe add effect to Gladiator to show attack radius.
+
+=== Update 25.01 ===
+	
+	> Bugfixes
+
+* Fixed a bug where Gladiators and Melee Squires had no collision against the player
+  or their attacks.
+
+* Fixed a bug where attacks no longer slowed Gladiators.
+
+* Fixed a bug where enemy Anim Blueprints wouldn't be update when an enemy was stunned.
+	# There aren't any stun animations, of course, but if there were they wouldn't
+	  have worked.
+
+	~ Known Bugs
+
+* Gladiators and Melee Squires do not stop attacking when stunned.
+
 
 === Update 25 "Corpses of Doom!" ===
 

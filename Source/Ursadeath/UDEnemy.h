@@ -77,6 +77,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
 		TObjectPtr<USoundBase> DamageSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USoundBase> DeathSound;
+
 	/** The spawn radius of the stun particle effect. 
 	*
 	* User parameters for Niagara Components don't appear in the detail panel if the component is made in C++ and all I got from looking this issue up was that this is a bug...*/

@@ -1,5 +1,17 @@
-TODO: Make animation controller recognize when enemy is stunned.
-Maybe add effect to Gladiator to show attack radius.
+TODO: Maybe add effect to Gladiator to show attack radius.
+
+=== Update 25.01 ===
+
+* Enemy's now support having a death sound.
+
+	> Bugfixes
+
+* The new upgrade icons now properly show in game.
+
+	~ Known Bugs
+
+* Gladiators and Melee Squires do not stop attacking when stunned.
+
 
 === Update 25.01 ===
 	

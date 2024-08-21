@@ -216,12 +216,6 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 			GetMovementComponent()->StopActiveMovement();
 		}
 
-		//Tell the enemy's animation script that its owner has died.
-		if (EnemyAnimInstance)
-		{
-			EnemyAnimInstance->bEnemyDead = true;
-		}
-
 		//Disable any status effect related particles when the enemy dies.
 		StunParticleComponent->Deactivate();
 		SlowParticleComponent->Deactivate();
@@ -233,6 +227,19 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 		if (OnEnemyKilled.IsBound())
 		{
 			OnEnemyKilled.Broadcast(this);
+		}
+
+			//Death Anims/FX
+
+		//Tell the enemy's animation script that its owner has died.
+		if (EnemyAnimInstance)
+		{
+			EnemyAnimInstance->bEnemyDead = true;
+		}
+
+		if (DeathSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
 		}
 	}
 }

@@ -1,6 +1,6 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 
-=== Update 25.01 ===
+=== Update 25.02 ===
 
 * Enemy's now support having a death sound.
 

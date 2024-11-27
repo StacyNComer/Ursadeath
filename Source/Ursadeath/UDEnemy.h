@@ -40,6 +40,9 @@ class URSADEATH_API AUDEnemy : public APawn
 	/*A delegate type used for when the enemy is killed. Because we allow the enemy's corpse to remain, OnDestroyed is not suitable for tracking enemy deaths.*/
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FEnemyKilledSignature, AUDEnemy*, EnemyKilled);
 
+	/** True if the enemy has finished spawning and is not dead. This is meant to be checked via the IsValidEnemy method.*/
+	bool ValidEnemy = false;
+
 public:
 	/** A delegate invoked before an enemy is affected by an attack during ReceiveAttack. This delegate is used to modify the attack based on an enemy's strength/weakness toward it.*/
 	UPROPERTY(BlueprintAssignable)
@@ -169,6 +172,10 @@ public:
 	/** Return's true if the enemy has no health and isn't immune to dying.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		const bool IsDead();
+
+	/** Returns true if the enemy has finished spawning and is not dead.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		bool IsValidEnemy() const;
 
 	/** Returns the amount of time this enemy should spend "spawning in"*/
 	const float GetSpawnTime();

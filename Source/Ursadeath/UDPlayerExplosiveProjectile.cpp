@@ -35,7 +35,7 @@ void AUDPlayerExplosiveProjectile::NotifyOnProjectileHit(AActor* ActorHit)
 			UGameplayStatics::PlaySound2D(GetWorld(), ExplosionSound);
 		}
 		
-		//THe explosion searches for Pawns (which all enemies are) and Players.
+		//The explosion searches for Enemies and Players.
 		TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_ENEMY));
 		objectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PLAYER));

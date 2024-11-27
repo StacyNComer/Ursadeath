@@ -98,6 +98,8 @@ void AUDEnemy::BeginPlay()
 	{
 		//If SpawnInstantly is set, spawn the controller on begin play.
 		SpawnDefaultController();
+
+		ValidEnemy = true;
 	}
 	else
 	{
@@ -120,7 +122,7 @@ void AUDEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//What to do each tick that the enemy is alive. 
-	// Note that if any enemy is set to be "immune to "Undieable", then these will still occur even if the enemy's health is below 0.
+	// Note that if any enemy is set to be "Undieable", then these will still occur even if the enemy's health is below 0.
 	if (!IsDead())
 	{
 		//Decrement the enemy's stun time.
@@ -204,8 +206,10 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	}
 
 	//Kill the enemy if they're health is 0 and they aren't immune to their otherwise inevitable demise.
-	if (!bUndieable && Health <= 0)
+	if (!bUndieable && WasKilled)
 	{
+		ValidEnemy = false;
+
 		//Make it so that the enemy no longer collides with pawns or attacks.
 		EnemyCollision->SetCollisionProfileName("DeadEnemyPawn");
 
@@ -293,6 +297,11 @@ const bool AUDEnemy::IsDead()
 	return Health <= 0 && !bUndieable;
 }
 
+bool AUDEnemy::IsValidEnemy() const
+{
+	return ValidEnemy;
+}
+
 void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
 {
 	EnemyTier = Tier;
@@ -341,6 +350,8 @@ void AUDEnemy::PossessedBy(AController* NewController)
 
 void AUDEnemy::EndSpawnSequence()
 {
+	ValidEnemy = true;
+
 	//Give the enemy its AI.
 	SpawnDefaultController();
 

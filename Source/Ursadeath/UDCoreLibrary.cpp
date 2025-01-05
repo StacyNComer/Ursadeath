@@ -7,27 +7,38 @@
 
 #define ECC_ENEMY ECC_GameTraceChannel4
 
-TArray<AUDEnemy*> UUDCoreLibrary::GetNearestEnemies(const UObject* WorldContextObject, int32 Count, const FVector Location)
+TArray<AUDEnemy*> UUDCoreLibrary::GetNearestEnemies(const UObject* WorldContextObject, TArray<AActor*> ActorsIgnored, const int32 Count, const int32 MaxSearchAttempts, const FVector Location, const bool bDrawDebug)
 {
 	//The enemies that are left for this method to find.
 	int32 RemainingCount = Count;
+
+	int32 SearchAttempts = 0;
 
 		//Setup for sphere-cast
 	//World object
 	UWorld* const World = WorldContextObject->GetWorld();
 	//The radius of the sphere cast. Doubles in size with each search until the MaxSearchRadius is surpassed.
-	float SearchRadius = 1000;
+	float SearchRadius = 1200;
 	//Search for objects of the "Enemy" type
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_ENEMY));
 	//Holds the enemies hit by the explosion.
 	TArray<AActor*> OutActorsHit;
+	
 	//Any aotors that that are found are ignored in any future searches performed by the same method call.
 	TArray<AActor*> ActorsFound;
-	
-	while (RemainingCount > 0 && SearchRadius <= 4000)
+
+	while (RemainingCount > 0 && SearchAttempts < MaxSearchAttempts)
 	{
-		UKismetSystemLibrary::SphereOverlapActors(World, Location, SearchRadius, ObjectTypes, AUDEnemy::StaticClass(), ActorsFound, OutActorsHit);
+		UKismetSystemLibrary::SphereOverlapActors(World, Location, SearchRadius, ObjectTypes, AUDEnemy::StaticClass(), ActorsIgnored, OutActorsHit);
+
+#if WITH_EDITOR
+		if (bDrawDebug)
+		{
+			//Draw a sphere for debugging the explosion radius.
+			DrawDebugSphere(World, Location, SearchRadius, 12, FColor::Green, false, 1 + SearchRadius / 2000);
+		}
+#endif
 
 		//We only bother sorting the actors if there are more actors than remaining enemies to find. Otherwise, we append the remaining enemies.
 		if (OutActorsHit.Num() > RemainingCount)
@@ -59,9 +70,13 @@ TArray<AUDEnemy*> UUDCoreLibrary::GetNearestEnemies(const UObject* WorldContextO
 		else
 		{
 			ActorsFound.Append(OutActorsHit);
+			//We only update Actors Ignored here since in the first case there will never be another iteration!
+			ActorsIgnored.Append(OutActorsHit);
+
 			RemainingCount -= OutActorsHit.Num();
 		}
 
+		SearchAttempts++;
 		//Double the search radius each time we go through the array.
 		SearchRadius *= 2;
 	}
@@ -76,3 +91,7 @@ TArray<AUDEnemy*> UUDCoreLibrary::GetNearestEnemies(const UObject* WorldContextO
 	return EnemiesFound;
 }
 
+float UUDCoreLibrary::GetArenaDiameter()
+{
+	return ArenaDiameter;
+}

@@ -1,5 +1,16 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 
+=== Update 27 Rainbow of Doom ===
+
+* Gave the "Flick of the Wrist" (Melee Beam) upgrade a minor rework: It now refracts to the two
+  nearest targets on impact. If it misses, it instead refracts to the three nearest targets.
+	* Regardless of the number of targets hit, only the first target hit grants energy.
+
+	~ Known Bugs
+
+* Ranged Squires and Archer Legionairres do not ragdoll out of their death animations.
+
+
 === Update 26 How-To-Play of Doom ===
 
 * Added a How-To-Play screen.

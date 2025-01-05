@@ -16,6 +16,14 @@ class URSADEATH_API UUDCoreLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	 UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
-		static TArray<AUDEnemy*> GetNearestEnemies(const UObject* WorldContextObject, const int32 Count, const FVector Location);
+private:
+	inline static float ArenaDiameter = 4500;
+
+public:
+	 UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject", AutoCreateRefTerm = "ActorsIgnored"))
+		static TArray<AUDEnemy*> GetNearestEnemies(const UObject* WorldContextObject, TArray<AActor*> ActorsIgnored, const int32 Count, const int32 MaxSearchAttempts, const FVector Location, const bool bDrawDebug);
+
+	//Returns the diameter of the arena, with some extra breathing room added in. Useful for traces that could potentially span the entire arena, such as beam attacks.
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		static float GetArenaDiameter();
 };

@@ -1,5 +1,37 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 
+=== Update 28 Joystick of Doom ===
+
+* Added partial controller support: The player character can be full controlled with a controller,
+  but the round menu cannot be navigated yet.
+	* Right trigger -> Primary
+	* Right bumper -> Melee
+	* Left trigger -> Rockets
+	* Left bumber -> Shockwave
+	* Open Round Screen/Pause -> Option
+	* You can edit the aim sensitivity via /PlayerCharacter/Input/IMC_Default. Under the
+	   IA_Look mapping, open the GamePad option and then the "Modifiers" option. Finally
+	   find the "Scalar" setting and adjust the values to your liking.
+		* There is no auto aim or aim acceleration, so it'll probably feel awkward no
+		  matter what you set it to...
+
+* The Shockwave now stuns longer 4s => 5s.
+	# I'm going to be testing some slight buffs to the Shockwave. Try it and let me know what
+	  you think. I'm also open to suggestions!
+
+	> Bugfixes
+
+* Fixed a bug where Vigilant lasers would appear short when aimed at the arena's outer walls.
+
+	~ Known Bugs
+
+* Ranged Squires, Archer Legionnaires, and Vigilants do not have a proper death animation if killed
+  while stunned.
+
+* This isn't really a bug, but the How-to-play screen should probably show the controls for
+  controller.
+
+
 === Update 27 Rainbow of Doom ===
 
 * Gave the "Flick of the Wrist" (Melee Beam) upgrade a minor rework: It now refracts to the two

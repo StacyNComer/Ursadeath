@@ -230,8 +230,9 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 		//Swap the controller to the UI input mode. No more clicking the screen to get the UI to work. It's over. It's dead.
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
 
-		//Set the round screent to the focus widget.
+		//Set the round screen to the focus widget.
 		RoundScreenWidget->SetFocus();
+
 	} else
 	{
 		UDPlayerController->SetInputMode(FInputModeGameOnly());

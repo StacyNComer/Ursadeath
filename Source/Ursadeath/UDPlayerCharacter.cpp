@@ -170,6 +170,10 @@ void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 		//Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUDPlayerCharacter::Look);
 
+		//Controller UI click
+		EnhancedInputComponent->BindAction(ControllerClickAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::PressUIViaController);
+		EnhancedInputComponent->BindAction(ControllerClickAction, ETriggerEvent::Completed, this, &AUDPlayerCharacter::ReleaseUIViaController);
+
 		//Primary Fire
 		EnhancedInputComponent->BindAction(PrimaryFireAbility->GetInputAction(), PrimaryFireAbility->GetInputTrigger(), this, &AUDPlayerCharacter::UsePrimaryAbility);
 
@@ -231,11 +235,15 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
 
 		//Set the round screen to the focus widget.
-		RoundScreenWidget->SetFocus();
+		//RoundScreenWidget->SetFocus();
+
+		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
 
 	} else
 	{
 		UDPlayerController->SetInputMode(FInputModeGameOnly());
+
+		InputSubsystem->RemoveMappingContext(GameMenuMappingContext);
 	}
 }
 
@@ -341,8 +349,9 @@ void AUDPlayerCharacter::DamagePlayer(int Damage)
 		GameOverWidget->SetVisibility(ESlateVisibility::Visible);
 		GameOverWidget->DisplayScore(UrsadeathGameInstance->GetCurrentRound(), UrsadeathGameInstance->GetAbsoluteWave());
 
-		//Turn of the player's game controls because they are dead now.
+		//Turn of the player's game controls because they are dead now. Turn on the menu controls
 		InputSubsystem->RemoveMappingContext(DefaultMappingContext);
+		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
 
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
 
@@ -502,6 +511,23 @@ void AUDPlayerCharacter::UseRocketAbility()
 void AUDPlayerCharacter::UseShockwaveAbility()
 {
 	ShockwaveAbility->TryUseAbility();
+}
+
+void AUDPlayerCharacter::PressUIViaController()
+{
+	if (UDPlayerController->LinkedButton)
+	{
+		UDPlayerController->LinkedButton->OnPressed.Broadcast();
+	}
+}
+
+void AUDPlayerCharacter::ReleaseUIViaController()
+{
+	if (UDPlayerController->LinkedButton)
+	{
+		UDPlayerController->LinkedButton->OnReleased.Broadcast();
+		UDPlayerController->LinkedButton->OnClicked.Broadcast();
+	}
 }
 
 AUDPlayerCharacter* AUDPlayerCharacter::GetCharacterInPlay(UObject* WorldContextObject)

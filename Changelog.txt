@@ -1,5 +1,23 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 
+=== Update 29 Menu Controls of Doom ===
+
+* A controller can now be used to move the mouse cursor while in the Round Menu and Game Over screen. The
+  "Bottom Face Button" ("A" on an Xbox controller) can be used to "click" buttons.
+
+* The UI can no longer be operated with pure keyboard.
+	# Unreal's default system for this (as far as I've looked into it) cannot have edits made to it	
+
+	> Bugfixes
+
+* The confirmation message for starting the round without an upgrade now properly displays over the round
+  menu instead of being under it.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+
 === Update 28 Joystick of Doom ===
 
 * Added partial controller support: The player character can be full controlled with a controller,

@@ -89,15 +89,12 @@ class AUDPlayerCharacter : public ACharacter
 
 	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem;
 
-	/** MappingContext */
+	/** MappingContexts */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		class UInputMappingContext* GameOverMappingContext;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		class UInputMappingContext* RoundMenuMappingContext;
+		class UInputMappingContext* GameMenuMappingContext;
 
 	/** A component that represents the spawning position and rotation for attacks.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
@@ -112,6 +109,10 @@ class AUDPlayerCharacter : public ACharacter
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* MoveAction;
+
+	/** Controller Click Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* ControllerClickAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UUDPlayerCooldownAbility> PrimaryFireAbility;
@@ -338,11 +339,13 @@ public:
 
 	void NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit);
 
+	///////////////////////////////////////////////////////////////////////// Input Functions
+
 	/** Swaps whether the round menu is on or off. */
 	void ToggleRoundMenu();
 
 protected:
-	///////////////////////////////////////////////////////////////////////// Input Functions
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -361,13 +364,17 @@ protected:
 	/** Uses the shockwave ability. Used for Input.*/
 	void UseShockwaveAbility();
 
+	/** If a Controller Button is linked to the Player Controller, call the button's click function.*/
+	void PressUIViaController();
+
+	void ReleaseUIViaController();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
 
 public:
-
 	/** Returns Mesh1P subobject **/
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 

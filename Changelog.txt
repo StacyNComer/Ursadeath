@@ -1,5 +1,14 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 
+=== Update 29.01 Menu Controls of Doom ===
+
+	> Bugfixes
+
+* Turned off the player's infinite energy! Rockets/Shockwaves should now use energy again!
+	# If ever you notice this in the future, infinite energy can be turned on/off in the
+	  Player Character Blueprint! You don't even need this update technically!
+
+
 === Update 29 Menu Controls of Doom ===
 
 * A controller can now be used to move the mouse cursor while in the Round Menu and Game Over screen. The

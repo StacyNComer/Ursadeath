@@ -276,7 +276,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DamagePlayer(int Damage);
 
-	/** Restore the given amount of helath to the player, but not beyond their max health.*/
+	/** Restore the given amount of health to the player, but not beyond their max health.*/
 	UFUNCTION(BlueprintCallable)
 		void RestoreHealth(int Value);
 

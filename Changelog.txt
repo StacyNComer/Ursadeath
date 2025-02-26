@@ -1,4 +1,35 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
+All shooting enemies NEED a windup
+Make Haste effect feel better
+See how controller feels
+Auto aim or aim accel for controller?
+Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming.
+
+=== Update 30 Feel of Doom ===
+
+* Reduced the speed multiplier from the Haste effect: 50% => 40%.
+	# This is less to nerf Haste and more to make it feel better. I found it hard to position the
+	  character or even aim during Haste with how absurdly fast it was!
+
+* Increased the player acceleration: 6144 => 20000.
+
+* Increased the Shockwave Width: 250 => 700.
+	# I'm hoping this is the change that will tip the Shockwave into being an equal to Rockets. It
+	  should be much easier to lock down entire swathes of enemies now!
+
+* The Shockwave to extends behind the player by a length equal to its width (so currently 700 units).
+
+	> Bugfixes
+
+* The pentagram symbol for the Blood Claw explosion is no longer invisible most of the time.	
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* This isn't really a bug, but the How-to-play screen should probably show the controls for
+  controller.
+
 
 === Update 29.01 Menu Controls of Doom ===
 
@@ -7,6 +38,12 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 * Turned off the player's infinite energy! Rockets/Shockwaves should now use energy again!
 	# If ever you notice this in the future, infinite energy can be turned on/off in the
 	  Player Character Blueprint! You don't even need this update technically!
+	
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+	# I might not even fix this one. I have some sledgehammering to do for the final implementation of
+	  controller UI.
 
 
 === Update 29 Menu Controls of Doom ===

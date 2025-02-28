@@ -5,6 +5,26 @@ See how controller feels
 Auto aim or aim accel for controller?
 Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming.
 
+
+=== Update 31 Aiming of Doom ===
+
+* Revamped controller aiming:
+	* Lowered the overall aim sensitivity (no idea why I had it so high in the first place!)
+	* The y axis is now less sensitive than the x axis.
+	* Added smoothing to the aiming. It should be at least a little easier to track enemies as you or
+	  they move.
+
+* The UI cursor speed when controlled by a controller now properly scales with the screen size: It
+   should no longer be too slow and large screens and too fast on small screens.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* This isn't really a bug, but the How-to-play screen should probably show the controls for
+  controller.
+
+
 === Update 30 Feel of Doom ===
 
 * Reduced the speed multiplier from the Haste effect: 50% => 40%.

@@ -25,7 +25,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		TObjectPtr<AUDPlayerController> PlayerController;
 
-	/** The buttona that should */
+	/** The button that should be pressable via controller.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UButton> LinkedButton;
 	

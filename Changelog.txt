@@ -1,9 +1,24 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
 All shooting enemies NEED a windup
-Make Haste effect feel better
 See how controller feels
 Auto aim or aim accel for controller?
 Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming.
+
+
+=== Update 32 More UI of Doom ===
+
+* The How-to-play menu now has controls for joystick.
+
+* There is now a visual effect for when a Ranged Squire or Archer Legionnare are about to fire.
+
+	> Bugfixes
+
+* The "don't show this message again" checkbox for the "no upgrade" confirmation screen can now be pressed
+  via controller.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
 
 
 === Update 31 Aiming of Doom ===

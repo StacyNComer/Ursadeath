@@ -139,6 +139,11 @@ void UUrsadeathGameInstance::StartWave(FEnemyWave Wave)
 	FTimerHandle WaveStartTimerHandle;
 	FTimerDelegate WaveStartDelegate = FTimerDelegate::CreateUObject(this, &UUrsadeathGameInstance::StartWaveInstant, Wave);
 	GetWorld()->GetTimerManager().SetTimer(WaveStartTimerHandle, WaveStartDelegate, WaveStartDelay, false);
+
+		//Other Side FX
+	
+	//Respawn a single one of the Health Pickups
+	GameArena->ReactivateSingleHealthPickup();
 }
 
 void UUrsadeathGameInstance::StartWaveInstant(FEnemyWave Wave)
@@ -278,6 +283,12 @@ void UUrsadeathGameInstance::StartRound()
 	//(Look, we all know that the index should always be 0, but the game might not know that. Better to have the game freak out here than give a confusing error 1 wave later.)
 	FEnemyWave NextWave = CurrentRoundWaves[RoundWaveNumber];
 
+	//Respawn the health pickups in the arena. We respawn them both at the end and beginning of rounds incase the player decided to be goofy and hit one for no reason.
+	GameArena->ReactivateHealthPickups();
+	//Make the health pickups no longer respawn after collecting them. Instead, a single one will respawn when the wave ends.
+	GameArena->SetHealthPickupCooldownMode(false);
+
+	//Start the rounds first wave.
 	StartWave(NextWave);
 }
 
@@ -339,8 +350,11 @@ void UUrsadeathGameInstance::ProcessEndWave()
 		//Restore the player to full health when they complete a round.
 		PlayerCharacter->RestoreHealth(999);
 
-		//Respawn the health pickups in the arena so the player doesn't have to wait for them to respawn.
+		//Respawn the health pickups in the arena. We respawn them both at the end and beginning of rounds incase the player decided to be goofy and hit one for no reason.
 		GameArena->ReactivateHealthPickups();
+
+		//Set all of the health pickups to respawn after being collected incase the player wants to mess around with hitting them.
+		GameArena->SetHealthPickupCooldownMode(true);
 	}
 }
 

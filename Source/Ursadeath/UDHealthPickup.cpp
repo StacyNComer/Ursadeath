@@ -12,8 +12,12 @@ AUDHealthPickup::AUDHealthPickup()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	//Pickups start out in cooldown mode and are meant to have the mode turned off when enemies begins spawning. This way, the player is free to smack health pickups without them being gone until they start the next round.
+	//When the round ends, pickups should go back into cooldown mode.
+	bInCooldownMode = true;
+
 	//Set default cooldown
-	Cooldown = 40;
+	Cooldown = 1;
 
 	CooldownTracker = 0;
 }
@@ -31,7 +35,7 @@ void AUDHealthPickup::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	//Decrement the pickup's cooldown.
-	if (!GetPickupActive())
+	if (!GetPickupActive() && bInCooldownMode)
 	{
 		SetCooldownTracker(CooldownTracker -= DeltaTime);
 
@@ -59,10 +63,6 @@ void AUDHealthPickup::UsePickup(AUDPlayerCharacter* UsingPlayer)
 {
 	UsingPlayer->NotifyOnHealthPickupUsed(this);
 
-	//Make the pickup hidden and intangable.
-	/*SetActorHiddenInGame(true);
-	SetActorEnableCollision(false);*/
-
 	OnPickupUsed();
 
 	//Pickup FX
@@ -78,8 +78,6 @@ void AUDHealthPickup::UsePickup(AUDPlayerCharacter* UsingPlayer)
 void AUDHealthPickup::ReactivatePickup()
 {
 	OnPickupRespawned();
-	/*SetActorHiddenInGame(false);
-	SetActorEnableCollision(true);*/
 
 	//Make sure the cooldown is no longer active in case the pickup is being forcibly respawned.
 	SetCooldownTracker(0);

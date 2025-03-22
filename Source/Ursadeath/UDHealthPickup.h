@@ -8,11 +8,17 @@
 
 class AUDPlayerCharacter;
 
-/** The base class for health pickups. Health pickups are used by the player melee attacking them. Health Pickups are reusable; When used, they merely disappear until a cooldown elapses.*/
+/** The base class for health pickups. Health pickups are used by the player melee attacking them. Health Pickups are reusable; When used, they merely disappear until a cooldown elapses.
+* The Arena blueprint is responsible for spawning pickups.*/
 UCLASS(Abstract)
 class URSADEATH_API AUDHealthPickup : public AActor
 {
 	GENERATED_BODY()
+
+public:
+	/** If true, the health pickup will count down a cooldown when used and call ReactivatePickup once the time elapses. A Cooldown can still be set when out of CooldownMode, but it will never actually tick down.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bInCooldownMode;
 	
 protected:
 	/** When a pickup is used, it is set on cooldown for this many seconds.*/
@@ -47,7 +53,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 		void OnCooldownTick(float CooldownMax, float CooldownRemaining);
 
-	/*Sets the cooldown tracker to the given value and calls OnCooldownTicked to update the game's visuals.*/
+	/* Sets the cooldown tracker to the given value and calls OnCooldownTicked to update the game's visuals.*/
 		void SetCooldownTracker(float value);
 
 public:

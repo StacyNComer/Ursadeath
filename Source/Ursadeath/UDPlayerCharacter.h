@@ -186,6 +186,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = UI)
 		TSubclassOf<UUDRoundScreenWidget> RoundScreenWidgetClass;
 
+	UPROPERTY(EditAnywhere, Category = UI)
+		TSubclassOf<UUserWidget> PauseScreenWidgetClass;
+
 	/**The class the game over screen will be created as.*/
 	UPROPERTY(EditAnywhere, Category = UI)
 		TSubclassOf<UUDGameOverWidget> GameOverWidgetClass;
@@ -207,6 +210,9 @@ protected:
 	/** The widget that appears when the player completes the game. Or dies.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUDGameOverWidget> GameOverWidget;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UUserWidget> PauseScreenWidget;
 
 	/** The player controller casted to UDPlayerController.*/
 	UPROPERTY(BlueprintReadOnly)
@@ -234,6 +240,9 @@ protected:
 	/** How many seconds of invulnerability the player has left.*/
 	float InvulnerabilityTimeTracker = 0;
 
+	/** True if the player is in a menu and no other menues should be allowed to open.*/
+	bool bInGameMenu;
+
 	TObjectPtr<UUrsadeathGameInstance> UrsadeathGameInstance;
 
 public:
@@ -255,6 +264,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* RoundMenuAction;
+
+	/** Pause Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* PauseAction;
 
 	/** Bool for AnimBP to switch to another animation set */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
@@ -341,8 +354,12 @@ public:
 
 	///////////////////////////////////////////////////////////////////////// Input Functions
 
-	/** Swaps whether the round menu is on or off. */
+	/** Swaps whether the round menu is on or off.*/
 	void ToggleRoundMenu();
+
+	/** Swaps whether the Pause menu is on or off*/
+	UFUNCTION(BlueprintCallable)
+	void TogglePauseMenu();
 
 protected:
 
@@ -368,6 +385,11 @@ protected:
 	void PressUIViaController();
 
 	void ReleaseUIViaController();
+
+	//End Input Functions
+
+	/** Pause the game and set the player input to work with menus. This can be used for any menu that should pause the game while the player interacts with it (e.g. the round screen)*/
+	void SetIsInPauseMenu(bool bIsPaused);
 
 protected:
 	// APawn interface

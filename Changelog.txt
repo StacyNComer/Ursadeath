@@ -6,6 +6,28 @@ Auto aim or aim accel for controller?
 ^- WONT DO - Now that I'm testing them with a computer that can actually run the game, they're fine (imho).
 ~~ All shooting enemies NEED a windup ~~ DONE - Thanks Travis!
 
+=== Update 34 Pause Menu of Doom ===
+
+* There is now a pause menu! Instead of closing the game "Escape" now opens a pause menu.
+	* "Start" on controller should also work.
+	* Tilde (the `~ key) now ends playmode, assuming editor preferences carry over. If this is not the case,
+	  the keyboard shortcut can be changed via Edit/Editor Preferences/Keyboard Shortcuts [under "General"
+          on the left hand menu]/Play World (PIE/SIE) via the "Stop" binding.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Gladiators and Melee Squires can hit the player more than once with a single melee attack!
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Very rarely, it is possible to "kill" an extra enemy and thus make the enemy counter negative, softlocking the
+  game!
+
+* If you close a menu with a confirmation screen up, the confirmation screen will still be up when the menu
+  os reopened.
+
 
 === Update 33 Better Health Pickups of Doom ===
 

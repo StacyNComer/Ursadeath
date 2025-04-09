@@ -1,8 +1,78 @@
 TODO: Maybe add effect to Gladiator to show attack radius.
-All shooting enemies NEED a windup
 See how controller feels
 Auto aim or aim accel for controller?
-Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming.
+
+~~ Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming. ~~
+^- WONT DO - Now that I'm testing them with a computer that can actually run the game, they're fine (imho).
+~~ All shooting enemies NEED a windup ~~ DONE - Thanks Travis!
+
+=== Update 34 Pause Menu of Doom ===
+
+* There is now a pause menu! Instead of closing the game "Escape" now opens a pause menu.
+	* "Start" on controller should also work.
+	* Tilde (the `~ key) now ends playmode, assuming editor preferences carry over. If this is not the case,
+	  the keyboard shortcut can be changed via Edit/Editor Preferences/Keyboard Shortcuts [under "General"
+          on the left hand menu]/Play World (PIE/SIE) via the "Stop" binding.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Gladiators and Melee Squires can hit the player more than once with a single melee attack!
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Very rarely, it is possible to "kill" an extra enemy and thus make the enemy counter negative, softlocking the
+  game!
+
+* If you close a menu with a confirmation screen up, the confirmation screen will still be up when the menu
+  os reopened.
+
+
+=== Update 33 Better Health Pickups of Doom ===
+
+* Health Pickups now have a cooldown of 1 second as long as the round has not been started.
+	# This is in case the player wants to mess around with them in between rounds.
+
+* Health pickups no longer respawn on cooldown while the round is active. Instead, a single used health pickup
+  respawns at the end of each wave.
+	#  This is to discourage stalling for the pickup to respawn while also making them feel a tad more
+	   consistent in how they behave between waves.
+
+* Health pickups now respawn when a new round starts in addition to whenever a round ends.
+	# Otherwise, the player could accidently make it where they are missing a health pickup due to the above
+	  two changes.
+
+* Health Pickups now have a particle effect whenever they are collected and whenever they respawn.
+
+* The How-To-Play screen now tells the player how health pickups work.
+
+* The How-To-Play tip about explosions going through walls now includes beams in its explanation.
+
+* The "Flick of the Wrist" upgrade (MeleeBeam in blueprints) has improved VFX: It is easier to see the intial
+  beam being fired and enemies hit by the attack now emit a burst of particles. 
+
+* Went through and adjusted all of the enemy and upgrade descriptions. They should in general be slighty
+  shorter and slightly more informative. Some specific changes include:
+	* The Archer Legionnare enemy description no longer incorrectly mentions them taking damage when
+	  stunned.
+	* The Gladiator enemy now says how long it is stunned for when damaged by Rockets.
+	* The Piercing Blast upgrade no longer refers to rockets as "Bombs".
+	* The Siphon Soul upgrade now says how much it heals for.
+
+		> Bugfixes
+
+* The Shockwave's particle FX now reflects the ability's actual width and length.
+	# Good job on the effect Laura!
+	# Oh, and incase anyone is messing around with the blueprint, the particle FX width now
+	   automatically changes with the Shockwave's own "Width" variable so you can see the
+	   attack and effect's size even before runtime!
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Gladiators and Melee Squires can hit the player more than once with a single melee attack!
 
 
 === Update 32 More UI of Doom ===

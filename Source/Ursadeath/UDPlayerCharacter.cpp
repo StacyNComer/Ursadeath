@@ -110,8 +110,14 @@ void AUDPlayerCharacter::BeginPlay()
 	//Create the game over widget.
 	GameOverWidget = CreateWidget<UUDGameOverWidget>(UDPlayerController, GameOverWidgetClass);
 	GameOverWidget->AddToViewport();
-	//Make sure the player is shown the game over screen the moment they load in!
+	//Make sure the player isn' shown the game over screen the moment they load in!
 	GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+	//Create the Pause Screen widget
+	PauseScreenWidget = CreateWidget<UUserWidget>(UDPlayerController, PauseScreenWidgetClass);
+	PauseScreenWidget->AddToViewport();
+	//Make sure the game doesn't start paused
+	PauseScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
 	//Set the input subsystem
 	InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer());
@@ -159,6 +165,9 @@ void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	{
 		//Toggling the round menu
 		EnhancedInputComponent->BindAction(RoundMenuAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::ToggleRoundMenu);
+
+		//Toggling the pause menu
+		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::TogglePauseMenu);
 
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
@@ -219,31 +228,30 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	//Decide whether the round screen should be opening or closing. The round screen closes if its visibity is already set to "Visible", and opens if the visibility is set to ANYTHING else.
 	bool RoundScreenOpening = RoundScreenWidget->GetVisibility() != ESlateVisibility::Visible;
 
-	//Collapse the round screen if it is open. Make the round screen visible otherwise.
-	ESlateVisibility NewRoundScreenVisibility = RoundScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
-	RoundScreenWidget->SetVisibility(NewRoundScreenVisibility);
-
-	//Pause the game if the round screen is being opened. Unpause if it is being closed.
-	UGameplayStatics::SetGamePaused(GetWorld(), RoundScreenOpening);
-
-	//Show/Hide the cursor based on whether or not the menu is being shown/hidden.
-	UDPlayerController->bShowMouseCursor = RoundScreenOpening;
-	
-	if (RoundScreenOpening)
+	//Prevent this menu from being opened if another menu is already open.
+	if (!(RoundScreenOpening && bInGameMenu))
 	{
-		//Swap the controller to the UI input mode. No more clicking the screen to get the UI to work. It's over. It's dead.
-		UDPlayerController->SetInputMode(FInputModeGameAndUI());
+		//Collapse the round screen if it is open. Make the round screen visible otherwise.
+		ESlateVisibility NewRoundScreenVisibility = RoundScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+		RoundScreenWidget->SetVisibility(NewRoundScreenVisibility);
 
-		//Set the round screen to the focus widget.
-		//RoundScreenWidget->SetFocus();
+		//Pause the game if the round screen is being opened. Unpause if it is being closed.
+		SetIsInPauseMenu(RoundScreenOpening);
+	}
+}
 
-		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
+void AUDPlayerCharacter::TogglePauseMenu()
+{
+	bool PauseScreenOpening = PauseScreenWidget->GetVisibility() != ESlateVisibility::Visible;
 
-	} else
+	//Prevent this menu from being opened if another menu is already open.
+	if (!(PauseScreenOpening && bInGameMenu))
 	{
-		UDPlayerController->SetInputMode(FInputModeGameOnly());
+		//Collapse the round screen if it is open. Make the round screen visible otherwise.
+		ESlateVisibility NewPauseScreenVisibility = PauseScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+		PauseScreenWidget->SetVisibility(NewPauseScreenVisibility);
 
-		InputSubsystem->RemoveMappingContext(GameMenuMappingContext);
+		SetIsInPauseMenu(PauseScreenOpening);
 	}
 }
 
@@ -527,6 +535,32 @@ void AUDPlayerCharacter::ReleaseUIViaController()
 	{
 		UDPlayerController->LinkedButton->OnReleased.Broadcast();
 		UDPlayerController->LinkedButton->OnClicked.Broadcast();
+	}
+}
+
+void AUDPlayerCharacter::SetIsInPauseMenu(bool bIsPaused)
+{
+	//Pause the game if the round screen is being opened. Unpause if it is being closed.
+	UGameplayStatics::SetGamePaused(GetWorld(), bIsPaused);
+
+	//Show/Hide the cursor based on whether or not the menu is being shown/hidden.
+	UDPlayerController->bShowMouseCursor = bIsPaused;
+
+	bInGameMenu = bIsPaused;
+
+	if (bIsPaused)
+	{
+		//Swap the controller to the UI input mode. No more clicking the screen to get the UI to work. It's over. It's dead.
+		UDPlayerController->SetInputMode(FInputModeGameAndUI());
+
+		//Enable the UI controls/
+		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
+	}
+	else
+	{
+		UDPlayerController->SetInputMode(FInputModeGameOnly());
+
+		InputSubsystem->RemoveMappingContext(GameMenuMappingContext);
 	}
 }
 

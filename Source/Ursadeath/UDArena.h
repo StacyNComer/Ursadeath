@@ -28,7 +28,7 @@ struct OccupiedSpawnPoint
 	}
 };
 
-/** An actor holding the arena mesh as well as all the locations for enemy and health bobule spawns.*/
+/** An actor holding the arena mesh as well as all the locations for enemy and health pickup spawns.*/
 UCLASS(Abstract)
 class URSADEATH_API AUDArena : public AActor
 {
@@ -157,4 +157,9 @@ public:
 	/** Respawn any health pickups in the arena that are on cooldown.*/
 	void ReactivateHealthPickups();
 
+	/** Iterate through the arena's health pickups and reactivate the first collected pickup found. If all pickups are active, nothing happens (silly).*/
+	void ReactivateSingleHealthPickup();
+
+	/** Set the cooldown mode for all health pickups in the arena.*/
+	void SetHealthPickupCooldownMode(bool bInCooldownMode);
 };

@@ -347,3 +347,25 @@ void AUDArena::ReactivateHealthPickups()
 		HealthPickups[i]->ReactivatePickup();
 	}
 }
+
+void AUDArena::ReactivateSingleHealthPickup()
+{
+	for (int i = 0; i < HealthPickups.Num(); i++)
+	{
+		AUDHealthPickup* HealthPickup = HealthPickups[i];
+
+		if (!HealthPickup->GetPickupActive())
+		{
+			HealthPickups[i]->ReactivatePickup();
+			break;
+		}
+	}
+}
+
+void AUDArena::SetHealthPickupCooldownMode(bool bInCooldownMode)
+{
+	for (int i = 0; i < HealthPickups.Num(); i++)
+	{
+		HealthPickups[i]->bInCooldownMode = bInCooldownMode;
+	}
+}

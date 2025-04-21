@@ -328,7 +328,7 @@ void AUDPlayerCharacter::ExpendEnergy(float ToExpend)
 
 void AUDPlayerCharacter::SetHealth(int Value)
 {
-	int DeltaHealth = Value - CurrentEnergy;
+	int DeltaHealth = Value - CurrentHealth;
 
 	CurrentHealth = Value;
 	

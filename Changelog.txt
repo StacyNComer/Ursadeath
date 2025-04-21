@@ -2,9 +2,36 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
-~~ Adjust the burst speed of the Archer Legionnaire (Burst Knight). I think they are *a bit* overwhelming. ~~
-^- WONT DO - Now that I'm testing them with a computer that can actually run the game, they're fine (imho).
-~~ All shooting enemies NEED a windup ~~ DONE - Thanks Travis!
+
+=== Update 35 Settings of Doom ===
+
+* Added a settings menu to the game. Currently this allows the aim sensitivity to be adjusted for controller
+  and keyboard and for the Y-Axis aiming to be inverted.
+
+* The Ho-to-Play screen can now be viewed from the pause menu.
+
+* The pause menu now has the game title!
+
+	> Bugfixes
+
+* Gladiators and melee squires should no longer be able to hit the play more than once with a single attack.
+
+* The "low health" animation now properly loops instead of only playing once.
+
+* The "low health" animation now properly disappears when the player is healed above 50% health.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Very rarely, it is possible to "kill" an extra enemy and thus make the enemy counter negative, softlocking the
+  game!
+
+* If you close a menu with a confirmation screen up, the confirmation screen will still be up when the menu
+  is reopened.
+
 
 === Update 34 Pause Menu of Doom ===
 

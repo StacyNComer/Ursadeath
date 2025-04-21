@@ -12,7 +12,8 @@
 				"Engine",
 				"CoreUObject",
 				"AIModule",
-				"UMG"
+				"UMG",
+				"EnhancedInput"
 			]
 		}
 	],
@@ -23,6 +24,10 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
 		}
 	]
 }

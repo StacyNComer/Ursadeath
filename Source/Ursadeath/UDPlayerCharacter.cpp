@@ -91,8 +91,8 @@ void AUDPlayerCharacter::BeginPlay()
 	HUDWidget->AddToViewport();
 
 	// Set the HUD to display the players starting stats.
-	HUDWidget->UpdateHealth(CurrentHealth, 0);
-	HUDWidget->UpdateEnergy(CurrentEnergy, 0, false);
+	HUDWidget->UpdateHealth(CurrentHealth, MaxHealth, 0);
+	HUDWidget->UpdateEnergy(CurrentEnergy, MaxEnergy, 0, false);
 
 	//Create the status icons for being hasted and invulnerable.
 	HasteStatusWidget = HUDWidget->AddPlayerStatusIcon();
@@ -263,6 +263,7 @@ void AUDPlayerCharacter::SetEnergy(float Value)
 	//Check if the change in energy resulted in an energy bar being filled.
 	bool EnergyBarGained = floorf(Value / 100) > floorf(CurrentEnergy / 100);
 	
+	//Set the player's energy
 	CurrentEnergy = Value;
 
 	if (EnergyBarGained && EnergyBarGainedSound)
@@ -271,7 +272,7 @@ void AUDPlayerCharacter::SetEnergy(float Value)
 	}
 
 	//Update the UI
-	HUDWidget->UpdateEnergy(CurrentEnergy, DeltaEnergy, EnergyBarGained);
+	HUDWidget->UpdateEnergy(CurrentEnergy, MaxEnergy, DeltaEnergy, EnergyBarGained);
 }
 
 void AUDPlayerCharacter::AddEnergy(float ToAdd)
@@ -333,7 +334,7 @@ void AUDPlayerCharacter::SetHealth(int Value)
 	CurrentHealth = Value;
 	
 	//Update the UI
-	HUDWidget->UpdateHealth(CurrentHealth, DeltaHealth);
+	HUDWidget->UpdateHealth(CurrentHealth, MaxHealth, DeltaHealth);
 }
 
 void AUDPlayerCharacter::DamagePlayer(int Damage)

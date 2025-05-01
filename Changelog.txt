@@ -2,6 +2,30 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 36 Nerfs of Doom I ===
+
+* Reduced the player's max energy: 300 => 400.
+	* For perspective, using a Rocket/Shockwave costs 100 energy.
+
+* Shockwaves have been nerfed:
+	* Their width is reduced: 1400 => 700.
+	* The stun time has been reduced: 6s => 5s.
+
+	~ Known Bugs
+
+* The energy bar does not properly reflect how much energy the player has, appearing as if they have less
+  than they actually do.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Very rarely, it is possible to "kill" an extra enemy and thus make the enemy counter negative, softlocking the
+  game!
+
+* If you close a menu with a confirmation screen up, the confirmation screen will still be up when the menu
+  is reopened.
+
 
 === Update 35 Settings of Doom ===
 

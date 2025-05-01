@@ -78,11 +78,11 @@ protected:
 public:
 	/**Called by the player character whenever their health changes. When Health Change is 0, the player's health is being initialized at the start of the game. Override to define how the HUD should change in response to the player's health.*/
 	UFUNCTION(BlueprintImplementableEvent)
-		void UpdateHealth(int PlayerHealth, int HealthChange);
+		void UpdateHealth(int PlayerHealth, int MaxHealth, int HealthChange);
 
 	/**Called by the player character whenever their energy changes. When the Energy Change is 0, the player's energy is being initialized at the start of the game. Override to define how the HUD should change in response to the player's energy.*/
 	UFUNCTION(BlueprintImplementableEvent)
-		void UpdateEnergy(float PlayerEnergy, float EnergyChange, bool EnergyBarGained);
+		void UpdateEnergy(float PlayerEnergy, float MaxEnergy, float EnergyChange, bool EnergyBarGained);
 
 	/** Displays the given text to the player as an announcement for the given amount of time. Note that this will overrite any previously displayed announcement as well as its DisplayTime.*/
 	UFUNCTION(BlueprintCallable)

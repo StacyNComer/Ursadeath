@@ -6,15 +6,26 @@ Auto aim or aim accel for controller?
 
 * Reduced the player's max energy: 300 => 400.
 	* For perspective, using a Rocket/Shockwave costs 100 energy.
+	# A single rocket/shockwave can be quite powerful, so rather than nerf them, I'm making it
+	  harder to horde them and burst down difficult waves.
 
 * Shockwaves have been nerfed:
 	* Their width is reduced: 1400 => 700.
 	* The stun time has been reduced: 6s => 5s.
 
+* Decreased the Archer Legionarre's Stun Multiplier: x2 => x1.5
+
+* Increased the Archer Legionarre's Projectile Speed: 3000 => 4500.
+	# I want the player to have to respect their space a bit more.
+
+* Increased the Archer Legionarre's movement speed: 400 => 600.
+
+* The player's exact amount of energy now shows in the HUD.
+
 	~ Known Bugs
 
-* The energy bar does not properly reflect how much energy the player has, appearing as if they have less
-  than they actually do.
+* The energy bars divisions are slightly misaligned; the player needs slightly more than a full bar before they
+   gain a use of their rocket/shockwave.
 
 * Buttons do not appear "pressed" when used via controller input.
 

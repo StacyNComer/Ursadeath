@@ -22,6 +22,8 @@ Auto aim or aim accel for controller?
 
 * The player's exact amount of energy now shows in the HUD.
 
+* Changed the enemy hitsound to something hopefully less grating.
+
 	~ Known Bugs
 
 * The energy bars divisions are slightly misaligned; the player needs slightly more than a full bar before they

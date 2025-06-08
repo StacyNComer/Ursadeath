@@ -136,6 +136,7 @@ void AUDPlayerCharacter::Tick(float deltaTime)
 	if (HasteTimeTracker > 0)
 	{
 		HasteTimeTracker -= deltaTime;
+		HasteStatusWidget->DecrementStatusTime(deltaTime);
 
 		if (HasteTimeTracker <= 0)
 		{
@@ -413,7 +414,7 @@ void AUDPlayerCharacter::ApplyHaste(float Time)
 		HasteTimeTracker = Time;
 
 		//Show in the player's HUD that they are Hasted for the given time.
-		HasteStatusWidget->SetStatusBarTime(Time);
+		HasteStatusWidget->StartStatusBar(Time);
 	}
 }
 
@@ -424,7 +425,7 @@ void AUDPlayerCharacter::ApplyInvulnerability(float Time)
 		InvulnerabilityTimeTracker = Time;
 
 		//Show in the player's HUD that they are invuln for the given time.
-		InvulnerableStatusWidget->SetStatusBarTime(Time);
+		InvulnerableStatusWidget->StartStatusBar(Time);
 	}
 }
 

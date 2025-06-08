@@ -47,7 +47,14 @@ protected:
 public:
 	/** Sets the status icon's bar to drain from full to empty over the given amount of time. It is also possible to use GetStatusBar to interact with the bar directly.*/
 	UFUNCTION(BlueprintCallable)
-		void SetStatusBarTime(float StatusTime);
+	void StartStatusBarFromTime(float MaxStatusTime, float CurrentStatusTime);
+	
+	UFUNCTION(BlueprintCallable)
+		void StartStatusBar(float StatusTime);
+
+	/** Decrease the status bar's time. Positive values will increase it instead. Make sure you call StartStatusBar to make the icon visible and set its max value.*/
+	UFUNCTION(BlueprintCallable)
+		void DecrementStatusTime(float DeltaTime);
 
 	/** Returns the status icon's progress bar.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure)

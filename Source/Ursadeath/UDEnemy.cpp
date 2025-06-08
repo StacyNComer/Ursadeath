@@ -165,39 +165,32 @@ void AUDEnemy::Tick(float DeltaTime)
 
 void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* AttackSource)
 {
-	//Call the attack recieved event.
+	//Call the attack recieved event. IMPORTANT: this event is used to calculate damage weaknesses and must be perfored first for damage/stun values to be accurate.
 	if (OnAttackRecieved.IsBound())
 	{
 		OnAttackRecieved.Broadcast(AttackData);
 	}
 
+	int32 AttackDamage = AttackData->AttackStats.Damage;
+	float AttackStunTime = AttackData->AttackStats.StunTime;
+
+	//Calculate if the enemy was killed by the attack. We do this before actually damaging them to make sure they weren't already dead.
+	bool WasKilled = Health > 0 && (Health - AttackDamage) <= 0;
+
 	//If the attack deals damage, damage the enemy and play a hit sound.
 	if (AttackData->AttackStats.Damage > 0)
 	{
-		Health -= AttackData->AttackStats.Damage;
+		Health -= AttackDamage;
 
 		//Play the damage sound.
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, GetActorLocation());
 	}
 
 	//Stun the enemy if the attack should stun them.
-	float AttackStunTime = AttackData->AttackStats.StunTime; 
-	if (AttackStunTime > 0)
+	if (!WasKilled && AttackStunTime > 0)
 	{
 		ApplyStun(AttackStunTime);
 	}
-
-#if WITH_EDITOR
-	//If PrintDamageTaken is enabled, print the damage/stun that an enemy has taken and their remaining health.
-	if (PrintDamageTaken)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Damage: ") + FString::SanitizeFloat(AttackData->AttackStats.Damage));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("StunTime: ") + FString::SanitizeFloat(AttackData->AttackStats.StunTime));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Remaining Health: ") + FString::SanitizeFloat(Health));
-	}
-#endif
-	
-	bool WasKilled = Health <= 0;
 
 	//Report that an enemy was hit to the attack's owning player.
 	if (AttackSource)
@@ -224,7 +217,7 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 		StunParticleComponent->Deactivate();
 		SlowParticleComponent->Deactivate();
 
-		//Interrupt the enemy as if they were stunned. This should cause any ongoing attacks no reliant on the AI to end, assuming this event is implemented correctly.
+		//Interrupt the enemy as if they were stunned. This should cause any ongoing attacks not reliant on the AI to end, assuming this event is implemented correctly.
 		OnInterrupted(IsStunned());
 
 		//Broadcast the OnEnemyKilled event.
@@ -246,6 +239,16 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
 		}
 	}
+
+#if WITH_EDITOR
+	//If PrintDamageTaken is enabled, print the damage/stun that an enemy has taken and their remaining health.
+	if (PrintDamageTaken)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Damage: ") + FString::SanitizeFloat(AttackDamage));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("StunTime: ") + FString::SanitizeFloat(AttackStunTime));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Remaining Health: ") + FString::SanitizeFloat(Health));
+	}
+#endif
 }
 
 const bool AUDEnemy::IsStunned()

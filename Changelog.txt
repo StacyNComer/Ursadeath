@@ -2,6 +2,74 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 37 Nerfs of Doom II === 
+TODO: Update the upgrade Descs.
+
+* Melee attacks now give less energy: 25% => 20%.
+
+* Primary Fire now gives less energy: 2% => 1%.
+
+* Adjusted Rockets:
+	* Reduced the self damage: 30 => 25.
+	* Quadrupeled the projectile speed: 3000 => 12000.
+	* Increased the projectile diameter: 20 => 50.
+	# I wanted to make the rocket able to compete more with the Shockwave. Now there is less risk
+	  of damaging onself or missing the attack entirely. I also buffed its upgrades (see below). I the
+	  future, I want to add more rocket upgrades that interact with the player's melee or primary fire.
+	  I suspect another major problem with rockets is that their upgrades both aren't particularly strong
+	  and don't have synergy with anything.
+
+* Adjusted the Blood Claw upgrade:
+	* Increased the cooldown: 9s => 16s.
+	* Increased the Stun time: 2s => 3s.
+	* Blood Claw now only triggers if hitting a Knight tier enemy.
+	# This was basically a free rocket every 9 seconds!
+	
+* Reduced the stun time for Flick of the Wrist: 8s => 5s.
+
+* Adjusted the Thunderstorm upgrade:
+	* Increased the radius: 750 => 1000.
+	* Upon obtaining the upgrade, a ring showing the lightning radius appears around the player.
+		* sparks also spawn around them!
+
+* Doubled the beam radius of the "Piercing Blast" upgrade: 100 => 200.
+
+* The Shockwave no longer effects an area behind the player.
+	# I want to make the Shockwave just slightly less safe.
+
+* The Shockwave now correctly stuns for 5s instead of 6s.
+	# The last update was supposed to have this change, but I seem to have left it out by accident. :P
+
+* Bumped up the health of Vigilants: 2200 => 2600.
+	# Now it takes 2 melees and 5 primary shots (~.75s of firing) instead of 2 melees and just 1. Doing a
+	  bit of experimenting. I'm planning to do a major rebalance of the content of enemy waves, so I
+	  don't think enemies actually need much of a buff. This does, however, make Shockwave + Melee a bit
+	  less reliable against these enemies.
+
+* The Valiant now gets stunned slightly longer when hit by a rocket: 2s => 2.5s.
+	# Even I would get hit half the time when trying to take advantage of this. It almost felt like a
+	  trap.
+
+	> Bugfixes
+
+* Status icons, such as for Haste or the Blood Claw cooldown, no longer count down while the game is paused,
+  which would cause them to become desynced from the actual cooldown.
+
+* It should no longer be possible for an enemy to "die" a second time, causing the enemy counter to be become
+  negative and softlocking the game.
+	# I say "should" because this bug was rare enough that there is a very real chance I just didn't run
+	  into it after "fixing" it.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* If you close a menu with a confirmation screen up, the confirmation screen will still be up when the menu
+  is reopened.
+
+
 === Update 36 Nerfs of Doom I ===
 
 * Reduced the player's max energy: 300 => 400.

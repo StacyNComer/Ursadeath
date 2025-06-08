@@ -9,7 +9,7 @@ void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if (CurrentStatusBarTime > 0)
+	/*if (CurrentStatusBarTime > 0)
 	{
 		CurrentStatusBarTime -= InDeltaTime;
 
@@ -39,10 +39,10 @@ void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 			StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
 
 		}
-	}
+	}*/
 }
 
-void UUDPlayerStatusIcon::SetStatusBarTime(float StatusTime)
+void UUDPlayerStatusIcon::StartStatusBarFromTime(float MaxStatusTime, float CurrentStatusTime)
 {
 	//Make sure that the widget/statusCounter is visible if it was set to disappear.
 	if (bDisappearWhenStatusDepleted)
@@ -57,8 +57,45 @@ void UUDPlayerStatusIcon::SetStatusBarTime(float StatusTime)
 	StatusBar->SetPercent(1);
 
 	//Set both the max and current status bar value to Status time. The status bar will then deplete over time in the widget's tick function.
-	MaxStatusBarTime = StatusTime;
-	CurrentStatusBarTime = StatusTime;
+	MaxStatusBarTime = MaxStatusTime;
+	CurrentStatusBarTime = CurrentStatusTime;
+}
+
+void UUDPlayerStatusIcon::StartStatusBar(float StatusTime)
+{
+	StartStatusBarFromTime(StatusTime, StatusTime);
+}
+
+void UUDPlayerStatusIcon::DecrementStatusTime(float DeltaTime)
+{
+	CurrentStatusBarTime -= DeltaTime;
+
+	StatusBar->SetPercent(CurrentStatusBarTime / MaxStatusBarTime);
+
+	FNumberFormattingOptions StatusNumberFormat;
+	StatusNumberFormat.MinimumFractionalDigits = StatusNumberFormat.MaximumFractionalDigits = 1;
+
+	if (CurrentStatusBarTime <= 0)
+	{
+		if (bDisappearWhenStatusDepleted)
+		{
+			SetVisibility(ESlateVisibility::Collapsed);
+		}
+		else if (bCounterDisplaysStatusTime)
+		{
+			StatusCounter->SetVisibility(ESlateVisibility::Collapsed);
+		}
+
+		if (bCounterDisplaysStatusTime)
+		{
+			StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
+		}
+	}
+	else if (bCounterDisplaysStatusTime)
+	{
+		StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
+
+	}
 }
 
 UProgressBar* const UUDPlayerStatusIcon::GetStatusBar()

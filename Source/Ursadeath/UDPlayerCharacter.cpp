@@ -26,6 +26,7 @@
 #include "Components/ProgressBar.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UDHealthPickup.h"
+#include "UDPauseMenuWidget.h"
 
 //////////////////////////////////////////////////////////////////////////// AUrsadeathCharacter
 
@@ -114,16 +115,16 @@ void AUDPlayerCharacter::BeginPlay()
 	GameOverWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 	//Create the Pause Screen widget
-	PauseScreenWidget = CreateWidget<UUserWidget>(UDPlayerController, PauseScreenWidgetClass);
-	PauseScreenWidget->AddToViewport();
+	PauseMenuWidget = CreateWidget<UUDPauseMenuWidget>(UDPlayerController, PauseMenuWidgetClass);
+	PauseMenuWidget->AddToViewport();
 	//Make sure the game doesn't start paused
-	PauseScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
 	//Set the input subsystem
 	InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(UDPlayerController->GetLocalPlayer());
 		
 	//Add Input Mapping Context
-	InputSubsystem->AddMappingContext(DefaultMappingContext, 0);
+	InputSubsystem->AddMappingContext(PlayerCharacterMappingContext, 0);
 
 	UrsadeathGameInstance->FinalizePlayerSetup(this);
 }
@@ -169,6 +170,9 @@ void AUDPlayerCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 
 		//Toggling the pause menu
 		EnhancedInputComponent->BindAction(PauseAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::TogglePauseMenu);
+
+		//Backing out of the pause menu
+		EnhancedInputComponent->BindAction(UIBackAction, ETriggerEvent::Started, this, &AUDPlayerCharacter::BackOutPauseMenu);
 
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
@@ -229,31 +233,48 @@ void AUDPlayerCharacter::ToggleRoundMenu()
 	//Decide whether the round screen should be opening or closing. The round screen closes if its visibity is already set to "Visible", and opens if the visibility is set to ANYTHING else.
 	bool RoundScreenOpening = RoundScreenWidget->GetVisibility() != ESlateVisibility::Visible;
 
-	//Prevent this menu from being opened if another menu is already open.
-	if (!(RoundScreenOpening && bInGameMenu))
-	{
-		//Collapse the round screen if it is open. Make the round screen visible otherwise.
-		ESlateVisibility NewRoundScreenVisibility = RoundScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
-		RoundScreenWidget->SetVisibility(NewRoundScreenVisibility);
+	//Collapse the round screen if it is open. Make the round screen visible otherwise.
+	ESlateVisibility NewRoundScreenVisibility = RoundScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	RoundScreenWidget->SetVisibility(NewRoundScreenVisibility);
 
-		//Pause the game if the round screen is being opened. Unpause if it is being closed.
-		SetIsInPauseMenu(RoundScreenOpening);
+	//Enable/Disable the Round Menu controls
+	if (RoundScreenOpening)
+	{
+		InputSubsystem->AddMappingContext(RoundMenuMappingContext, 0);
 	}
+	else
+	{
+		InputSubsystem->RemoveMappingContext(RoundMenuMappingContext);
+	}
+
+	//Pause the game if the round screen is being opened. Unpause if it is being closed.
+	SetIsInMenu(RoundScreenOpening);
 }
 
 void AUDPlayerCharacter::TogglePauseMenu()
 {
-	bool PauseScreenOpening = PauseScreenWidget->GetVisibility() != ESlateVisibility::Visible;
+	bool PauseScreenOpening = PauseMenuWidget->GetVisibility() != ESlateVisibility::Visible;
 
-	//Prevent this menu from being opened if another menu is already open.
-	if (!(PauseScreenOpening && bInGameMenu))
+	//Collapse the round screen if it is open. Make the round screen visible otherwise.
+	ESlateVisibility NewPauseScreenVisibility = PauseScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
+	PauseMenuWidget->SetVisibility(NewPauseScreenVisibility);
+
+	//Enable/disable the pause menu controls.
+	if (PauseScreenOpening)
 	{
-		//Collapse the round screen if it is open. Make the round screen visible otherwise.
-		ESlateVisibility NewPauseScreenVisibility = PauseScreenOpening ? ESlateVisibility::Visible : ESlateVisibility::Collapsed;
-		PauseScreenWidget->SetVisibility(NewPauseScreenVisibility);
-
-		SetIsInPauseMenu(PauseScreenOpening);
+		InputSubsystem->AddMappingContext(PauseMenuMappingContext, 0);
 	}
+	else
+	{
+		InputSubsystem->RemoveMappingContext(PauseMenuMappingContext);
+	}
+
+	SetIsInMenu(PauseScreenOpening);
+}
+
+void AUDPlayerCharacter::BackOutPauseMenu()
+{
+	PauseMenuWidget->BackOutMenu();
 }
 
 void AUDPlayerCharacter::SetEnergy(float Value)
@@ -360,7 +381,7 @@ void AUDPlayerCharacter::DamagePlayer(int Damage)
 		GameOverWidget->DisplayScore(UrsadeathGameInstance->GetCurrentRound(), UrsadeathGameInstance->GetAbsoluteWave());
 
 		//Turn of the player's game controls because they are dead now. Turn on the menu controls
-		InputSubsystem->RemoveMappingContext(DefaultMappingContext);
+		InputSubsystem->RemoveMappingContext(PlayerCharacterMappingContext);
 		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
 
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
@@ -488,6 +509,11 @@ UUDRoundScreenWidget* const AUDPlayerCharacter::GetRoundScreenWidget()
 	return RoundScreenWidget;
 }
 
+AUDPlayerController* const AUDPlayerCharacter::GetUDPlayerController() const
+{
+	return UDPlayerController;
+}
+
 void AUDPlayerCharacter::NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit)
 {
 	if (OnPlayerProjectileHit.IsBound())
@@ -540,7 +566,7 @@ void AUDPlayerCharacter::ReleaseUIViaController()
 	}
 }
 
-void AUDPlayerCharacter::SetIsInPauseMenu(bool bIsPaused)
+void AUDPlayerCharacter::SetIsInMenu(bool bIsPaused)
 {
 	//Pause the game if the round screen is being opened. Unpause if it is being closed.
 	UGameplayStatics::SetGamePaused(GetWorld(), bIsPaused);
@@ -555,14 +581,20 @@ void AUDPlayerCharacter::SetIsInPauseMenu(bool bIsPaused)
 		//Swap the controller to the UI input mode. No more clicking the screen to get the UI to work. It's over. It's dead.
 		UDPlayerController->SetInputMode(FInputModeGameAndUI());
 
-		//Enable the UI controls/
+		//Enable the UI controls
 		InputSubsystem->AddMappingContext(GameMenuMappingContext, 0);
+
+		//Disable the player controls
+		InputSubsystem->RemoveMappingContext(PlayerCharacterMappingContext);
 	}
 	else
 	{
 		UDPlayerController->SetInputMode(FInputModeGameOnly());
 
 		InputSubsystem->RemoveMappingContext(GameMenuMappingContext);
+
+		//Reenable the player controls
+		InputSubsystem->AddMappingContext(PlayerCharacterMappingContext, 0);
 	}
 }
 

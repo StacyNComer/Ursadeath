@@ -12,6 +12,8 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "UDRoundRewardMenu.h"
 #include "UDPlayerUpgrade.h"
+#include "UDPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "PlayerHUD"
 
@@ -374,6 +376,11 @@ void UUrsadeathGameInstance::ResetGame()
 	SetupGame();
 
 	GenerateRound(RoundNumber);
+
+	//Make sure the player is not in the UI input mode (most likely they are if the game is being reset.
+	PlayerCharacter->GetUDPlayerController()->SetInputMode(FInputModeGameOnly());
+
+	UGameplayStatics::OpenLevelBySoftObjectPtr(GetWorld(), GameLevel);
 }
 
 FEnemySpawnData UUrsadeathGameInstance::GetSquireSpawnData()

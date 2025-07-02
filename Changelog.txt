@@ -2,6 +2,48 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 38 Reset of Doom ===
+
+* The energy bar now has a number showing the current energy bars full.
+
+* The the game can now be restarted from the first Round/Wave via the Main Menu. No longer will you have to
+  turn off and back on the game!
+
+* Added a credits screen to the pause menu.
+
+* The Round Screen can now be closed via the ESCAPE key.
+
+* The ESCAPE key now backs out of whatever submenu is open in the Pause Menu. If the Pause Menu is at its root
+  menu, the game instead resumes.
+	* Backing out of any of the confirmation screens (such as the Quit confirmation screen) will close the
+	  screen instead of "confirming" the action. This should make it hard for a player to accidently change
+	  their settings or quit the game.
+
+* The Settings menu should no longer be refered to as the "Options" menu anywhere in game or within blueprints.
+
+* Increased Rocket direct hit damage ever so slightly: 2500 -> 2600
+	# So that they oneshot Vigilants after their health buff.
+
+	> Bugfixes
+
+* The How-to-play screen's background now scales correctly with different sized displays.
+
+* The Round Screen no longer has the outdated How-To-Play screen.
+
+* The "No Upgrade" confirmation now closes if the Round Screen is exited.
+
+* Deleted the stray blue ring that was under the arena.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+ 
+
 === Update 37 Nerfs of Doom II === 
 TODO: Update the upgrade Descs.
 

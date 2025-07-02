@@ -150,6 +150,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		float WaveStartDelay = 3;
 
+	/** The level that the game will load if the player resets for any reason.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
+		TSoftObjectPtr<UWorld> GameLevel;
+
 	/** The current set of Knights types which the game will choose to place in waves. As the game progresses from round to round, more Knight types are added to the spawn pool. Though it should start the game empty, it can be editted in blueprints to allow for debugging.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
 		TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;
@@ -168,6 +172,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UDataTable* UpgradeDataTable;
+
 
 	/** Copied from the UpgradesInPlay whenever the game is set up.*/
 	TArray<FPlayerUpgradeData*> UpgradeRewardPool;

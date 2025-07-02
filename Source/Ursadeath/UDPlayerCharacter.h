@@ -29,6 +29,7 @@ class UUDPlayerTickedUpgrade;
 class AUDHealthPickup;
 class AUDPlayerAttackProjectile;
 class UUDPlayerStatusIcon;
+class UUDPauseMenuWidget;
 struct FEnemyWave;
 enum class EEnemyTier : uint8;
 
@@ -90,11 +91,18 @@ class AUDPlayerCharacter : public ACharacter
 	TObjectPtr<UEnhancedInputLocalPlayerSubsystem> InputSubsystem;
 
 	/** MappingContexts */
+	/** The mapping context for the player character outside of menus.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-		class UInputMappingContext* DefaultMappingContext;
+		class UInputMappingContext* PlayerCharacterMappingContext;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* GameMenuMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputMappingContext* RoundMenuMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputMappingContext* PauseMenuMappingContext;
 
 	/** A component that represents the spawning position and rotation for attacks.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
@@ -113,6 +121,9 @@ class AUDPlayerCharacter : public ACharacter
 	/** Controller Click Input Action*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* ControllerClickAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+		class UInputAction* UIBackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Attacking, meta = (AllowPrivateAccess = "true"))
 		TObjectPtr<UUDPlayerCooldownAbility> PrimaryFireAbility;
@@ -187,7 +198,7 @@ protected:
 		TSubclassOf<UUDRoundScreenWidget> RoundScreenWidgetClass;
 
 	UPROPERTY(EditAnywhere, Category = UI)
-		TSubclassOf<UUserWidget> PauseScreenWidgetClass;
+		TSubclassOf<UUDPauseMenuWidget> PauseMenuWidgetClass;
 
 	/**The class the game over screen will be created as.*/
 	UPROPERTY(EditAnywhere, Category = UI)
@@ -212,7 +223,7 @@ protected:
 		TObjectPtr<UUDGameOverWidget> GameOverWidget;
 
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UUserWidget> PauseScreenWidget;
+		TObjectPtr<UUDPauseMenuWidget> PauseMenuWidget;
 
 	/** The player controller casted to UDPlayerController.*/
 	UPROPERTY(BlueprintReadOnly)
@@ -350,6 +361,8 @@ public:
 	/** Returns a reference to the player's round screen*/
 	UUDRoundScreenWidget* const GetRoundScreenWidget();
 
+	AUDPlayerController* const GetUDPlayerController() const;
+
 	void NotifyOnPlayerProjectileHit(AUDPlayerAttackProjectile* Projectile, AActor* ActorHit);
 
 	///////////////////////////////////////////////////////////////////////// Input Functions
@@ -361,8 +374,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TogglePauseMenu();
 
-protected:
+	/** Regresses the pause menu toward its root "main" menu, closing the pause menu if it is already there.*/
+	void BackOutPauseMenu();
 
+protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -389,7 +404,7 @@ protected:
 	//End Input Functions
 
 	/** Pause the game and set the player input to work with menus. This can be used for any menu that should pause the game while the player interacts with it (e.g. the round screen)*/
-	void SetIsInPauseMenu(bool bIsPaused);
+	void SetIsInMenu(bool bIsPaused);
 
 protected:
 	// APawn interface

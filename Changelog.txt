@@ -2,6 +2,29 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 38.01 Reset of Doom ===
+
+(You don't need new compiled code if you already have the code that came with Update 38)
+
+* Increased the size of the Health Pickup base plate.
+
+* Scaled the Health Pickup respawn VFX to fit with the base plate.
+
+* Reverted the enemy hit sound to the old "hitmarker" sound.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* Occaisionally, the numbers for the Blood Claw upgrade's cooldown do not disappear when the cooldown reaches
+  0.
+
+
 === Update 38 Reset of Doom ===
 
 * The energy bar now has a number showing the current energy bars full.
@@ -42,6 +65,9 @@ Auto aim or aim accel for controller?
 
 * Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
   confirm it as if it were still selected.
+
+* Occaisionally, the numbers for the Blood Claw upgrade's cooldown do not disappear when the cooldown reaches
+  0.
  
 
 === Update 37 Nerfs of Doom II === 

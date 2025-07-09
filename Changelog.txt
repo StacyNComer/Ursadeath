@@ -2,7 +2,58 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
-=== Update 38.01 Reset of Doom ===
+=== Update 38.02 ===
+[This is the Alpha v3 update!]
+
+(You don't need new compiled code if you already have the code that came with Update 38)
+
+* Adjusted the Siphon Soul upgrade:
+	* It now only heals when a non-Squire is killed.
+	* The healing amount has been reduced to 8 hitpoints.
+	# The Haste effect alone makes this upgrade good. Healing from squires basically means you'll only
+	   die if you try to stage dive a swarm of enemies.
+
+* Increased the Archer Legionairre projectile damage: 8 => 10.
+
+* Melee attacks can now be performed by pressing the right thumbstick on controller.
+
+* The Valiant description now clarifies that damage from rocket upgrades also stuns them and correctly
+  gives the rocket damage stun as 2.5 seconds instead of 2 seconds.
+
+* The Archer Legionarre description now correctly states the stuns last 50% longer instead of twice as long.
+
+* Swapped around some of the enemy death sound to (hopefully) be more fitting.
+
+* Made the enemy hit sound slightly quieter.
+
+	> Bugfixes
+
+* Fixed a bug that kept enemies from pathing through the center of the arena.
+
+* The "Low Health" HUD effect now properly scales to different screen sizes.
+
+* The Round Screen's buttons now properly work with controller.
+
+* Removed the "Press ESC to quit" text from the HUD.
+
+* Corrected a typo in the Piercing Blast upgrade description.
+
+	~ Known Bugs
+
+* Valiant can sometimes hit the player twice with their melee attacks.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* Occaisionally, the numbers for the Blood Claw upgrade's cooldown do not disappear when the cooldown reaches
+  0.
+
+
+=== Update 38.01 ===
 
 (You don't need new compiled code if you already have the code that came with Update 38)
 
@@ -156,8 +207,6 @@ TODO: Update the upgrade Descs.
 
 * Increased the Archer Legionarre's movement speed: 400 => 600.
 
-* The player's exact amount of energy now shows in the HUD.
-
 * Changed the enemy hitsound to something hopefully less grating.
 
 	~ Known Bugs
@@ -181,7 +230,7 @@ TODO: Update the upgrade Descs.
 * Added a settings menu to the game. Currently this allows the aim sensitivity to be adjusted for controller
   and keyboard and for the Y-Axis aiming to be inverted.
 
-* The Ho-to-Play screen can now be viewed from the pause menu.
+* The How-to-Play screen can now be viewed from the pause menu.
 
 * The pause menu now has the game title!
 

@@ -51,20 +51,24 @@ void UUDRoundRewardMenu::NativeOnInitialized()
 
 void UUDRoundRewardMenu::ConfirmReward()
 {
+	if (!bRepeatReward)
+	{
+		bMenuActive = false;
+
+		//Prevent the reward options from being selected now that they are accepted.
+		SetRewardOptionsEnabled(false);
+
+		//Set the prompt text to show that the player has accepted their reward.
+		PromptText->SetText(RewardAcceptedMessage);
+	}
+
+	//Disable the confirm button so another reward must be reselected next time the menu is active.
 	ConfirmRewardButton->SetIsEnabled(false);
-
-	bMenuActive = false;
-
-	//Prevent the reward options from being selected now that they are accepted.
-	SetRewardOptionsEnabled(false);
-
-	//Set the prompt text to show that the player has accepted their reward.
-	PromptText->SetText(RewardAcceptedMessage);
-
+	
 	//Get the Reward Option Widget the player just accepted.
-	FRewardOptionEntry RewardOptionEntryAccepted = RewardOptionEntries[RewardIndexSelected];
+	FRewardOptionEntry RewardOptionEntryAccepted = RewardOptionEntries[RewardIndexSelected]; 
 
-	//Create a Description Source for the reward the player accepted.
+		//Create a Description Source for the reward the player accepted.
 	UUDDescriptionSourceWidget* DescSource = CreateWidget<UUDDescriptionSourceWidget>(this, DescriptionSourceClass);	
 	//Set the Description Source's receiver.
 	DescSource->DescriptionReceiver = DescriptionReceiver;
@@ -73,7 +77,7 @@ void UUDRoundRewardMenu::ConfirmReward()
 	//Attach the description to the Rewards Accepted Panel.
 	RewardsAcceptedPanel->AddChild(DescSource);
 
-	//Create a widget to display the reward the player accepted.
+		//Create a widget to display the reward the player accepted.
 	UUDRoundRewardIconWidget* AcceptedRewardWidget = CreateWidget<UUDRoundRewardIconWidget>(this, RewardAcceptedWidgetClass);
 	//Set the accepted reward's image to that of the Reward Option the player had chosen.
 	AcceptedRewardWidget->SetImageUI(RewardOptionEntryAccepted.RewardOptionWidget->GetImage());
@@ -212,6 +216,11 @@ int32 UUDRoundRewardMenu::GetMaxRewardOptions()
 bool UUDRoundRewardMenu::GetMenuActive()
 {
 	return bMenuActive;
+}
+
+void UUDRoundRewardMenu::SetRepeatReward(bool bNewRepeatReward)
+{
+	this->bRepeatReward = bNewRepeatReward;
 }
 
 #undef LOCTEXT_NAMESPACE

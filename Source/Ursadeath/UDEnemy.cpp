@@ -35,6 +35,7 @@ AUDEnemy::AUDEnemy()
 	EnemyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Enemy Collision"));
 	EnemyCollision->SetupAttachment(SceneRoot);
 	EnemyCollision->SetCollisionProfileName("EnemyPawn");
+	EnemyCollision->bDynamicObstacle = true;
 
 	//Set the default spawning material.
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> SpawningMaterialFinder(TEXT("/Game/Ursadeath/Enemies/Core/Materials/M_SpawningEnemy"));

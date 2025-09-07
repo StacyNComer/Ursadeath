@@ -110,9 +110,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = RoundDisplay)
 		void DisplayRound(int RoundNumber, TArray<FEnemyWave> RoundWaves);
 
-	/** Allow the player to start the round by enabling the round button. The button's text is also changed to "Start Round"*/
+	/** If the round is ready to be started, allow the player to start the round by enabling the round button. The button's text is also changed to "Start Round"*/
 	UFUNCTION()
-		void EnableRoundStart();
+		void TryEnableRoundStart();
 
 	UButton* const GetRoundStartButton();
 

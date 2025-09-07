@@ -13,6 +13,7 @@ class AUDArena;
 class AUDPlayerCharacter;
 class UDataTable;
 class UUDPlayerUpgrade;
+class UUDRoundRewardMenu;
 
 /** Holds information about spawning a given type of enemy. Ony one entry should exist on the data table per class of enemy. Squire tier enemies do not currentlt get spawn data.*/
 USTRUCT(BlueprintType)
@@ -82,6 +83,18 @@ struct FEnemyWaveCommonData
 		int32 MaxKnights;
 };
 
+/** Used to check if the wave is the beginning of a new round and how the enemies will progress at the start of that new round. The NONE value means that the wave does not start a new round.*/
+UENUM(BlueprintType)
+enum class ENewRoundType : uint8
+{
+	/** The wave does not start a new round.*/
+	NONE = 0,
+	/** The new round adds a new enemy type.*/
+	NEW_ENEMY = 1,
+	/** The new round upgrades a previously added enemy type.*/
+	UPGRADE_ENEMY = 2
+};
+
 /** A structure meant to act as a blueprint (not the Unreal ones diploid!) for how an enemy wave should behave. The Enemy Waves themselves, and what enemy types spawn in them, are generated at runtime.*/
 USTRUCT(BlueprintType)
 struct FEnemyWaveScheme : public FTableRowBase
@@ -103,6 +116,10 @@ struct FEnemyWaveScheme : public FTableRowBase
 	/** Forces one of the Knight Types to be the newest Knight tier enemy added to the spawn pool.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bUseNewKnight;
+
+	/** Whether the wave is the beginning of a new round and what is added to the round if so.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		ENewRoundType NewRoundType;
 };
 
 /** A structure storing the information about each wave of enemies.*/
@@ -142,10 +159,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		TArray<FEnemyWave> CurrentRoundWaves;
 
-	/** The current round the player is fighting.*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
-		int RoundNumber = 0;
-
 	/** The time it takes in seconds for the next wave to begin after the previous wave ends.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = GameRules)
 		float WaveStartDelay = 3;
@@ -168,11 +181,18 @@ protected:
 
 	/** The spawn data for when a knight enemy type has yet to be chosen for the upcoming round.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
-		FEnemySpawnData UnchosenKnightSpawnData;
+		TArray<FEnemySpawnData> UnchosenKnightSpawnData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UDataTable* UpgradeDataTable;
 
+	/** The Round that the game starts at (0 = Round 1!). Rewards/Enemy choices from previous rounds can still be chosen.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
+		int32 StartingRound = 0;
+
+	/** The wave of the Starting Round that the game starts at (0 = Wave 1).*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
+		int32 StartingWave = 0;
 
 	/** Copied from the UpgradesInPlay whenever the game is set up.*/
 	TArray<FPlayerUpgradeData*> UpgradeRewardPool;
@@ -180,6 +200,8 @@ protected:
 	TArray<FEnemySpawnData> KnightRewardOptions;
 
 	TArray<FPlayerUpgradeData*> UpgradeRewardOptions;
+
+	TArray<ENewRoundType> NewRoundProgessions;
 
 	FRandomStream RandomStream;
 
@@ -190,7 +212,14 @@ protected:
 	TArray<FEnemySpawnData> KnightRewardPool;
 
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
-	TArray<FEnemyWaveScheme*> EnemyWaveSchemes; 
+	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
+
+	UUDRoundRewardMenu* KnightRewardMenu;
+
+	UUDRoundRewardMenu* UpgradeRewardMenu;
+
+	/** The current round the player is fighting.*/
+	int RoundNumber = 0;
 
 	/** The current wave number in the current round that the player is fighting.*/
 	int RoundWaveNumber;
@@ -200,6 +229,12 @@ protected:
 
 	/** If true, the game's seed was randomly generated and will be randomly generated again if the player diesd and restarts.*/
 	bool SeedWasRandomized = false;
+
+	/** How many extra upgrades the player is getting beyond their usual upgrades.*/
+	int32 ExtraUpgrades = 0;
+
+	/** The number of Knight enemy types which have yet to be chosen by the player. Mainly used if the player starts on a wave other than the very first.*/
+	int32 UnchosenEnemies = 0;
 
 public:
 	/** The maximum different classes of Non-Squire tier enemy that should ever be in a single wave.*/
@@ -221,8 +256,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyData)
 		TObjectPtr<UDataTable> KnightSpawnDataTable;
 
-protected:
-	/** Generates the given round and populates the CurrentRoundWaves value. The value stored RoundWaveCounts[RoundIndex] determines the number of waves generated. 
+protected:	
+		void GenerateRound(int RoundIndex, int FirstWaveNum);
+
+	/** Generates the given round and populates the CurrentRoundWaves value. The value stored RoundWaveCounts[RoundIndex] determines the number of waves generated.
 	* The waves are generated using the wave schemes starting from EnemyWaveSchemes[CurrentAbsoluteWave] and ending at EnemyWaveSchemes[CurrentAbsoluteWave + RoundWaveCount] inclusive. Hence, assuming CurrentAbsoluteWave is updated properly, the waves should be generated in the order they appear on the data table, with new calls of this method continuing from where the previous left off.
 	* After a wave is generated, it may be spawned with the StartRound() method.*/
 	UFUNCTION(BlueprintCallable)
@@ -238,7 +275,7 @@ protected:
 
 	/** Replaces all instance of the UnchosenKnight in the current round with the given enemy type.*/
 	UFUNCTION(BlueprintCallable)
-		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType);
+		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType, int32 UnchosenKnightIndex);
 
 	virtual void Init() override;
 	
@@ -273,6 +310,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ResetGame();
 
+	/** Makes sure that there aren't any additional new enemies or enemy upgrades to be chosen from, populating the appropriate reward if there is and telling the menu not to renew if that was the last reward.*/
+	void CheckEnemyProgression();
+		
 	/** Adds the knight type that the player has chosen from their Round Rewards into the spawn pool. The Unchosen Knight instances in the round are also replaced with this new enemy type.*/
 	UFUNCTION()
 		void AddKnightReward();
@@ -302,4 +342,7 @@ public:
 
 	/** Meant to be called when the player's Begin Play initialization is complete. Performs first-time updates to the player's UI and sets them as the Player Character in play.*/
 	void FinalizePlayerSetup(AUDPlayerCharacter* Player);
+
+	/** Returns true if there are no unchosen enemy types or enemy upgrades.*/
+	bool const RoundReadyToStart();
 };

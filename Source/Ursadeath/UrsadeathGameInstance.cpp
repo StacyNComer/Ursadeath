@@ -38,10 +38,31 @@ void UUrsadeathGameInstance::Init()
 	//Populate the enemy wave scheme array.
 	WaveSchemeDataTable->GetAllRows("GameInstanceEnemyWaveSchemeArrayInit", EnemyWaveSchemes);
 
+		//Iterate through the waves to get the number of waves per round.
+	//Tracks which round we are counting the waves for.
+	int RoundBeingCounted = 0;
+	//We start with the first wave already counted and skipped over since that will always be the start of a new round (and therefore mess up the loop!).
+	RoundWaveCounts.Add(1);
+	for (int i = 1; i < EnemyWaveSchemes.Num(); i++)
+	{
+		FEnemyWaveScheme* WaveScheme = EnemyWaveSchemes[i];
+
+		//If the wave represents the start of a new round, increment the round being counted to and add a new index to the RoundWaveCounts array. Otherwise, simply increment the round wave count value.
+		if (WaveScheme->NewRoundType != ENewRoundType::NONE)
+		{
+			RoundBeingCounted++;
+			RoundWaveCounts.Add(1);
+		}
+		else
+		{
+			RoundWaveCounts[RoundBeingCounted]++;
+		}
+	}
+
 	SetupGame();
 
 	//Generate the game's first round.
-	GenerateRound(RoundNumber);
+	GenerateRound(RoundNumber, StartingWave);
 }
 
 void UUrsadeathGameInstance::PopulateKnightRewards()
@@ -50,8 +71,6 @@ void UUrsadeathGameInstance::PopulateKnightRewards()
 	KnightRewardOptions.Empty();
 
 	TArray<FRewardInfo> KnightRewardInfo;
-
-	UUDRoundRewardMenu* KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
 
 	//Set the options for the Knight Type reward.
 	for (int i = 0; i < KnightRewardPool.Num() && i < KnightRewardMenu->GetMaxRewardOptions(); i++)
@@ -77,8 +96,6 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 	UpgradeRewardOptions.Empty();
 
 	TArray<FRewardInfo> UpgradeRewardInfo;
-
-	UUDRoundRewardMenu* UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
 
 	//Take upgrades from the beginning of the UpgradeRewardPool until either the pool is exhausted or the UpgradeMenu's max rewards is reached.
 	while (UpgradeRewardPool.Num() > 0 && UpgradeRewardOptions.Num() < UpgradeRewardMenu->GetMaxRewardOptions())
@@ -158,7 +175,7 @@ void UUrsadeathGameInstance::StartWaveInstant(FEnemyWave Wave)
 	GameArena->SpawnEnemyWave(Wave);
 }
 
-void UUrsadeathGameInstance::GenerateRound(int RoundIndex)
+void UUrsadeathGameInstance::GenerateRound(int RoundIndex, int WavesSkipped)
 {
 	//Get the number of waves that should be generated for this round.
 	int RoundWaveCount = RoundWaveCounts[RoundIndex];
@@ -166,16 +183,34 @@ void UUrsadeathGameInstance::GenerateRound(int RoundIndex)
 	//Empty out the RoundWaves array, reserving space for the round's number of waves.
 	CurrentRoundWaves.Empty(RoundWaveCount);
 
+	//We still generate the entire round, even if we skip a wave. This value slides back the AbsoluteWaveNumber back to the start of the Round.
+	int FirstWaveIndex = AbsoluteWaveNumber - WavesSkipped;
+
+	//If the new round has a new enemy type, add the Unchosen Knight to the pool of enemies.
+	if (WavesSkipped == 0 && EnemyWaveSchemes[FirstWaveIndex]->NewRoundType == ENewRoundType::NEW_ENEMY)
+	{
+		KnightSpawnPool.Add(UnchosenKnightSpawnData[UnchosenEnemies].EnemyClass);
+		UnchosenEnemies++;
+		
+		NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
+	}
+
 	//Generate the waves that will be in the round.
 	for (int i = 0; i < RoundWaveCount; i++)
 	{
 		//Get the wave scheme we'll be using.
-		FEnemyWaveScheme WaveScheme = *EnemyWaveSchemes[AbsoluteWaveNumber + i];
+		FEnemyWaveScheme WaveScheme = *EnemyWaveSchemes[FirstWaveIndex + i];
+
 		FEnemyWave EnemyWave = GenerateEnemyWave(WaveScheme);
 
 		//Add the wave that was just generated to the round.
 		CurrentRoundWaves.Add(EnemyWave);
 	}
+}
+
+void UUrsadeathGameInstance::GenerateRound(int RoundIndex)
+{
+	GenerateRound(RoundIndex, 0);
 }
 
 FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme)
@@ -194,12 +229,12 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	//If UseNewKnight is set to true, forcibly add the UnchosenKnight to the wave. 
 	if (WaveScheme.bUseNewKnight)
 	{
-		EnemyWave.KnightCounts.Add(UnchosenKnightSpawnData.EnemyClass, 1);
+		EnemyWave.KnightCounts.Add(UnchosenKnightSpawnData[0].EnemyClass, 1);
 
 		//Record that the Knight Type is in the wave for later use.
-		WaveKnightTypes.Add(UnchosenKnightSpawnData.EnemyClass);
+		WaveKnightTypes.Add(UnchosenKnightSpawnData[0].EnemyClass);
 
-		KnightPool.Remove(UnchosenKnightSpawnData.EnemyClass);
+		KnightPool.Remove(UnchosenKnightSpawnData[0].EnemyClass);
 	}
 
 	//Add a random Knight Type to the wave's KnightCount map until the map as as many entries as the Wave Scheme's Knight Types. Also populate WaveKnightTypes for later use.
@@ -244,7 +279,7 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	return EnemyWave;
 }
 
-void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType)
+void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType, int32 UnchosenKnightIndex)
 {
 	for (int i = 0; i < CurrentRoundWaves.Num(); i++)
 	{
@@ -252,16 +287,22 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 		FEnemyWave* Wave = &CurrentRoundWaves[i];
 		
 		//Make sure wave contains an unchosen knight.
-		if (Wave->KnightCounts.Contains(UnchosenKnightSpawnData.EnemyClass))
+		if (Wave->KnightCounts.Contains(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass))
 		{
 			//Set what the enemy count for our new enemy type will be from the count of the UnchosenKnight. Then, remove the UnchosenKnight from the listing of enemy counts.
 			int32 EnemyCount;
-			Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData.EnemyClass, EnemyCount);
+			Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass, EnemyCount);
 
 			//Add the new enemy type to the wave.
 			Wave->KnightCounts.Add(NewKnightType, EnemyCount);
 		}	
 	}
+
+	//Remove the now-chosen unchosen knight from the spawn pool.
+	KnightSpawnPool.Remove(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass);
+
+	//Decrement the unchosen enemies now that one of them has been chosen.
+	UnchosenEnemies--;
 
 	//Update the round screen so that it shows the new enemy.
 	UpdateRoundScreen();
@@ -269,14 +310,33 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 
 const FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass)
 {
-	if (EnemyClass == UnchosenKnightSpawnData.EnemyClass)
+	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO: Make this work with different unchosen knights. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+	/*if (EnemyClass == UnchosenKnightSpawnData[0].EnemyClass)
 	{
-		return UnchosenKnightSpawnData;
+		return UnchosenKnightSpawnData[0];
 	}
 	else
 	{
 		return *EnemyDataMap[EnemyClass];
-	}	
+	}*/
+
+	if (EnemyDataMap.Contains(EnemyClass))
+	{
+		return *EnemyDataMap[EnemyClass];
+	}
+	else
+	{
+		for (int i = 0; i < UnchosenKnightSpawnData.Num(); i++)
+		{
+			if (UnchosenKnightSpawnData[i].EnemyClass == EnemyClass)
+			{
+				return UnchosenKnightSpawnData[i];
+			}
+		}
+
+		//The script is never meant to actually get here; If it does, the means there are not enough UnchosenKnight entries in UnchosenKnightSpawnData.
+		return UnchosenKnightSpawnData[-1];
+	}
 }
 
 void UUrsadeathGameInstance::StartRound()
@@ -329,7 +389,7 @@ void UUrsadeathGameInstance::ProcessEndWave()
 			//If there are no KnightRewards to choose from, enable the Round Start Button (Normally the button is disabled until the player selects a new Knight for that round). Otherwise, set the start button text to tell the player to select an enemy type.
 			if (KnightRewardOptions.Num() == 0)
 			{
-				PlayerCharacter->GetRoundScreenWidget()->EnableRoundStart();
+				PlayerCharacter->GetRoundScreenWidget()->TryEnableRoundStart();
 			}
 			else
 			{
@@ -375,7 +435,8 @@ void UUrsadeathGameInstance::ResetGame()
 
 	SetupGame();
 
-	GenerateRound(RoundNumber);
+	//Generate the game's first round.
+	GenerateRound(RoundNumber, StartingWave);
 
 	//Make sure the player is not in the UI input mode (most likely they are if the game is being reset.
 	PlayerCharacter->GetUDPlayerController()->SetInputMode(FInputModeGameOnly());
@@ -416,9 +477,34 @@ void UUrsadeathGameInstance::ShuffleArray(TArray<T> &Array)
 	}
 }
 
+void UUrsadeathGameInstance::CheckEnemyProgression()
+{
+	NewRoundProgessions.RemoveAt(0);
+
+	if (NewRoundProgessions.Num() > 0)
+	{
+		ENewRoundType NextProgression = NewRoundProgessions[0];
+
+		if (NextProgression == ENewRoundType::NEW_ENEMY)
+		{
+			PopulateKnightRewards();
+		}
+		else //We assume that the new round type is UPGRADE_ENEMY if it is not NEW_ENEMY since "NONE" should never actually be in the progression.
+		{
+
+		}
+
+		//If this is the last reward, then tell the menus not to let the player select something else.
+		if (NewRoundProgessions.Num() == 1)
+		{
+			KnightRewardMenu->SetRepeatReward(false);
+			//KnightUpgradeRewardMenu->SetRepeatReward(false);
+		}
+	}
+}
+
 void UUrsadeathGameInstance::AddKnightReward()
 {
-	UUDRoundRewardMenu* KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
 	int32 KnightRewardIndex = KnightRewardMenu->GetRewardSelected();
 
 	//Get the knight reward spawn data
@@ -431,21 +517,16 @@ void UUrsadeathGameInstance::AddKnightReward()
 	KnightSpawnPool.Add(KnightRewardClass);
 
 	//Set the "Unchosen" Knight instances in our round to the new knight type.
-	SetUnchosenKnight(KnightRewardClass);
+	SetUnchosenKnight(KnightRewardClass, UnchosenEnemies-1);
 
 	//Remove the chosen Knight from the Knight reward pool.
 	KnightRewardPool.Remove(RewardData);
 
-	//If there are no more knight rewards to be given, remove the unchosen knight from the spawn pool.
-	if (KnightRewardPool.Num() == 0)
-	{
-		KnightSpawnPool.Remove(UnchosenKnightSpawnData.EnemyClass);
-	}
+	CheckEnemyProgression();
 }
 
 void UUrsadeathGameInstance::AddUpgradeReward()
 {
-	UUDRoundRewardMenu* UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
 	int32 RewardIndex = UpgradeRewardMenu->GetRewardSelected();
 
 	FPlayerUpgradeData* UpgradeData = UpgradeRewardOptions[RewardIndex];
@@ -453,6 +534,21 @@ void UUrsadeathGameInstance::AddUpgradeReward()
 	UUDPlayerUpgrade::CreatePlayerUpgrade(UpgradeData->UpgradeClass, PlayerCharacter);
 
 	UpgradeRewardOptions.Remove(UpgradeData);
+
+	//If the player starts with extra upgrades due to starting beyond Round 1, repopulate the upgrades so that the player has new to choose from.
+	if (ExtraUpgrades > 0)
+	{
+		ExtraUpgrades--;
+
+		DiscardIntoPool(UpgradeRewardPool, UpgradeRewardOptions);
+		
+		PopulateUpgradeRewards();
+
+		if (ExtraUpgrades == 0)
+		{
+			UpgradeRewardMenu->SetRepeatReward(false);
+		}
+	}
 }
 
 void UUrsadeathGameInstance::SetupGame()
@@ -512,14 +608,54 @@ void UUrsadeathGameInstance::SetupGame()
 	//Shuffle the Knight rewards.
 	ShuffleArray(KnightRewardPool);
 
-	//Add the UnchosenKnight to the spawn pool.
-	KnightSpawnPool.Add(UnchosenKnightSpawnData.EnemyClass);
+	//Perform some extra setup if the game is starting on a Round/Wave other than the first.
+	if (StartingRound != 0 || StartingWave != 0)
+	{
+		RoundWaveNumber = AbsoluteWaveNumber = StartingWave;
+
+		RoundNumber = StartingRound;
+
+		//Give the player extra upgrade if starting beyond the first round
+		ExtraUpgrades = StartingRound;
+		
+		//Make sure the absolute wave count lines up.
+		for (int i = 0; i < StartingRound; i++)
+		{
+			AbsoluteWaveNumber += RoundWaveCounts[i];
+		}
+
+		int32 ExtraNewEnemies = 0;
+
+		//Count the number of knight rewards to add.
+		for (int i = 0; i < AbsoluteWaveNumber; i++)
+		{
+			if (EnemyWaveSchemes[i]->NewRoundType == ENewRoundType::NEW_ENEMY)
+			{
+				KnightSpawnPool.Add(UnchosenKnightSpawnData[ExtraNewEnemies].EnemyClass);
+				ExtraNewEnemies++;
+
+				NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
+			}
+		}
+
+		UnchosenEnemies = ExtraNewEnemies;
+	}
 }
 
 void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 {
 	PlayerCharacter = Player;
 
+	//Cache the reward menus.
+	UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
+	KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
+
+	//Tell the Upgrad Menu that it is expected to give out more than one upgrade. 
+	if (ExtraUpgrades > 0)
+	{
+		UpgradeRewardMenu->SetRepeatReward(true);
+	}
+ 
 	UpdateRoundScreen();
 
 	PopulateKnightRewards();
@@ -527,6 +663,11 @@ void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 	PopulateUpgradeRewards();
 
 	Player->GetHUDWidget()->SetGameSeedText(FText::FromName(GameSeedName));
+}
+
+bool const UUrsadeathGameInstance::RoundReadyToStart()
+{
+	return NewRoundProgessions.Num() == 0;
 }
 
 #undef LOCTEXT_NAMESPACE

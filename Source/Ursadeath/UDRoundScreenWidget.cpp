@@ -54,12 +54,11 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 
 	//Bind the confirm button for knight rewards so that it adds the chosen enemy type.
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddKnightReward);
+	//Allow the player to start the round after they choose the round's new knight type.
+	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::TryEnableRoundStart);
 
 	//Bind the confirm button for the Upgrade Rewards so that it gives the player their chosen upgrade.
 	UpgradeRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddUpgradeReward);
-
-	//Allow the player to start the round after they choose the round's new knight type.
-	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::EnableRoundStart);
 }
 
 bool UUDRoundScreenWidget::GetHideConfirmationMenu()
@@ -136,11 +135,14 @@ void UUDRoundScreenWidget::DisplayRound(int RoundNumber, TArray<FEnemyWave> Roun
 	}
 }
 
-void UUDRoundScreenWidget::EnableRoundStart()
+void UUDRoundScreenWidget::TryEnableRoundStart()
 {
-	RoundStartButton->SetIsEnabled(true);
+	if (UrsadeathGameInstance->RoundReadyToStart())
+	{
+		RoundStartButton->SetIsEnabled(true);
 
-	StartButtonText->SetText(LOCTEXT("StartButtonCanStartRound", "Start Round"));
+		StartButtonText->SetText(LOCTEXT("StartButtonCanStartRound", "Start Round"));
+	}	
 }
 
 UButton* const UUDRoundScreenWidget::GetRoundStartButton()

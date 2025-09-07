@@ -2,6 +2,33 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 39 Game Start Overhaul! ===
+[None of these affect the actual game, but should make testing it A LOT easier]
+
+* You can now have the game start on a Wave/Round other than the first. The starting round and starting 
+  wave in that round can be set via the UrsadeathGameInstance Blueprint.
+	# IMPORTANT NOTE: The game's WAVES/ROUNDS start from 0. (e.g. Round 1 in the UrsadeathGameInstance is
+	  actually Round 2!).
+
+	> Bugfixes
+
+* Enemies should now be able to move when manually dragged into the level instead of spawned.
+	# The game was trying to treat them as a wall for the purpose of navigation, so they were essentially
+	  "stuck" inside themselves.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* Occaisionally, the numbers for the Blood Claw upgrade's cooldown do not disappear when the cooldown reaches
+  0.
+
+
 === Update 38.02 ===
 [This is the Alpha v3 update!]
 

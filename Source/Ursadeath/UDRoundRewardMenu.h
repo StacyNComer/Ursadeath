@@ -57,6 +57,9 @@ private:
 	/** True if the menu has reward options to be chosen and the player has yet to choose one.*/
 	bool bMenuActive;
 
+	/** If true, the menu will continue to be active even after a reward is picked. Note that the reward will not automatically be repopulated.*/
+	bool bRepeatReward;
+
 protected:
 	/** The class that this menu's description sources will be created as.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -160,4 +163,6 @@ public:
 
 	/** Returns true if the menu has at least one reward option to choose from and the player has yet to choose one.*/
 	bool GetMenuActive();
+
+	void SetRepeatReward(bool bNewRepeatReward);
 };

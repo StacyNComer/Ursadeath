@@ -13,6 +13,7 @@ class UUDRoundRewardIconWidget;
 class UUDRoundRewardOptionWidget;
 class UUDDescriptionSourceWidget;
 class IUDUIDescriptionReceiver;
+class UUDRewardDisplayWidget;
 
 /**
 * A struct for holding the icon, title, and descrtiption of the rewards to be displayed in the menu. 
@@ -77,13 +78,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 		TObjectPtr<UPanelWidget> RewardOptionPanel;
 
-	/** The UI panel in which the accepted reward widgets are created.*/
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		TObjectPtr<UPanelWidget> RewardsAcceptedPanel;
-
-	/** A text block urging the player to choose their reward.*/
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		TObjectPtr<UTextBlock> RewardTitleText;
+	/** The widget meant to display what rewards the player has accepted.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UUDRewardDisplayWidget> RewardDisplayWidget;
 
 	/** A text block urging the player to choose their reward.*/
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
@@ -99,10 +96,6 @@ protected:
 	/** The maximums different rewards this widget will accept as an option.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		int32 MaxRewardOptions = 3;
-
-	/** The text telling the player what kind of reward the menu offers. Shown above the accepted rewards*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = RewardMessages)
-		FText RewardTitleMessage;
 
 	/** The text that should appear when the player has rewards to choose from.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = RewardMessages)

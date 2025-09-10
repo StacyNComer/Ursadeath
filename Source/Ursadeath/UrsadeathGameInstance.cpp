@@ -427,6 +427,9 @@ void UUrsadeathGameInstance::ResetGame()
 	RoundWaveNumber = 0;
 	AbsoluteWaveNumber = 0;
 
+	//Empty the Round Progressions for the player.
+	NewRoundProgessions.Empty();
+
 	//Reset the Knight spawn pool.
 	KnightSpawnPool.Empty();
 

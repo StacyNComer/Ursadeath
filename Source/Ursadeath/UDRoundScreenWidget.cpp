@@ -24,7 +24,6 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	UrsadeathGameInstance = GetGameInstance<UUrsadeathGameInstance>();
 
 	KnightRewardMenu->InitDescriptionReceiver(this);
-
 	UpgradeRewardMenu->InitDescriptionReceiver(this);
 
 	//Create the Wave Entry widgets.

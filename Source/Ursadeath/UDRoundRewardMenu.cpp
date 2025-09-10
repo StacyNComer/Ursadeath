@@ -9,15 +9,13 @@
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetTree.h"
+#include "UDRewardDisplayWidget.h"
 
 #define LOCTEXT_NAMESPACE "RoundRewards"
 
 void UUDRoundRewardMenu::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	//Set the Reward's title message.
-	RewardTitleText->SetText(RewardTitleMessage);
 
 	//The confirm button for the rewards menu starts disable.
 	ConfirmRewardButton->SetIsEnabled(false); 
@@ -75,7 +73,6 @@ void UUDRoundRewardMenu::ConfirmReward()
 	//Set the Description Source description to that of the reward Option the player had chosen.
 	DescSource->SetDescription(RewardOptionEntryAccepted.DescriptionSource->GetDescription());
 	//Attach the description to the Rewards Accepted Panel.
-	RewardsAcceptedPanel->AddChild(DescSource);
 
 		//Create a widget to display the reward the player accepted.
 	UUDRoundRewardIconWidget* AcceptedRewardWidget = CreateWidget<UUDRoundRewardIconWidget>(this, RewardAcceptedWidgetClass);
@@ -83,6 +80,8 @@ void UUDRoundRewardMenu::ConfirmReward()
 	AcceptedRewardWidget->SetImageUI(RewardOptionEntryAccepted.RewardOptionWidget->GetImage());
 	//Attach the Accepted Reward Widget to its description widget.
 	DescSource->GetContentPanel()->AddChild(AcceptedRewardWidget);
+
+	RewardDisplayWidget->AddReward(DescSource, AcceptedRewardWidget);
 }
 
 void UUDRoundRewardMenu::SetRewardOptionsEnabled(bool IsEnabled)
@@ -97,6 +96,8 @@ void UUDRoundRewardMenu::SetRewardOptionsEnabled(bool IsEnabled)
 void UUDRoundRewardMenu::InitDescriptionReceiver(TScriptInterface<IUDUIDescriptionReceiver> DescReceiver)
 {
 	DescriptionReceiver = DescReceiver;
+
+	RewardDisplayWidget->InitDescriptionReceiver(DescReceiver);
 
 	//Set the description reciever for the reward options.
 	for (int i = 0; i < RewardOptionEntries.Num(); i++)

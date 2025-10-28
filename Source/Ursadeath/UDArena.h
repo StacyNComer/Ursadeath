@@ -13,6 +13,7 @@ class UStaticMeshComponent;
 class AUDHealthPickup;
 class UArrowComponent;
 class UUrsadeathGameInstance;
+class UUDEnemyUpgrade;
 struct FEnemyWave;
 
 /** A struct for tracking how long until a given scene component's position is no longer occupied by a spawning enemy.*/
@@ -110,9 +111,12 @@ protected:
 	/** Test if there are no non-Squire enemies remaining and if current wave has no enemies left to be spawned. If these are true, the wave stops trying to spawn anything. If there are no Squires in play, then game will also proceed to the next wave/round.*/
 	void CheckWaveDepletion();
 
-	UFUNCTION(BlueprintCallable)
-	/** Spawns an enemy at a random free spawn point. This will not check if a there is actually a free place to spawn at.*/
+	/** An overload of SpawnEnemy which gives it no upgrade by default.*/
 	AUDEnemy* SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass);
+	
+	UFUNCTION(BlueprintCallable)
+	/** Spawns an enemy at a random free spawn point. This will not check if a there is actually a free place to spawn at. Also applies an Upgrade to the enemy if one is given.*/
+	AUDEnemy* SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass, UUDEnemyUpgrade* Upgrade);
 
 	/** Returns true if there is at least one free spawn point for an enemy to spawn at.*/
 	UFUNCTION(BlueprintCallable)

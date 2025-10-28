@@ -25,6 +25,7 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 
 	KnightRewardMenu->InitDescriptionReceiver(this);
 	UpgradeRewardMenu->InitDescriptionReceiver(this);
+	EnemyUpgradeRewardMenu->InitDescriptionReceiver(this);
 
 	//Create the Wave Entry widgets.
 	for (int i = 0; i < UrsadeathGameInstance->MaxWavesPerRound; i++)
@@ -55,6 +56,11 @@ void UUDRoundScreenWidget::NativeOnInitialized()
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddKnightReward);
 	//Allow the player to start the round after they choose the round's new knight type.
 	KnightRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::TryEnableRoundStart);
+
+	//Bind the confirm button for the enemy upgrade rewards so that it adds the chosen upgrade.
+	EnemyUpgradeRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddEnemyUpgradeReward);
+	EnemyUpgradeRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(this, &UUDRoundScreenWidget::TryEnableRoundStart);
+
 
 	//Bind the confirm button for the Upgrade Rewards so that it gives the player their chosen upgrade.
 	UpgradeRewardMenu->GetConfirmButton()->OnClicked.AddDynamic(UrsadeathGameInstance, &UUrsadeathGameInstance::AddUpgradeReward);
@@ -154,12 +160,17 @@ UTextBlock* const UUDRoundScreenWidget::GetStartButtonText()
 	return StartButtonText;
 }
 
-UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu()
+UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu() const
 {
 	return KnightRewardMenu;
 }
 
-UUDRoundRewardMenu* const UUDRoundScreenWidget::GetUpgradeRewardMenu()
+UUDRoundRewardMenu* const UUDRoundScreenWidget::GetEnemyUpgradeRewardMenu() const
+{
+	return EnemyUpgradeRewardMenu;
+}
+
+UUDRoundRewardMenu* const UUDRoundScreenWidget::GetUpgradeRewardMenu() const
 {
 	return UpgradeRewardMenu;
 }

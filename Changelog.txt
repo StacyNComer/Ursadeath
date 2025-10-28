@@ -2,6 +2,25 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 40 Ascension of Doom ===
+
+* Added a mechanic where enemies can gain "Ward". Ward acts as a shield that takes damage in place of the
+  enemy's health. As long as an enemy has at least one point of Ward, they are completely immune to rockets
+  and shockwaves.
+	* The only way in game for an enemy to recieve Ward as of this update is the "Warded" Ascension
+	  (see below).
+
+* Enemy types can now gain "Ascensions" (called EnemyUpgrades in code). These essentially upgrade all enemies 
+  of the relevant type in some major way.
+	* Currently the only Ascension type is "Warded", which grants the chosen enemy ward equal to 50%
+	  of their hitpoint maximum upon spawning.
+	* On rounds where enemies gain Ascensions, the player does not get to pick an upgrade!
+
+* There is now a 4th round. Instead of choosing a new enemy type this round, the player chooses an existing
+  enemy type to recieve an Ascension.
+	# For now, this is just an exact copy of Round 3 in terms of the amount of enemies spawned.
+
+
 === Update 39.01 Game Start Overhaul! ===
 
 	> Bugfixes

@@ -14,10 +14,16 @@
 #include "UDPlayerUpgrade.h"
 #include "UDPlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "UDEnemyUpgrade.h"
 
 #define LOCTEXT_NAMESPACE "PlayerHUD"
 
-bool FEnemySpawnData::operator==(FEnemySpawnData const& Other)
+bool FEnemySpawnData::operator==(FEnemySpawnData const& Other) const
+{
+	return EnemyClass == Other.EnemyClass;
+}
+
+bool FEnemySpawnEntry::operator==(FEnemySpawnEntry const& Other) const
 {
 	return EnemyClass == Other.EnemyClass;
 }
@@ -33,6 +39,29 @@ void UUrsadeathGameInstance::Init()
 	{
 		FEnemySpawnData* SpawnDataEntry = KnightSpawnData[i];
 		EnemyDataMap.Add(SpawnDataEntry->EnemyClass, SpawnDataEntry);
+	}
+
+	//Get an array of the enemy upgrades
+	TArray<FEnemyUpgradeData*> EnemyUpgradeData;
+	EnemyUpgradeDataTable->GetAllRows("GameInstanceEnemyUpgradeInit", EnemyUpgradeData);
+
+	for (int i = 0; i < EnemyUpgradeData.Num(); i++)
+	{
+		FEnemyUpgradeData UpgradeDataEntry = *EnemyUpgradeData[i];
+
+		/** If the enemy upgrade is enabled, create an instance of it and */
+		if (UpgradeDataEntry.bEnabled)
+		{
+			UUDEnemyUpgrade* UpgradeInstance = UUDEnemyUpgrade::CreateUpgrade(UpgradeDataEntry.UpgradeClass, this);
+
+			FEnemyUpgradeReward EnemyUpgradeReward;
+			EnemyUpgradeReward.UpgradeData = UpgradeDataEntry;
+			EnemyUpgradeReward.UpgradeInstance = UpgradeInstance;
+
+			EnemyUpgradeInstances.Add(EnemyUpgradeReward);
+			
+			EnemyUpgradeReferences.Add(UpgradeInstance);
+		}
 	}
 
 	//Populate the enemy wave scheme array.
@@ -65,12 +94,21 @@ void UUrsadeathGameInstance::Init()
 	GenerateRound(RoundNumber, StartingWave);
 }
 
+void UUrsadeathGameInstance::RemoveFromKnightPool(TSubclassOf<AUDEnemy> EnemyClass)
+{
+	FEnemySpawnEntry RemovedEntry;
+	RemovedEntry.EnemyClass = EnemyClass;
+
+	KnightSpawnPool.Remove(RemovedEntry);
+}
+
 void UUrsadeathGameInstance::PopulateKnightRewards()
 {
 	//Make sure the reward options are cleared out.
 	KnightRewardOptions.Empty();
 
-	TArray<FRewardInfo> KnightRewardInfo;
+	//We populate this array as we select the rewards. We then feed this info to the UI for displaying.
+	TArray<FRewardInfo> KnightRewardOptionInfo;
 
 	//Set the options for the Knight Type reward.
 	for (int i = 0; i < KnightRewardPool.Num() && i < KnightRewardMenu->GetMaxRewardOptions(); i++)
@@ -84,18 +122,46 @@ void UUrsadeathGameInstance::PopulateKnightRewards()
 		KnightInfo.RewardDescription = KnightRewardData.Description;
 		KnightInfo.RewardImage = KnightRewardData.EnemyIcon;
 
-		KnightRewardInfo.Add(KnightInfo);
+		KnightRewardOptionInfo.Add(KnightInfo);
 	}
 
 	//Display the Knight Type Rewards to the player's UI.
-	KnightRewardMenu->SetRewardOptions(KnightRewardInfo);
+	KnightRewardMenu->SetRewardOptions(KnightRewardOptionInfo);
+}
+
+void UUrsadeathGameInstance::PopulateEnemyUpgradeRewards()
+{
+	EnemyUpgradeRewardOptions.Empty();
+
+	//Shuffle the enemy upgrade reward pool. We shuffle before each time the pool is populated because the addition of new Knight types also causes more enemy upgrades to be added!
+	ShuffleArray(EnemyUpgradeRewardPool);
+
+	//We populate this array as we select the rewards. We then feed this info to the UI for displaying.
+	TArray<FRewardInfo> UpgradeRewardOptionInfo;
+
+	for (int i = 0; i < EnemyUpgradeRewardPool.Num() && i < EnemyUpgradeRewardMenu->GetMaxRewardOptions(); i++)
+	{
+		FEnemyUpgradeReward UpgradeReward = EnemyUpgradeRewardPool[i];
+
+		EnemyUpgradeRewardOptions.Add(UpgradeReward);
+
+		FRewardInfo UpgradeInfo;
+
+		UpgradeInfo.RewardDescription = UpgradeReward.UpgradeData.Description;;
+		UpgradeInfo.RewardImage = UpgradeReward.UpgradeData.UIImage;
+
+		UpgradeRewardOptionInfo.Add(UpgradeInfo);
+	}
+
+	EnemyUpgradeRewardMenu->SetRewardOptions(UpgradeRewardOptionInfo);
 }
 
 void UUrsadeathGameInstance::PopulateUpgradeRewards()
 {
 	UpgradeRewardOptions.Empty();
 
-	TArray<FRewardInfo> UpgradeRewardInfo;
+	//We populate this array as we select the rewards. We then feed this info to the UI for displaying.
+	TArray<FRewardInfo> UpgradeRewardOptionInfo;
 
 	//Take upgrades from the beginning of the UpgradeRewardPool until either the pool is exhausted or the UpgradeMenu's max rewards is reached.
 	while (UpgradeRewardPool.Num() > 0 && UpgradeRewardOptions.Num() < UpgradeRewardMenu->GetMaxRewardOptions())
@@ -108,25 +174,12 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 		UpgradeInfo.RewardDescription = UpgradeReward->Description;
 		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
 
-		UpgradeRewardInfo.Add(UpgradeInfo);
+		UpgradeRewardOptionInfo.Add(UpgradeInfo);
 
 		UpgradeRewardPool.Remove(UpgradeReward);
 	}
 
-	/*for (int i = 0; i < UpgradeRewardPool.Num() && i < UpgradeRewardMenu->GetMaxRewardOptions(); i++)
-	{
-		FPlayerUpgradeData* UpgradeReward = UpgradeRewardPool[i];
-		UpgradeRewardOptions.Add(UpgradeReward);
-
-		FRewardInfo UpgradeInfo;
-
-		UpgradeInfo.RewardDescription = UpgradeReward->Description;
-		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
-
-		UpgradeRewardInfo.Add(UpgradeInfo);
-	}*/
-
-	UpgradeRewardMenu->SetRewardOptions(UpgradeRewardInfo);
+	UpgradeRewardMenu->SetRewardOptions(UpgradeRewardOptionInfo);
 }
 
 template<class T>
@@ -187,12 +240,21 @@ void UUrsadeathGameInstance::GenerateRound(int RoundIndex, int WavesSkipped)
 	int FirstWaveIndex = AbsoluteWaveNumber - WavesSkipped;
 
 	//If the new round has a new enemy type, add the Unchosen Knight to the pool of enemies.
-	if (WavesSkipped == 0 && EnemyWaveSchemes[FirstWaveIndex]->NewRoundType == ENewRoundType::NEW_ENEMY)
+	if (WavesSkipped == 0)
 	{
-		KnightSpawnPool.Add(UnchosenKnightSpawnData[UnchosenEnemies].EnemyClass);
-		UnchosenEnemies++;
-		
-		NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
+		if (EnemyWaveSchemes[FirstWaveIndex]->NewRoundType == ENewRoundType::NEW_ENEMY)
+		{
+			FEnemySpawnEntry UnchosenSpawnEntry;
+			UnchosenSpawnEntry.EnemyClass = UnchosenKnightSpawnData[UnchosenEnemies].EnemyClass;
+			KnightSpawnPool.Add(UnchosenSpawnEntry);
+			UnchosenEnemies++;
+
+			NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
+		}
+		else if (EnemyWaveSchemes[FirstWaveIndex]->NewRoundType == ENewRoundType::UPGRADE_ENEMY)
+		{
+			NewRoundProgessions.Add(ENewRoundType::UPGRADE_ENEMY);
+		}
 	}
 
 	//Generate the waves that will be in the round.
@@ -221,7 +283,7 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	EnemyWave.WaveData = WaveScheme.WaveCommonData;
 
 	//Make a copy of the Knight Pool that can be editted.
-	TArray<TSubclassOf<AUDEnemy>> KnightPool = KnightSpawnPool;
+	TArray<FEnemySpawnEntry> KnightPool = KnightSpawnPool;
 
 	//An array of the Knight Types that will be in the wave we are generating. This is used to help us set the actual amount of a Knight Type that will be in the wave.
 	TArray<TSubclassOf<AUDEnemy>> WaveKnightTypes;
@@ -229,26 +291,35 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	//If UseNewKnight is set to true, forcibly add the UnchosenKnight to the wave. 
 	if (WaveScheme.bUseNewKnight)
 	{
-		EnemyWave.KnightCounts.Add(UnchosenKnightSpawnData[0].EnemyClass, 1);
+		FEnemySpawnParams SpawnParams;
+		SpawnParams.Count = 1;
+		EnemyWave.KnightParams.Add(UnchosenKnightSpawnData[0].EnemyClass, SpawnParams);
 
 		//Record that the Knight Type is in the wave for later use.
 		WaveKnightTypes.Add(UnchosenKnightSpawnData[0].EnemyClass);
 
-		KnightPool.Remove(UnchosenKnightSpawnData[0].EnemyClass);
+		FEnemySpawnEntry UnchosenSpawnEntry;
+		KnightPool.Remove(UnchosenSpawnEntry);
 	}
 
 	//Add a random Knight Type to the wave's KnightCount map until the map as as many entries as the Wave Scheme's Knight Types. Also populate WaveKnightTypes for later use.
-	for (int i = 0; EnemyWave.KnightCounts.Num() < WaveScheme.KnightTypes; i++)
+	for (int i = 0; EnemyWave.KnightParams.Num() < WaveScheme.KnightTypes; i++)
 	{
 		//Pick a Knight from a random index in the Knight Pool. The index is remembered to make removing the Knight a bit more efficient later.
 		int KnightTypeIndex = RandomStream.RandRange(0, KnightPool.Num()-1);
-		TSubclassOf<AUDEnemy> KnightType = KnightPool[KnightTypeIndex];
+		FEnemySpawnEntry SpawnEntry = KnightPool[KnightTypeIndex];
+
+		TSubclassOf<AUDEnemy> KnightClass = SpawnEntry.EnemyClass;
+		UUDEnemyUpgrade* KnightUpgrade = SpawnEntry.Upgrade;
 
 		//Add the Knight Type to the Knight Count map. The type's count always starts at 1 so that their is always at least one Knight of each added type.
-		EnemyWave.KnightCounts.Add(KnightType,1);
+		FEnemySpawnParams SpawnParams;
+		SpawnParams.Count = 1;
+		SpawnParams.Upgrade = KnightUpgrade;
+		EnemyWave.KnightParams.Add(KnightClass, SpawnParams);
 
 		//Record that the Knight Type is in the wave for later use.
-		WaveKnightTypes.Add(KnightType);
+		WaveKnightTypes.Add(KnightClass);
 
 		//Remove the Knight type from the spawn pool.
 		KnightPool.RemoveAt(KnightTypeIndex);
@@ -258,7 +329,7 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	if (WaveScheme.KnightTypes == 1)
 	{
 		//If there is only one Knight Type, we can simply set it to have the Knight Count.
-		EnemyWave.KnightCounts[WaveKnightTypes[0]] = WaveScheme.KnightCount;
+		EnemyWave.KnightParams[WaveKnightTypes[0]].Count = WaveScheme.KnightCount;
 	}
 	else
 	{
@@ -272,7 +343,7 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 			TSubclassOf<AUDEnemy> KnightType = WaveKnightTypes[RandomStream.RandRange(0, WaveKnightTypes.Num() - 1)];
 
 			//Increment the Knight Type's count.
-			EnemyWave.KnightCounts[KnightType]++;
+			EnemyWave.KnightParams[KnightType].Count++;
 		}
 	}
 
@@ -287,19 +358,19 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 		FEnemyWave* Wave = &CurrentRoundWaves[i];
 		
 		//Make sure wave contains an unchosen knight.
-		if (Wave->KnightCounts.Contains(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass))
+		if (Wave->KnightParams.Contains(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass))
 		{
 			//Set what the enemy count for our new enemy type will be from the count of the UnchosenKnight. Then, remove the UnchosenKnight from the listing of enemy counts.
-			int32 EnemyCount;
-			Wave->KnightCounts.RemoveAndCopyValue(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass, EnemyCount);
+			FEnemySpawnParams SpawnParams;
+			Wave->KnightParams.RemoveAndCopyValue(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass, SpawnParams);
 
 			//Add the new enemy type to the wave.
-			Wave->KnightCounts.Add(NewKnightType, EnemyCount);
+			Wave->KnightParams.Add(NewKnightType, SpawnParams);
 		}	
 	}
 
 	//Remove the now-chosen unchosen knight from the spawn pool.
-	KnightSpawnPool.Remove(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass);
+	RemoveFromKnightPool(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass);
 
 	//Decrement the unchosen enemies now that one of them has been chosen.
 	UnchosenEnemies--;
@@ -310,16 +381,6 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 
 const FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDEnemy> EnemyClass)
 {
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO: Make this work with different unchosen knights. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
-	/*if (EnemyClass == UnchosenKnightSpawnData[0].EnemyClass)
-	{
-		return UnchosenKnightSpawnData[0];
-	}
-	else
-	{
-		return *EnemyDataMap[EnemyClass];
-	}*/
-
 	if (EnemyDataMap.Contains(EnemyClass))
 	{
 		return *EnemyDataMap[EnemyClass];
@@ -376,10 +437,6 @@ void UUrsadeathGameInstance::ProcessEndWave()
 		//DiscardIntoPool(KnightRewardPool, KnightRewardOptions);
 		DiscardIntoPool(UpgradeRewardPool, UpgradeRewardOptions);
 
-		//Populate the rewards.
-		PopulateKnightRewards();
-		PopulateUpgradeRewards();
-
 		//Generate the game's next round, if one exists. The game will wait for StartRound() to be called before spawning anything.
 		if(RoundWaveCounts.IsValidIndex(RoundNumber + 1))
 		{
@@ -394,6 +451,28 @@ void UUrsadeathGameInstance::ProcessEndWave()
 			else
 			{
 				PlayerCharacter->GetRoundScreenWidget()->GetStartButtonText()->SetText(LOCTEXT("StartButtonChooseEnemy", "You must choose a foe!"));
+			}
+
+			//Populate the rewards.
+			if (NewRoundProgessions[0] == ENewRoundType::NEW_ENEMY)
+			{
+				PopulateKnightRewards();
+
+				KnightRewardMenu->SetVisibility(ESlateVisibility::Visible);
+				EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
+
+				//Players only get an upgrade on rounds where a new knight type is being chosen.
+				PopulateUpgradeRewards();
+			}
+			else
+			{
+				PopulateEnemyUpgradeRewards();
+
+				KnightRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
+				EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Visible);
+
+				//Tell the player that they don't get an upgrade!
+				UpgradeRewardMenu->ShowLockedMessage();
 			}
 
 			UpdateRoundScreen();
@@ -429,9 +508,13 @@ void UUrsadeathGameInstance::ResetGame()
 
 	//Empty the Round Progressions for the player.
 	NewRoundProgessions.Empty();
+	UnchosenEnemies = 0;
 
 	//Reset the Knight spawn pool.
 	KnightSpawnPool.Empty();
+
+	//Reset the enemy upgrade pool
+	EnemyUpgradeRewardPool.Empty();
 
 	//Reset the Upgrade pool
 	UpgradeRewardPool.Empty();
@@ -491,17 +574,23 @@ void UUrsadeathGameInstance::CheckEnemyProgression()
 		if (NextProgression == ENewRoundType::NEW_ENEMY)
 		{
 			PopulateKnightRewards();
+
+			KnightRewardMenu->SetVisibility(ESlateVisibility::Visible);
+			EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		else //We assume that the new round type is UPGRADE_ENEMY if it is not NEW_ENEMY since "NONE" should never actually be in the progression.
 		{
+			PopulateEnemyUpgradeRewards();
 
+			KnightRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
+			EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Visible);
 		}
 
 		//If this is the last reward, then tell the menus not to let the player select something else.
 		if (NewRoundProgessions.Num() == 1)
 		{
 			KnightRewardMenu->SetRepeatReward(false);
-			//KnightUpgradeRewardMenu->SetRepeatReward(false);
+			EnemyUpgradeRewardMenu->SetRepeatReward(false);
 		}
 	}
 }
@@ -517,13 +606,79 @@ void UUrsadeathGameInstance::AddKnightReward()
 	TSubclassOf<AUDEnemy> KnightRewardClass = RewardData.EnemyClass;
 
 	//Add the new knight to the spawn pool.
-	KnightSpawnPool.Add(KnightRewardClass);
+	FEnemySpawnEntry SpawnEntry;
+	SpawnEntry.EnemyClass = KnightRewardClass;
+	KnightSpawnPool.Add(SpawnEntry);
 
 	//Set the "Unchosen" Knight instances in our round to the new knight type.
 	SetUnchosenKnight(KnightRewardClass, UnchosenEnemies-1);
 
 	//Remove the chosen Knight from the Knight reward pool.
 	KnightRewardPool.Remove(RewardData);
+
+	//Add an Enemy Upgrade Reward containing the chosen knight for each upgrade in the game.
+	for (int i = 0; i < EnemyUpgradeInstances.Num(); i++)
+	{
+		FEnemyUpgradeReward UpgradeReward = EnemyUpgradeInstances[i];
+
+		UpgradeReward.EnemyUpgraded = KnightRewardClass;
+
+		//Change the upgrade's title to include the name of the enemy type being upgraded.
+		UpgradeReward.UpgradeData.Description.Title = FText::Format(LOCTEXT("EnemyUpgradeInit", "{UpgradeTitle} {EnemyTitle}"), UpgradeReward.UpgradeData.Description.Title, EnemyDataMap[UpgradeReward.EnemyUpgraded]->Description.Title);
+
+		EnemyUpgradeRewardPool.Add(UpgradeReward);
+	}
+
+	CheckEnemyProgression();
+}
+
+void UUrsadeathGameInstance::AddEnemyUpgradeReward()
+{
+	int32 RewardIndex = EnemyUpgradeRewardMenu->GetRewardSelected();
+
+	FEnemyUpgradeReward UpgradeReward = EnemyUpgradeRewardOptions[RewardIndex];
+	UUDEnemyUpgrade* EnemyUpgrade = UpgradeReward.UpgradeInstance;
+	TSubclassOf<AUDEnemy> EnemyToUpgrade = UpgradeReward.EnemyUpgraded;
+
+	//Find the enemy being upgraded in the spawn pool and set them to have the upgrade.
+	for (int i = 0; i < KnightSpawnPool.Num(); i++)
+	{
+		//We get a pointer to the spawn entry since we will be editting it.
+		FEnemySpawnEntry* SpawnEntry = &KnightSpawnPool[i];
+
+		if (SpawnEntry->EnemyClass == EnemyToUpgrade)
+		{
+			SpawnEntry->Upgrade = EnemyUpgrade;
+		}
+	}
+
+	//Make sure that the relavant enemy in the currently generated wave also gets the upgrade.
+	for (int i = 0; i < CurrentRoundWaves.Num(); i++)
+	{
+		//Get a pointer to the wave being modified this iteration.
+		FEnemyWave* Wave = &CurrentRoundWaves[i];
+
+		//Make sure the wave contains the enemy we are upgrading.
+		if (Wave->KnightParams.Contains(EnemyToUpgrade))
+		{
+			Wave->KnightParams[EnemyToUpgrade].Upgrade = EnemyUpgrade;
+		}
+	}
+
+	//Enemies are only allowed one upgrade: iterate through the upgrade pool and remove any other upgrades that target that enemy.
+	for (int i = 0; i < EnemyUpgradeRewardPool.Num();)
+	{
+		FEnemyUpgradeReward Upgrade = EnemyUpgradeRewardPool[i];
+
+		if (Upgrade.EnemyUpgraded == EnemyToUpgrade)
+		{
+			EnemyUpgradeRewardPool.RemoveAt(i);
+		}
+		else
+		{
+			i++;
+		}
+	}
 
 	CheckEnemyProgression();
 }
@@ -587,8 +742,12 @@ void UUrsadeathGameInstance::SetupGame()
 		KnightRewardPool.Add(*SpawnDataEntry);
 	}
 
+	//Get an array of the enemy upgrades
+	TArray<FEnemyUpgradeData*> EnemyUpgradeData;
+	EnemyUpgradeDataTable->GetAllRows("GameInstanceEnemyUpgradeInit", EnemyUpgradeData);
+
 	//Set the Player Upgrade Pool from the data table of Player Upgrades.
-	UpgradeDataTable->GetAllRows("GameInstancePlayerRewardInit", UpgradeRewardPool);
+	PlayerUpgradeDataTable->GetAllRows("GameInstancePlayerRewardInit", UpgradeRewardPool);
 
 	//Remove any disabled upgrades.
 	for(int i = 0; i < UpgradeRewardPool.Num();)
@@ -619,7 +778,7 @@ void UUrsadeathGameInstance::SetupGame()
 		RoundNumber = StartingRound;
 
 		//Give the player extra upgrade if starting beyond the first round
-		ExtraUpgrades = StartingRound;
+		//ExtraUpgrades = StartingRound;
 		
 		//Make sure the absolute wave count lines up.
 		for (int i = 0; i < StartingRound; i++)
@@ -634,10 +793,23 @@ void UUrsadeathGameInstance::SetupGame()
 		{
 			if (EnemyWaveSchemes[i]->NewRoundType == ENewRoundType::NEW_ENEMY)
 			{
-				KnightSpawnPool.Add(UnchosenKnightSpawnData[ExtraNewEnemies].EnemyClass);
+				FEnemySpawnEntry SpawnEntry;
+				SpawnEntry.EnemyClass = UnchosenKnightSpawnData[ExtraNewEnemies].EnemyClass;
+				KnightSpawnPool.Add(SpawnEntry);
+
 				ExtraNewEnemies++;
 
+				//Add an extra upgrade for each New Enemy Round. We make sure i is not zero since, while the first round is supposed to be a new enemy round, a single upgrade is given to the player regardless of round type!
+				if (i != 0)
+				{
+					ExtraUpgrades++;
+				}
+
 				NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
+			}
+			else if (EnemyWaveSchemes[i]->NewRoundType == ENewRoundType::UPGRADE_ENEMY)
+			{
+				NewRoundProgessions.Add(ENewRoundType::UPGRADE_ENEMY);
 			}
 		}
 
@@ -648,10 +820,13 @@ void UUrsadeathGameInstance::SetupGame()
 void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 {
 	PlayerCharacter = Player;
+	
+	UUDRoundScreenWidget* RoundScreenWidget = PlayerCharacter->GetRoundScreenWidget();
 
 	//Cache the reward menus.
-	UpgradeRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetUpgradeRewardMenu();
-	KnightRewardMenu = PlayerCharacter->GetRoundScreenWidget()->GetKnightRewardMenu();
+	UpgradeRewardMenu = RoundScreenWidget->GetUpgradeRewardMenu();
+	EnemyUpgradeRewardMenu = RoundScreenWidget->GetEnemyUpgradeRewardMenu();
+	KnightRewardMenu = RoundScreenWidget->GetKnightRewardMenu();
 
 	//Tell the Upgrad Menu that it is expected to give out more than one upgrade. 
 	if (ExtraUpgrades > 0)
@@ -662,9 +837,21 @@ void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 	UpdateRoundScreen();
 
 	PopulateKnightRewards();
-
+	PopulateEnemyUpgradeRewards();
 	PopulateUpgradeRewards();
 
+	//Make sure the proper Enemy Reward menu is visible.
+	if (NewRoundProgessions[0] == ENewRoundType::NEW_ENEMY)
+	{
+		KnightRewardMenu->SetVisibility(ESlateVisibility::Visible);
+		EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		KnightRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
+		EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Visible);
+	}
+	
 	Player->GetHUDWidget()->SetGameSeedText(FText::FromName(GameSeedName));
 }
 

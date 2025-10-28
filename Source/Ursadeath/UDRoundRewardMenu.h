@@ -109,6 +109,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = RewardMessages)
 		FText NoRewardsMessage;
 
+	/** Text that appears if a reward is locked or forbidden for any reason. Unlike, the other messages, this must be manually shown via the ShowLockedMessage function.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = RewardMessages)
+		FText RewardLockedMessage;
+
 	/** The description reciever that the reward icons/options will send their descriptions to.*/
 	TScriptInterface<IUDUIDescriptionReceiver> DescriptionReceiver;
 
@@ -158,4 +162,7 @@ public:
 	bool GetMenuActive();
 
 	void SetRepeatReward(bool bNewRepeatReward);
+
+	/** Causes the Prompt Text Block to show the RewardLockedMessage as its text. This lasts until something else changes the text, such as the reward options being set.*/
+	void ShowLockedMessage();
 };

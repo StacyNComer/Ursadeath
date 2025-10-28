@@ -224,4 +224,9 @@ void UUDRoundRewardMenu::SetRepeatReward(bool bNewRepeatReward)
 	this->bRepeatReward = bNewRepeatReward;
 }
 
+void UUDRoundRewardMenu::ShowLockedMessage()
+{
+	PromptText->SetText(RewardLockedMessage);
+}
+
 #undef LOCTEXT_NAMESPACE

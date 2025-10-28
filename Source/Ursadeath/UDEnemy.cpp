@@ -15,6 +15,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "UDEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "UDEnemyUpgrade.h"
 
 
 // Sets default values
@@ -59,6 +60,11 @@ AUDEnemy::AUDEnemy()
 	//Set the slow particles to start deactivated.
 	SlowParticleComponent->bAutoActivate = false;
 
+	//Spawn the root component for the Ward VFX.
+	WardFXRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WardFXRoot"));
+	WardFXRoot->SetupAttachment(SceneRoot);
+	WardFXRoot->SetVisibility(false, true);
+
 	SlowedSpeedScalar = 0.6f;
 }
 
@@ -80,10 +86,10 @@ void AUDEnemy::BeginPlay()
 		{
 			//Print a message incase a different movement component is eventually used. 	
 			//TODO: Remove this message and perhaps edit the code when all of the movement components being used are finalized.
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("This pawn has a movement component other than the Floating Pawn Movement. Tell Stacy so that he can adjust the source code for this. The enemy should work fine, except it can't recieve the 'Slow' effect."));
-			}
+if (GEngine)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, TEXT("This pawn has a movement component other than the Floating Pawn Movement. Tell Stacy so that he can adjust the source code for this. The enemy should work fine, except it can't recieve the 'Slow' effect."));
+}
 		}
 	}
 
@@ -114,6 +120,14 @@ void AUDEnemy::BeginPlay()
 		//Sets a timer that completes the enemy's spawn sequence in SpawningTime seconds.
 		FTimerHandle SpawnTimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &AUDEnemy::EndSpawnSequence, SpawnTime, false);
+	}
+
+	//If the enemy has a debu upgrade, give them that upgrade.
+	if (DebugUpgrade)
+	{
+		UUDEnemyUpgrade* Upgrade = UUDEnemyUpgrade::CreateUpgrade(DebugUpgrade, this);
+
+		Upgrade->OnUpgrageApplied(this);
 	}
 }
 
@@ -175,13 +189,46 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	int32 AttackDamage = AttackData->AttackStats.Damage;
 	float AttackStunTime = AttackData->AttackStats.StunTime;
 
+	//Ward resistances
+	if (Ward > 0)
+	{
+		//Enemies are immune to rockets and shockwaves while warded!
+		if (AttackData->AttackStats.AttackType == EPlayerAttackType::ROCKET || AttackData->AttackStats.AttackType == EPlayerAttackType::SHOCKWAVE)
+		{
+			AttackDamage = 0;
+			AttackStunTime = 0;
+		}
+	}
+		
 	//Calculate if the enemy was killed by the attack. We do this before actually damaging them to make sure they weren't already dead.
-	bool WasKilled = Health > 0 && (Health - AttackDamage) <= 0;
+	bool WasKilled = Health > 0 && (Health + Ward - AttackDamage) <= 0;
+
 
 	//If the attack deals damage, damage the enemy and play a hit sound.
-	if (AttackData->AttackStats.Damage > 0)
+	if (AttackDamage > 0)
 	{
-		Health -= AttackDamage;
+		//If the enemy has any amount of Ward, have it absorb the damage. Otherwise, only the health needs to be affected.
+		if (Ward > 0)
+		{
+			Ward -= AttackDamage;
+
+			//If the damage exceeds the Ward amount (i.e. the damage reduces it below zero), the negative value (or "overflow") is taken from the enemy's health.
+			if (Ward <= 0)
+			{
+				//We add because the Ward amount will be nega
+				Health += Ward;
+
+				//Since we take the Ward value into account when deciding whether or not an enemy has died, we must set the ward to 0 to prevent the enemy from dying prematurely.
+				Ward = 0;
+
+				//Turn of the WardFX
+				WardFXRoot->SetVisibility(false, true);
+			}
+		}
+		else
+		{
+			Health -= AttackDamage;
+		}
 
 		//Play the damage sound.
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DamageSound, GetActorLocation());
@@ -247,7 +294,9 @@ void AUDEnemy::ReceiveAttack(UUDPlayerAttackData* AttackData, AUDPlayerAttack* A
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Damage: ") + FString::SanitizeFloat(AttackDamage));
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("StunTime: ") + FString::SanitizeFloat(AttackStunTime));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Orange, FString("Remaining Health: ") + FString::SanitizeFloat(Health));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString("Remaining Ward: ") + FString::SanitizeFloat(Ward));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, FString("Remaining Health: ") + FString::SanitizeFloat(Health));
+
 	}
 #endif
 }
@@ -306,6 +355,13 @@ bool AUDEnemy::IsValidEnemy() const
 	return ValidEnemy;
 }
 
+void AUDEnemy::ApplyWard(int32 WardAmount)
+{
+	Ward += WardAmount;
+
+	WardFXRoot->SetVisibility(true, true);
+}
+
 void AUDEnemy::SetEnemyTier(EEnemyTier Tier)
 {
 	EnemyTier = Tier;
@@ -362,7 +418,7 @@ void AUDEnemy::EndSpawnSequence()
 	//Give the enemy its collision
 	SetActorEnableCollision(true);
 	
-	//Reset the enemy's mesh materials.
+	//Reset the enemy's mesh materials to their default values.
 	SetEnemyMaterials(NULL);
 
 	//Tell the blueprint side of the script that the enemy has spawned.
@@ -373,10 +429,15 @@ void AUDEnemy::SetEnemyMaterials(UMaterialInterface* newMaterial)
 {	
 	for (int i = 0; i < EnemyMeshes.Num(); i++)
 	{
-		//We iterate throught the meshes materials in case it has more than one material.
-		for (int j = 0; j < EnemyMeshes[i]->GetMaterials().Num(); j++)
+		if (EnemyMeshes[i]->GetAttachParent() != WardFXRoot)
 		{
-			EnemyMeshes[i]->SetMaterial(j, newMaterial);
+			//We iterate throught the meshes materials in case it has more than one material.
+			for (int j = 0; j < EnemyMeshes[i]->GetMaterials().Num(); j++)
+			{
+
+				EnemyMeshes[i]->SetMaterial(j, newMaterial);
+
+			}
 		}
 	}
 }

@@ -45,7 +45,7 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 
 	//Generate an array of the enemy types to be iterated through
 	TArray <TSubclassOf<AUDEnemy>> NonSquireClasses;
-	Wave.KnightCounts.GenerateKeyArray(NonSquireClasses);
+	Wave.KnightParams.GenerateKeyArray(NonSquireClasses);
 
 	//"i" is declared here since we'll need it for multiple loops.
 	int i = 0;
@@ -68,7 +68,7 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 
 		//Set the spawn count. The count shown is multiplied by that enemy's spawn scalar.
 		int32 EnemySpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass).SpawnScalar;
-		SpawnIndicator->SetEnemyCount(Wave.KnightCounts[EnemyClass] * EnemySpawnScalar);
+		SpawnIndicator->SetEnemyCount(Wave.KnightParams[EnemyClass].Count * EnemySpawnScalar);
 
 		//Set the enemy's description from their Spawn Data.
 		EnemyEntry->DescriptionSourceWidget->SetDescription(SpawnDataEntry.Description);

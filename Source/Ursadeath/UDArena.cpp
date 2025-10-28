@@ -6,6 +6,7 @@
 #include "UrsadeathGameInstance.h"
 #include "UDHealthPickup.h"
 #include "Components/ArrowComponent.h"
+#include "UDEnemyUpgrade.h"
 
 // Sets default values
 AUDArena::AUDArena()
@@ -127,7 +128,7 @@ void AUDArena::Tick(float DeltaTime)
 				int32 EnemyClassIndex;
 				TSubclassOf<AUDEnemy> EnemyClass;
 				
-				//Choose a random enemy class from the spawn pool to spawn. The game will
+				//Choose a random enemy class from the spawn pool to spawn. The game will not choose a Knight with a spawn count higher than the remaining spawn points.
 				do
 				{
 					EnemyClassIndex = FMath::RandRange(0, KnightSpawnPool.Num() - 1);
@@ -142,13 +143,16 @@ void AUDArena::Tick(float DeltaTime)
 				if (SpawnAttempts == MaxKnightSpawnAttempts && EnemySpawnScalar > FreeEnemySpawnPoints.Num())
 					break;
 
+				//The upgrade the enemy will recieve, assuming this value is not null.
+				UUDEnemyUpgrade* EnemyUpgrade = CurrentWave.KnightParams[EnemyClass].Upgrade;
+
 				//How much the enemy counts as for the purposes of determining the number of knights in play. A weight of 1 represents the enemy counting as a single enemy.
 				float EnemyCountWeight = 1.0f / EnemySpawnScalar;
 
 				//Spawn the enemy
 				for (int i = 0; i < EnemySpawnScalar; i++)
 				{
-					AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass);
+					AUDEnemy* EnemySpawned = SpawnEnemy(EnemyClass, EnemyUpgrade);
 
 					//Set the enemy to be a Knight. ARISE A KNIGHT!
 					EnemySpawned->SetEnemyTier(EEnemyTier::KNIGHT);
@@ -160,9 +164,9 @@ void AUDArena::Tick(float DeltaTime)
 				}
 
 				//Decrement the amount of the spawned enemy type in the wave. If that enemy type is depleted, remove it from the wave and spawn pool so it is not chosen anymore.
-				if (--CurrentWave.KnightCounts[EnemyClass] == 0)
+				if (--CurrentWave.KnightParams[EnemyClass].Count == 0)
 				{
-					CurrentWave.KnightCounts.Remove(EnemyClass);
+					CurrentWave.KnightParams.Remove(EnemyClass);
 					KnightSpawnPool.RemoveAt(EnemyClassIndex);
 				}
 
@@ -212,7 +216,7 @@ bool AUDArena::GetSquireSlowSpawnActive()
 
 void AUDArena::CheckWaveDepletion()
 {
-	if (CurrentWave.WaveData.SquireCount == 0 && CurrentWave.KnightCounts.Num() == 0 && KnightsInPlay == 0)
+	if (CurrentWave.WaveData.SquireCount == 0 && CurrentWave.KnightParams.Num() == 0 && KnightsInPlay == 0)
 	{
 		bSpawningWave = false;
 
@@ -224,6 +228,11 @@ void AUDArena::CheckWaveDepletion()
 }
 
 AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass)
+{
+	return SpawnEnemy(EnemyClass, nullptr);
+}
+
+AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass, UUDEnemyUpgrade* Upgrade)
 {
 	//Pick a random free spawn point.
 	int SpawnIndex = FMath::RandRange(0, FreeEnemySpawnPoints.Num()-1);
@@ -243,6 +252,12 @@ AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass)
 
 	AUDEnemy* EnemySpawned = World->SpawnActor<AUDEnemy>(EnemyClass, SpawnPoint->GetComponentLocation(), SpawnPoint->GetComponentRotation(), ActorSpawnParams);
 
+	//Add the upgrade to the enemy if one was provided.
+	if (Upgrade)
+	{
+		Upgrade->OnUpgrageApplied(EnemySpawned);
+	}
+
 	//Add the enemy to the corpse array when it dies.
 	EnemySpawned->OnEnemyKilled.AddDynamic(this, &AUDArena::AddEnemyCorpse);
 
@@ -255,9 +270,9 @@ void AUDArena::SpawnEnemyWave(FEnemyWave Wave)
 	CurrentWave = Wave;
 
 	//Generate the pool of Knight enemy types from the ones set to spawn in the enemy wave.
-	CurrentWave.KnightCounts.GenerateKeyArray(KnightSpawnPool);
+	CurrentWave.KnightParams.GenerateKeyArray(KnightSpawnPool);
 
-	//THe squire slow spawning starts on cooldown.
+	//The squire slow spawning starts on cooldown.
 	SquireSlowSpawnCooldownTracker = CurrentWave.WaveData.SquireSlowSpawnCooldown;
 
 	//Tell the arena to start spawning the current wave.
@@ -272,7 +287,7 @@ bool AUDArena::SpawnPointFree()
 bool AUDArena::CanSpawnKnight()
 {
 	//We round up the decimal when comparing the knights in play to the max knight count: Otherwise, killing a single Knight type that spawns in pairs could spawn enemies above the Max Knights!
-	return CurrentWave.KnightCounts.Num() > 0 && FMath::CeilToInt(KnightsInPlay) < CurrentWave.WaveData.MaxKnights;
+	return CurrentWave.KnightParams.Num() > 0 && FMath::CeilToInt(KnightsInPlay) < CurrentWave.WaveData.MaxKnights;
 }
 
 bool AUDArena::CanSpawnSquire()

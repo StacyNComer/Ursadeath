@@ -123,11 +123,11 @@ void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 		TSubclassOf<AUDEnemy> KnightClass = KnightClasses[i];
 		UUDEnemySpawnIndicator* SpawnIndicator = KnightSpawnIndicators[KnightClass];
 
-		if (Wave.KnightCounts.Contains(KnightClass))
+		if (Wave.KnightParams.Contains(KnightClass))
 		{
 			int32 KnightSpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(KnightClass).SpawnScalar;
 
-			SpawnIndicator->SetEnemyCount(Wave.KnightCounts[KnightClass] * KnightSpawnScalar);
+			SpawnIndicator->SetEnemyCount(Wave.KnightParams[KnightClass].Count * KnightSpawnScalar);
 			SpawnIndicator->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		}
 		else

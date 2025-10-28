@@ -18,6 +18,7 @@ class UFloatingPawnMovement;
 class UUDEnemyAnimInstance; 
 class UPrimitiveComponent;
 class UCapsuleComponent;
+class UUDEnemyUpgrade;
 
 /** Represents the tier of enemy. Untiered enemies are summons, Squires are weak fodder type enemies, Knights are stronger elite enemies, and Champions are bosses.*/
 UENUM(BlueprintType)
@@ -55,6 +56,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
 		bool bUndieable;
 
+	/** Creates an instance of the given upgrade and gives it to this enemy. Note that upgrades that effect an enemy outside of them as individuals will not function when spawned this way.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug, meta = (ExposeOnSpawn = "true"))
+		TSubclassOf<UUDEnemyUpgrade> DebugUpgrade;
+
 #if WITH_EDITORONLY_DATA
 	/** If true, print any damage/stun that the enemy takes and their remaining health. Useful for if the damage/stun values of the player's attacks are acting funny.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug, meta = (ExposeOnSpawn = "true"))
@@ -78,6 +83,9 @@ protected:
 		TObjectPtr<UNiagaraComponent> SlowParticleComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
+		TObjectPtr<USceneComponent> WardFXRoot;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
 		TObjectPtr<USoundBase> DamageSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FX)
@@ -99,6 +107,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
 		int32 Health;
+
+	/** A special version of health that causes the enemy to be immune to rockets and shockwaves.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		int32 Ward;
 
 	/** The remaining seconds an enemy has until they are no longer stunned. An enemy is considered to be stunned while this is > 0.*/
 	UPROPERTY(BlueprintReadOnly, Category = Status)
@@ -176,6 +188,10 @@ public:
 	/** Returns true if the enemy has finished spawning and is not dead.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 		bool IsValidEnemy() const;
+
+	/** Increases the enemy's Ward by a given amount. Ward takes damage in place of the enemies health while making them immune to Rockets and Shockwaves.*/
+	UFUNCTION(BlueprintCallable, Category = Status)
+		void ApplyWard(int32 WardAmount);
 
 	/** Returns the amount of time this enemy should spend "spawning in"*/
 	const float GetSpawnTime();

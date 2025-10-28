@@ -73,6 +73,10 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
 		TObjectPtr<UUDRoundRewardMenu> KnightRewardMenu;
 
+	/** The "Reward" menu for viewing or adding to the Knight enemy types in play.*/
+	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
+		TObjectPtr<UUDRoundRewardMenu> EnemyUpgradeRewardMenu;
+
 	UPROPERTY(BlueprintReadWrite, Category = RoundRewards, meta = (BindWidget))
 		TObjectPtr<UUDRoundRewardMenu> UpgradeRewardMenu;
 
@@ -119,9 +123,11 @@ public:
 	UTextBlock* const GetStartButtonText();
 
 	/** Returns the "reward" menus for view or adding Knight enemy types in play.*/
-	UUDRoundRewardMenu* const GetKnightRewardMenu();
+	UUDRoundRewardMenu* const GetKnightRewardMenu() const;
 
-	UUDRoundRewardMenu* const GetUpgradeRewardMenu();
+	UUDRoundRewardMenu* const GetEnemyUpgradeRewardMenu() const;
+
+	UUDRoundRewardMenu* const GetUpgradeRewardMenu() const;
 
 	/** Upgrades are not in the game, so currently this simply enables the Round Start button.*/
 	void SetRoundRewards();

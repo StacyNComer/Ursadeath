@@ -14,6 +14,7 @@ class AUDPlayerCharacter;
 class UDataTable;
 class UUDPlayerUpgrade;
 class UUDRoundRewardMenu;
+class UUDEnemyUpgrade;
 
 /** Holds information about spawning a given type of enemy. Ony one entry should exist on the data table per class of enemy. Squire tier enemies do not currentlt get spawn data.*/
 USTRUCT(BlueprintType)
@@ -34,7 +35,7 @@ struct FEnemySpawnData : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		int32 SpawnScalar = 1;
 
-	bool operator==(FEnemySpawnData const& Other);
+	bool operator==(FEnemySpawnData const& Other) const;
 };
 
 USTRUCT(BlueprintType)
@@ -54,6 +55,39 @@ struct FPlayerUpgradeData : public FTableRowBase
 	/** If false, the upgrade will be excluded from the pool.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		bool bEnabled = true;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyUpgradeData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UUDEnemyUpgrade> UpgradeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UTexture2D> UIImage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FUIDescription Description;
+
+	/** If false, the upgrade will be excluded from the pool.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool bEnabled = true;
+};
+
+USTRUCT(BlueprintType)
+struct FEnemyUpgradeReward
+{
+	GENERATED_BODY()
+
+	FEnemyUpgradeData UpgradeData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UUDEnemyUpgrade> UpgradeInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TSubclassOf<AUDEnemy> EnemyUpgraded;
 };
 
 /** Holds the data shared between the EnemyWaveScheme and the actual EnemyWave.*/
@@ -122,6 +156,38 @@ struct FEnemyWaveScheme : public FTableRowBase
 		ENewRoundType NewRoundType;
 };
 
+/** Holds any information needed to spawn an enemy other than its class.*/
+USTRUCT(BlueprintType)
+struct FEnemySpawnParams
+{
+	GENERATED_BODY()
+
+public:
+	/** How many of the enemy to spawn.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		int32 Count;
+
+	/** The upgrade that should be applied to an enemy when they spawn.*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UUDEnemyUpgrade> Upgrade;
+};
+
+/** Used to link Knight Types to their respective upgrades in the Knight Spawn Pool.*/
+USTRUCT(BlueprintType)
+struct FEnemySpawnEntry
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<AUDEnemy> EnemyClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UUDEnemyUpgrade> Upgrade;
+
+	bool operator==(FEnemySpawnEntry const& Other) const;
+};
+
 /** A structure storing the information about each wave of enemies.*/
 USTRUCT(BlueprintType)
 struct FEnemyWave
@@ -129,9 +195,9 @@ struct FEnemyWave
 	GENERATED_BODY()
 
 public:
-	/** A map linking each Knight Type to how many of that enemy should spawn during a wave. An Knight Type should only have an entry here if greater than 0 of it should spawn.*/
+	/** A map linking each Knight Type to the parameters for spawning them during the wave. A Knight Type should only have an entry here if greater than 0 of it should spawn.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		TMap<TSubclassOf<AUDEnemy>, int32> KnightCounts;
+		TMap<TSubclassOf<AUDEnemy>, FEnemySpawnParams> KnightParams;
 
 	/** Holds the data shared between the wave and the wave scheme that it was made from. The number of each particular type of Knight tier enemy is instead held in the Knight Counts value.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -169,7 +235,7 @@ protected:
 
 	/** The current set of Knights types which the game will choose to place in waves. As the game progresses from round to round, more Knight types are added to the spawn pool. Though it should start the game empty, it can be editted in blueprints to allow for debugging.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = SpawnData)
-		TArray<TSubclassOf<AUDEnemy>> KnightSpawnPool;
+		TArray<FEnemySpawnEntry> KnightSpawnPool;
 
 	/** The data table of FWaveSchemes used to generate waves during gameplay. The waves should be set in chronological order, starting with the first wave.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SpawnData)
@@ -184,7 +250,10 @@ protected:
 		TArray<FEnemySpawnData> UnchosenKnightSpawnData;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		UDataTable* UpgradeDataTable;
+		UDataTable* PlayerUpgradeDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		TObjectPtr<UDataTable> EnemyUpgradeDataTable;
 
 	/** The Round that the game starts at (0 = Round 1!). Rewards/Enemy choices from previous rounds can still be chosen.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
@@ -194,12 +263,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Debug)
 		int32 StartingWave = 0;
 
+	/** An array of each upgrade and its data for being displayed in the UI. The "Enemy Upgraded" value is meant to be null; copies of these paired with enemies as enemy types are added to the game.*/
+	UPROPERTY(BlueprintReadOnly)
+		TArray<FEnemyUpgradeReward> EnemyUpgradeInstances;
+
+	TArray<TObjectPtr<UUDEnemyUpgrade>> EnemyUpgradeReferences;
+
 	/** Copied from the UpgradesInPlay whenever the game is set up.*/
 	TArray<FPlayerUpgradeData*> UpgradeRewardPool;
+
+	/** The data for the knight types which may be offer to the player to be added into play. Initialized from the Knight Spawn Data.*/
+	TArray<FEnemySpawnData> KnightRewardPool;
+
+	TArray<FEnemyUpgradeReward> EnemyUpgradeRewardPool;
 
 	TArray<FEnemySpawnData> KnightRewardOptions;
 
 	TArray<FPlayerUpgradeData*> UpgradeRewardOptions;
+
+	/** Holds the current options for the enemy upgrade rewards. The index of each option corresponds with an index in the relavant UI.*/
+	TArray<FEnemyUpgradeReward> EnemyUpgradeRewardOptions;
 
 	TArray<ENewRoundType> NewRoundProgessions;
 
@@ -208,13 +291,12 @@ protected:
 	/** Maps the classes of non-Squire tier enemies in play to their entry in the data table so that they are easy for other parts of the program to get.*/
 	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData*> EnemyDataMap;
 
-	/** The data for the knight types which may be offer to the player to be added into play. Initialized from the Knight Spawn Data.*/
-	TArray<FEnemySpawnData> KnightRewardPool;
-
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
 	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;
 
 	UUDRoundRewardMenu* KnightRewardMenu;
+
+	UUDRoundRewardMenu* EnemyUpgradeRewardMenu;
 
 	UUDRoundRewardMenu* UpgradeRewardMenu;
 
@@ -278,6 +360,10 @@ protected:
 		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType, int32 UnchosenKnightIndex);
 
 	virtual void Init() override;
+
+	/** Removes the given enemy class from the KnightPool. Gets around conversion issues surrounding FEnemySpawnEntry.
+	* Similar to TArray.Remove, this only removes the first instance found.*/
+	void RemoveFromKnightPool(TSubclassOf<AUDEnemy> EnemyClass);
 	
 	/** Append the elements of the source array to the Pool array in a random order, leaving the source array emptied. Used to discard reward options such that they do not reappear until every reward has been an option for the player.
 	* If SourceArray is empty, nothing should happen.
@@ -287,6 +373,8 @@ protected:
 
 	/** Sets the KnightTypeRewards that the player may choose from and updates their UI to show these options.*/
 	void PopulateKnightRewards();
+
+	void PopulateEnemyUpgradeRewards();
 
 	void PopulateUpgradeRewards();
 
@@ -316,6 +404,9 @@ public:
 	/** Adds the knight type that the player has chosen from their Round Rewards into the spawn pool. The Unchosen Knight instances in the round are also replaced with this new enemy type.*/
 	UFUNCTION()
 		void AddKnightReward();
+
+	UFUNCTION()
+		void AddEnemyUpgradeReward();
 
 	/** Grants to the player the upgrade selected from in the Upgrade Reward Menu.*/
 	UFUNCTION()

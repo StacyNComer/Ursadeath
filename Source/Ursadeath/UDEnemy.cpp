@@ -63,7 +63,6 @@ AUDEnemy::AUDEnemy()
 	//Spawn the root component for the Ward VFX.
 	WardFXRoot = CreateDefaultSubobject<USceneComponent>(TEXT("WardFXRoot"));
 	WardFXRoot->SetupAttachment(SceneRoot);
-	WardFXRoot->SetVisibility(false, true);
 
 	SlowedSpeedScalar = 0.6f;
 }
@@ -72,6 +71,9 @@ AUDEnemy::AUDEnemy()
 void AUDEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//If the enemy didn't spawn with any Ward, make the Ward FX invisible.
+	WardFXRoot->SetVisibility(Ward > 0, true);
 
 	//Set the default size for the stun particles.
 	StunParticleComponent->SetFloatParameter(TEXT("User.SpawnRadius"), StunParticleRadius);

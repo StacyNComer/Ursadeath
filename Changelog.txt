@@ -2,6 +2,43 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 41 Frenzy of Doom ===
+
+* Added the "Frenzy" mechanic. Certain upgrades grant frenzy, doubling primary fire and melee attack speed.
+
+* Added the "BombFrenzy" upgrade (Pyromania in-game). When a rocket is fired, the player gains Frenzy for
+  7 seconds.
+	# This might even be a good rocket upgrade!
+
+* Added the "PickupBuff" upgrade (Unleash Power in-game). When a pickup is used, the player gains both Haste
+  and Frenzy for 7 seconds. 
+
+* Added the "MiniBomb" upgrade (Heavy Weapon in-game). Every 80 primary shots, the next shot also fires a
+  rocket that deals half damage but still triggers rocket upgrades (such as Thunderstorm or Pyromania).
+	* Primary shots while Frenzied count as 60% of a primary shot so that this is not overpowered when
+	  combined with Pyromania.
+
+* Rockets no longer deal self damage.
+	# Shockwaves are so generally useful despite dealing no damage that I felt rockets deserved a bit of a
+	  buff. Originally I made shockwaves to be useful where rockets wouldn't be; You can use them in close
+	  range and its better at hitting enemies through walls. However, I'm realizing that shockwaves are so
+ 	  generally useful that self damage is more of a weakness of rockets than it is encouragement to use
+	  shockwaves.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* The numbers for Blood Claw's cooldown display -0.0 when off cooldown.
+
+
 === Update 40 Ascension of Doom ===
 
 * Added a mechanic where enemies can gain "Ward". Ward acts as a shield that takes damage in place of the
@@ -19,6 +56,18 @@ Auto aim or aim accel for controller?
 * There is now a 4th round. Instead of choosing a new enemy type this round, the player chooses an existing
   enemy type to recieve an Ascension.
 	# For now, this is just an exact copy of Round 3 in terms of the amount of enemies spawned.
+
+	~ Known Bugs
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* Occaisionally, the numbers for the Blood Claw upgrade's cooldown do not disappear when the cooldown reaches
+  0.
 
 
 === Update 39.01 Game Start Overhaul! ===

@@ -152,6 +152,15 @@ class AUDPlayerCharacter : public ACharacter
 
 	/** The status icon that shows when the player is invulnerable.*/
 	TObjectPtr<UUDPlayerStatusIcon> InvulnerableStatusWidget;
+
+	/** The status icon that shows when the player is frenzied.*/
+	TObjectPtr<UUDPlayerStatusIcon> FrenzyStatusWidget;
+
+	/** A multiplier for the player's cooldown abilities. A higher value means longer cooldowns.*/
+	float CooldownScalar = 1;
+
+	/** The time until the player ceases to be frenzied.*/
+	float FrenzyTimeTracker = 0;
 	
 protected:
 	UPROPERTY(BlueprintAssignable)
@@ -210,6 +219,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = UI)
 		UTexture2D* InvulnerableStatusImage;
 
+	UPROPERTY(EditAnywhere, Category = UI)
+		UTexture2D* FrenzyStatusImage;
+
 	/** The player's HUD.*/
 	UPROPERTY(BlueprintReadOnly)
 		TObjectPtr<UUDPlayerHUDWidget> HUDWidget;
@@ -247,6 +259,10 @@ protected:
 	/** The player is immune to damage while this is true.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Debug)
 		bool bPermanentInvulnerability;
+
+	/** How fast cooldowns are while frenzied (ex. 2 makes cooldowns twice as fast).*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Status)
+		float FrenzyCooldownSpeedBonus = 1.5;
 
 	/** How many seconds of invulnerability the player has left.*/
 	float InvulnerabilityTimeTracker = 0;
@@ -312,9 +328,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ApplyInvulnerability(float Time);
 
-	/** Returns true while the player is invulnerable and shouldn't be effected by damage.*/
+	/** Give the player the "Frenzied" effect for the given amount of time, decreasing the cooldown of the player's attacks.*/
 	UFUNCTION(BlueprintCallable)
-		bool IsInvulnerable();
+		void ApplyFrenzy(float Time);
+
+	/** Returns true while the player is invulnerable and shouldn't be effected by damage.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		bool IsInvulnerable() const;
+
+	/** Returns true if the player is cureently under the frenzy.*/
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+		bool IsFrenzied() const;
 
 	/** Spawns the given attack with the player as the owner.*/
 	UFUNCTION(BlueprintCallable)
@@ -323,6 +347,9 @@ public:
 	/** Spawns the given attack class rotated to where the player's camera is facing.*/
 	UFUNCTION(BlueprintCallable)
 		void SpawnAttackFromPlayer(const TSubclassOf<AUDPlayerAttack> AttackClass);
+
+	UFUNCTION(BlueprintCallable)
+		float GetCooldownScalar();
 
 	void AddUpgrade(UUDPlayerUpgrade* Upgrade);
 

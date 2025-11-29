@@ -57,9 +57,13 @@ void AUDPlayerExplosiveProjectile::NotifyOnProjectileHit(AActor* ActorHit)
 			{
 				ApplyAttackExclusive(EnemyHit, ExplosionStats);
 			}
-			else if (AUDPlayerCharacter* PlayerHit = Cast<AUDPlayerCharacter>(OutActorsHit[i]))
+			else if (ExplosionPlayerDamage > 0)
 			{
-				PlayerHit->DamagePlayer(ExplosionPlayerDamage);
+				//This is nested because declarations in IF statements don't play nice with boolean operators.
+				if (AUDPlayerCharacter* PlayerHit = Cast<AUDPlayerCharacter>(OutActorsHit[i]))
+				{
+					PlayerHit->DamagePlayer(ExplosionPlayerDamage);
+				}	
 			}
 
 #if WITH_EDITOR

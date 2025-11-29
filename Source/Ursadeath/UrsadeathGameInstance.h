@@ -170,6 +170,9 @@ public:
 	/** The upgrade that should be applied to an enemy when they spawn.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UUDEnemyUpgrade> Upgrade;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		int32 SpawnScalar = 1;
 };
 
 /** Used to link Knight Types to their respective upgrades in the Knight Spawn Pool.*/
@@ -357,7 +360,7 @@ protected:
 
 	/** Replaces all instance of the UnchosenKnight in the current round with the given enemy type.*/
 	UFUNCTION(BlueprintCallable)
-		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType, int32 UnchosenKnightIndex);
+		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightClass, int32 UnchosenKnightIndex);
 
 	virtual void Init() override;
 

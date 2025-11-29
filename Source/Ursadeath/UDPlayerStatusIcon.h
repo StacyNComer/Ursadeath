@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "UDPlayerStatusIcon.generated.h"
 
+//TODO: recomment the code because a lot of this functionality has had major changes to it.
+
 class UProgressBar;
 class UTextBlock;
 
@@ -52,9 +54,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void StartStatusBar(float StatusTime);
 
+	/** Sets the status bar to display the given value.*/
+	UFUNCTION(BlueprintCallable)
+		void SetStatusValue(float StatusValue);
+
 	/** Decrease the status bar's time. Positive values will increase it instead. Make sure you call StartStatusBar to make the icon visible and set its max value.*/
 	UFUNCTION(BlueprintCallable)
-		void DecrementStatusTime(float DeltaTime);
+		void AddStatusValue(float ValueAdded);
 
 	/** Returns the status icon's progress bar.*/
 	UFUNCTION(BlueprintCallable, BlueprintPure)

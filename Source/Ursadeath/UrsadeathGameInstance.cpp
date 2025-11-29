@@ -312,10 +312,11 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 		TSubclassOf<AUDEnemy> KnightClass = SpawnEntry.EnemyClass;
 		UUDEnemyUpgrade* KnightUpgrade = SpawnEntry.Upgrade;
 
-		//Add the Knight Type to the Knight Count map. The type's count always starts at 1 so that their is always at least one Knight of each added type.
+		//Add the Knight Type to the Knight Param map. The type's count always starts at 1 so that their is always at least one Knight of each added type.
 		FEnemySpawnParams SpawnParams;
 		SpawnParams.Count = 1;
 		SpawnParams.Upgrade = KnightUpgrade;
+		SpawnParams.SpawnScalar = GetSpawnDataEntry(KnightClass).SpawnScalar;
 		EnemyWave.KnightParams.Add(KnightClass, SpawnParams);
 
 		//Record that the Knight Type is in the wave for later use.
@@ -350,7 +351,7 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 	return EnemyWave;
 }
 
-void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightType, int32 UnchosenKnightIndex)
+void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightClass, int32 UnchosenKnightIndex)
 {
 	for (int i = 0; i < CurrentRoundWaves.Num(); i++)
 	{
@@ -364,8 +365,11 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightTy
 			FEnemySpawnParams SpawnParams;
 			Wave->KnightParams.RemoveAndCopyValue(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass, SpawnParams);
 
+			//Make sure the enemy being replaced has the proper Spawn Scalar.
+			SpawnParams.SpawnScalar = GetSpawnDataEntry(NewKnightClass).SpawnScalar;
+
 			//Add the new enemy type to the wave.
-			Wave->KnightParams.Add(NewKnightType, SpawnParams);
+			Wave->KnightParams.Add(NewKnightClass, SpawnParams);
 		}	
 	}
 
@@ -600,10 +604,10 @@ void UUrsadeathGameInstance::AddKnightReward()
 	int32 KnightRewardIndex = KnightRewardMenu->GetRewardSelected();
 
 	//Get the knight reward spawn data
-	FEnemySpawnData RewardData = KnightRewardOptions[KnightRewardIndex];
+	FEnemySpawnData KnightRewardData = KnightRewardOptions[KnightRewardIndex];
 
 	//Get the knight type the player chose from their round rewards.
-	TSubclassOf<AUDEnemy> KnightRewardClass = RewardData.EnemyClass;
+	TSubclassOf<AUDEnemy> KnightRewardClass = KnightRewardData.EnemyClass;
 
 	//Add the new knight to the spawn pool.
 	FEnemySpawnEntry SpawnEntry;
@@ -614,7 +618,7 @@ void UUrsadeathGameInstance::AddKnightReward()
 	SetUnchosenKnight(KnightRewardClass, UnchosenEnemies-1);
 
 	//Remove the chosen Knight from the Knight reward pool.
-	KnightRewardPool.Remove(RewardData);
+	KnightRewardPool.Remove(KnightRewardData);
 
 	//Add an Enemy Upgrade Reward containing the chosen knight for each upgrade in the game.
 	for (int i = 0; i < EnemyUpgradeInstances.Num(); i++)

@@ -2,6 +2,7 @@
 
 
 #include "UDPlayerCooldownAbility.h"
+#include "UDPlayerCharacter.h"
 
 UUDPlayerCooldownAbility::UUDPlayerCooldownAbility()
 {
@@ -28,7 +29,7 @@ void UUDPlayerCooldownAbility::NotifyOnAbilitySuccessful()
 {
 	Super::NotifyOnAbilitySuccessful();
 
-	CurrentCooldown = Cooldown;
+	CurrentCooldown = Cooldown * OwningPlayer->GetCooldownScalar();
 }
 
 void UUDPlayerCooldownAbility::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

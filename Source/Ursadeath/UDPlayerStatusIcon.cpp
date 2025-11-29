@@ -5,6 +5,8 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
+//TODO: recomment the code because a lot of this functionality has had major changes to it.
+
 void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -44,7 +46,7 @@ void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 
 void UUDPlayerStatusIcon::StartStatusBarFromTime(float MaxStatusTime, float CurrentStatusTime)
 {
-	//Make sure that the widget/statusCounter is visible if it was set to disappear.
+	//Make sure that the widget/status Counter is visible if it was set to disappear.
 	if (bDisappearWhenStatusDepleted)
 	{
 		SetVisibility(ESlateVisibility::Visible);
@@ -56,9 +58,13 @@ void UUDPlayerStatusIcon::StartStatusBarFromTime(float MaxStatusTime, float Curr
 
 	StatusBar->SetPercent(1);
 
-	//Set both the max and current status bar value to Status time. The status bar will then deplete over time in the widget's tick function.
+	//Set both the max and current status bar value to Status time. 
 	MaxStatusBarTime = MaxStatusTime;
 	CurrentStatusBarTime = CurrentStatusTime;
+
+	FNumberFormattingOptions StatusNumberFormat;
+	StatusNumberFormat.MinimumFractionalDigits = StatusNumberFormat.MaximumFractionalDigits = 1;
+	StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
 }
 
 void UUDPlayerStatusIcon::StartStatusBar(float StatusTime)
@@ -66,9 +72,9 @@ void UUDPlayerStatusIcon::StartStatusBar(float StatusTime)
 	StartStatusBarFromTime(StatusTime, StatusTime);
 }
 
-void UUDPlayerStatusIcon::DecrementStatusTime(float DeltaTime)
+void UUDPlayerStatusIcon::SetStatusValue(float StatusValue)
 {
-	CurrentStatusBarTime -= DeltaTime;
+	CurrentStatusBarTime = StatusValue;
 
 	StatusBar->SetPercent(CurrentStatusBarTime / MaxStatusBarTime);
 
@@ -81,10 +87,10 @@ void UUDPlayerStatusIcon::DecrementStatusTime(float DeltaTime)
 		{
 			SetVisibility(ESlateVisibility::Collapsed);
 		}
-		else if (bCounterDisplaysStatusTime)
+		/*else if (bCounterDisplaysStatusTime)
 		{
 			StatusCounter->SetVisibility(ESlateVisibility::Collapsed);
-		}
+		}*/
 
 		if (bCounterDisplaysStatusTime)
 		{
@@ -94,8 +100,12 @@ void UUDPlayerStatusIcon::DecrementStatusTime(float DeltaTime)
 	else if (bCounterDisplaysStatusTime)
 	{
 		StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
-
 	}
+}
+
+void UUDPlayerStatusIcon::AddStatusValue(float ValueAdded)
+{
+	SetStatusValue(CurrentStatusBarTime + ValueAdded);
 }
 
 UProgressBar* const UUDPlayerStatusIcon::GetStatusBar()

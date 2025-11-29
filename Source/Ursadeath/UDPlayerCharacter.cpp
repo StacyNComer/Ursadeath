@@ -102,6 +102,9 @@ void AUDPlayerCharacter::BeginPlay()
 	InvulnerableStatusWidget = HUDWidget->AddPlayerStatusIcon();
 	InvulnerableStatusWidget->SetStatusImage(InvulnerableStatusImage);
 
+	FrenzyStatusWidget = HUDWidget->AddPlayerStatusIcon();
+	FrenzyStatusWidget->SetStatusImage(HasteStatusImage);
+
 	//Create the round screen.
 	RoundScreenWidget = CreateWidget<UUDRoundScreenWidget>(UDPlayerController, RoundScreenWidgetClass);
 	RoundScreenWidget->AddToViewport();
@@ -137,7 +140,7 @@ void AUDPlayerCharacter::Tick(float deltaTime)
 	if (HasteTimeTracker > 0)
 	{
 		HasteTimeTracker -= deltaTime;
-		HasteStatusWidget->DecrementStatusTime(deltaTime);
+		HasteStatusWidget->AddStatusValue(-deltaTime);
 
 		if (HasteTimeTracker <= 0)
 		{
@@ -149,7 +152,22 @@ void AUDPlayerCharacter::Tick(float deltaTime)
 	if (InvulnerabilityTimeTracker > 0)
 	{
 		InvulnerabilityTimeTracker -= deltaTime;
+		InvulnerableStatusWidget->AddStatusValue(-deltaTime);
 	}
+
+	//Decrement the player's Frenzy time. Their frenzy ends if the time is depleted to 0.
+	if (FrenzyTimeTracker > 0)
+	{
+		FrenzyTimeTracker -= deltaTime;
+		FrenzyStatusWidget->AddStatusValue(-deltaTime);
+
+		//Undo the Frenzy effect's cooldown bonus when the time is depleted.
+		if (FrenzyTimeTracker <= 0)
+		{
+			CooldownScalar *= FrenzyCooldownSpeedBonus;
+		}
+	}
+
 
 	//Tick any upgrades the player has that requires such.
 	for (UUDPlayerTickedUpgrade* TickedUpgrade : TickedUpgrades)
@@ -450,9 +468,29 @@ void AUDPlayerCharacter::ApplyInvulnerability(float Time)
 	}
 }
 
-bool AUDPlayerCharacter::IsInvulnerable()
+void AUDPlayerCharacter::ApplyFrenzy(float Time)
+{
+	if(FrenzyTimeTracker <= 0)
+	{
+		CooldownScalar /= FrenzyCooldownSpeedBonus;
+	}
+
+	if (Time > FrenzyTimeTracker)
+	{
+		FrenzyTimeTracker = Time;
+
+		FrenzyStatusWidget->StartStatusBar(Time);
+	}
+}
+
+bool AUDPlayerCharacter::IsInvulnerable() const
 {
 	return bPermanentInvulnerability || InvulnerabilityTimeTracker > 0;
+}
+
+bool AUDPlayerCharacter::IsFrenzied() const
+{
+	return FrenzyTimeTracker > 0;
 }
 
 void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackClass, FVector Location, FRotator Rotation)
@@ -478,6 +516,11 @@ void AUDPlayerCharacter::SpawnAttack(const TSubclassOf<AUDPlayerAttack> AttackCl
 void AUDPlayerCharacter::SpawnAttackFromPlayer(const TSubclassOf<AUDPlayerAttack> AttackClass)
 {
 	SpawnAttack(AttackClass, AttackSpawnComponent->GetComponentLocation(), AttackSpawnComponent->GetComponentRotation());
+}
+
+float AUDPlayerCharacter::GetCooldownScalar()
+{
+	return CooldownScalar;
 }
 
 void AUDPlayerCharacter::NotifyOnEnemyHit(AUDEnemy* Enemy, AUDPlayerAttack* Attack, bool EnemyWasKilled)

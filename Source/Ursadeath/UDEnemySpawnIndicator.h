@@ -29,6 +29,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 		void SetEnemyImage(UTexture2D* Image);
 
+	/** Sets the image for the enemy's upgrade.*/
+	UFUNCTION(BlueprintImplementableEvent)
+		void SetUpgradeImage(UTexture2D* Image);
+
 protected:
 	virtual void NativeOnInitialized() override;
 

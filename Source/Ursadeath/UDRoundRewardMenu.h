@@ -23,9 +23,13 @@ struct FRewardInfo
 {
 	GENERATED_BODY()
 
-	/** The image the reward should be displayed as.*/
+	/** The large image the reward should be displayed as.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		UTexture2D* RewardImage;
+		UTexture2D* LargeRewardImage;
+
+	/** The a small image that can optionally accompany the reward.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		UTexture2D* MiniRewardImage;
 
 	/** The description of the reward.*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

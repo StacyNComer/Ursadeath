@@ -22,17 +22,21 @@ struct FEnemySpawnData : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TSubclassOf<AUDEnemy> EnemyClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TObjectPtr<UTexture2D> EnemyIcon;
+
+	/** The icon of the upgrade the enemy currently has. Should start empty.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		TObjectPtr<UTexture2D> UpgradeIcon;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FUIDescription Description;
 
 	/** How many enemies per count in a wave should spawn. (e.g. if this is set to 2, the enemy will spawn in pairs)*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 SpawnScalar = 1;
 
 	bool operator==(FEnemySpawnData const& Other) const;
@@ -47,7 +51,7 @@ struct FPlayerUpgradeData : public FTableRowBase
 		TSubclassOf<UUDPlayerUpgrade> UpgradeClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		TObjectPtr<UTexture2D> UIIcon;
+		TObjectPtr<UTexture2D> UpgrageIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		FUIDescription Description;
@@ -66,7 +70,10 @@ struct FEnemyUpgradeData : public FTableRowBase
 	TSubclassOf<UUDEnemyUpgrade> UpgradeClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UTexture2D> UIImage;
+	TObjectPtr<UTexture2D> UpgradeIcon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UTexture2D> EnemyIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FUIDescription Description;
@@ -171,8 +178,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		TObjectPtr<UUDEnemyUpgrade> Upgrade;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		int32 SpawnScalar = 1;
 };
 
 /** Used to link Knight Types to their respective upgrades in the Knight Spawn Pool.*/
@@ -292,7 +297,7 @@ protected:
 	FRandomStream RandomStream;
 
 	/** Maps the classes of non-Squire tier enemies in play to their entry in the data table so that they are easy for other parts of the program to get.*/
-	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData*> EnemyDataMap;
+	TMap<TSubclassOf<AUDEnemy>, FEnemySpawnData> EnemyDataMap;
 
 	/** An array of EnemyWaveSchemes generated from the WaveSchemeDataTable when the game begins.*/
 	TArray<FEnemyWaveScheme*> EnemyWaveSchemes;

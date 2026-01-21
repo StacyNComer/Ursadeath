@@ -63,8 +63,9 @@ void UUDWaveEntryWidget::DisplayWave(FEnemyWave Wave)
 		
 		FEnemySpawnData SpawnDataEntry = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass);
 
-		//Display the enemy's icon and count for the wave.
+		//Display the enemy's icon for the wave.
 		SpawnIndicator->SetEnemyImage(SpawnDataEntry.EnemyIcon);
+		SpawnIndicator->SetUpgradeImage(SpawnDataEntry.UpgradeIcon);
 
 		//Set the spawn count. The count shown is multiplied by that enemy's spawn scalar.
 		int32 EnemySpawnScalar = UrsadeathGameInstance->GetSpawnDataEntry(EnemyClass).SpawnScalar;

@@ -113,6 +113,7 @@ void UUDPlayerHUDWidget::DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, E
 
 void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 {
+	//The the squires' spawn number
 	SquireSpawnIndicator->SetEnemyCount(Wave.WaveData.SquireCount);
 
 	TArray<TSubclassOf<AUDEnemy>> KnightClasses;
@@ -135,4 +136,9 @@ void UUDPlayerHUDWidget::DisplayEnemyWave(FEnemyWave Wave)
 			SpawnIndicator->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
+}
+
+UUDEnemySpawnIndicator* UUDPlayerHUDWidget::GetEnemySpawnIndicator(TSubclassOf<AUDEnemy> EnemyClass)
+{
+	return KnightSpawnIndicators[EnemyClass];
 }

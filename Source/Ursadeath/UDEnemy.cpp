@@ -129,7 +129,7 @@ if (GEngine)
 	{
 		UUDEnemyUpgrade* Upgrade = UUDEnemyUpgrade::CreateUpgrade(DebugUpgrade, this);
 
-		Upgrade->OnUpgrageApplied(this);
+		Upgrade->OnUpgradeApplied(this);
 	}
 }
 

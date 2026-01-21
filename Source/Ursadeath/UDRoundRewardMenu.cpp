@@ -77,7 +77,9 @@ void UUDRoundRewardMenu::ConfirmReward()
 		//Create a widget to display the reward the player accepted.
 	UUDRoundRewardIconWidget* AcceptedRewardWidget = CreateWidget<UUDRoundRewardIconWidget>(this, RewardAcceptedWidgetClass);
 	//Set the accepted reward's image to that of the Reward Option the player had chosen.
-	AcceptedRewardWidget->SetImageUI(RewardOptionEntryAccepted.RewardOptionWidget->GetImage());
+	AcceptedRewardWidget->SetLargeImage(RewardOptionEntryAccepted.RewardOptionWidget->GetLargeImage());
+	AcceptedRewardWidget->SetMiniImage(RewardOptionEntryAccepted.RewardOptionWidget->GetMiniImage());
+
 	//Attach the Accepted Reward Widget to its description widget.
 	DescSource->GetContentPanel()->AddChild(AcceptedRewardWidget);
 
@@ -155,8 +157,9 @@ void UUDRoundRewardMenu::SetRewardOptions(TArray<FRewardInfo> Rewards)
 			//Make sure the Option Widget is visible.
 			RewardEntry.RewardOptionWidget->SetVisibility(ESlateVisibility::Visible);
 
-			//Set the reward's image;
-			RewardEntry.RewardOptionWidget->SetImageUI(RewardInfo.RewardImage);
+			//Set the reward's images;
+			RewardEntry.RewardOptionWidget->SetLargeImage(RewardInfo.LargeRewardImage);
+			RewardEntry.RewardOptionWidget->SetMiniImage(RewardInfo.MiniRewardImage);
 
 			//Set the reward's description.
 			RewardEntry.DescriptionSource->SetDescription(RewardInfo.RewardDescription);

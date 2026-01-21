@@ -100,4 +100,7 @@ public:
 	void DecrementEnemyCount(TSubclassOf<AUDEnemy> EnemyClass, EEnemyTier EnemyTier);
 
 	void DisplayEnemyWave(FEnemyWave Wave);
+
+	/** Returns the spawn indicator for the given enemy class. Note that this cannot be used to get the spawn indicaotor for squires.*/
+	UUDEnemySpawnIndicator* GetEnemySpawnIndicator(TSubclassOf<AUDEnemy> EnemyClass);
 };

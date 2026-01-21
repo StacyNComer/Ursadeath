@@ -2,6 +2,7 @@
 
 
 #include "UDEnemyUpgrade.h"
+#include "UrsadeathGameInstance.h"
 
 UUDEnemyUpgrade* UUDEnemyUpgrade::CreateUpgrade(TSubclassOf<UUDEnemyUpgrade> UpgradeClass, UObject* Outer)
 {
@@ -17,6 +18,7 @@ UUDEnemyUpgrade* UUDEnemyUpgrade::CreateUpgrade(TSubclassOf<UUDEnemyUpgrade> Upg
 	Super::BeginDestroy();
 }*/
 
+
 UWorld* UUDEnemyUpgrade::GetWorld() const
 {
 	/*
@@ -30,4 +32,9 @@ UWorld* UUDEnemyUpgrade::GetWorld() const
 	}
 
 	return nullptr;
+}
+
+FEnemySpawnData UUDEnemyUpgrade::OnEnemyDataChangeApplied_Implementation(FEnemySpawnData OriginalData) const
+{
+	return OriginalData;
 }

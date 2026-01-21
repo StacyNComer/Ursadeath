@@ -255,7 +255,7 @@ AUDEnemy* AUDArena::SpawnEnemy(TSubclassOf<AUDEnemy> EnemyClass, UUDEnemyUpgrade
 	//Add the upgrade to the enemy if one was provided.
 	if (Upgrade)
 	{
-		Upgrade->OnUpgrageApplied(EnemySpawned);
+		Upgrade->OnUpgradeApplied(EnemySpawned);
 	}
 
 	//Add the enemy to the corpse array when it dies.

@@ -15,6 +15,7 @@
 #include "UDPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "UDEnemyUpgrade.h"
+#include "UDEnemySpawnIndicator.h"
 
 #define LOCTEXT_NAMESPACE "PlayerHUD"
 
@@ -30,17 +31,6 @@ bool FEnemySpawnEntry::operator==(FEnemySpawnEntry const& Other) const
 
 void UUrsadeathGameInstance::Init()
 {
-	//Generate an array of the EnemySpawnData structures.
-	TArray<FEnemySpawnData*> KnightSpawnData;
-	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
-
-	//Populate the EnemyDataMap with the spawn data of each enemy.
-	for (int i = 0; i < KnightSpawnData.Num(); i++)
-	{
-		FEnemySpawnData* SpawnDataEntry = KnightSpawnData[i];
-		EnemyDataMap.Add(SpawnDataEntry->EnemyClass, SpawnDataEntry);
-	}
-
 	//Get an array of the enemy upgrades
 	TArray<FEnemyUpgradeData*> EnemyUpgradeData;
 	EnemyUpgradeDataTable->GetAllRows("GameInstanceEnemyUpgradeInit", EnemyUpgradeData);
@@ -120,7 +110,7 @@ void UUrsadeathGameInstance::PopulateKnightRewards()
 		FRewardInfo KnightInfo;
 
 		KnightInfo.RewardDescription = KnightRewardData.Description;
-		KnightInfo.RewardImage = KnightRewardData.EnemyIcon;
+		KnightInfo.LargeRewardImage = KnightRewardData.EnemyIcon;
 
 		KnightRewardOptionInfo.Add(KnightInfo);
 	}
@@ -147,8 +137,11 @@ void UUrsadeathGameInstance::PopulateEnemyUpgradeRewards()
 
 		FRewardInfo UpgradeInfo;
 
-		UpgradeInfo.RewardDescription = UpgradeReward.UpgradeData.Description;;
-		UpgradeInfo.RewardImage = UpgradeReward.UpgradeData.UIImage;
+		UpgradeInfo.RewardDescription = UpgradeReward.UpgradeData.Description;
+
+		//Set the reward images.
+		UpgradeInfo.LargeRewardImage = UpgradeReward.UpgradeData.EnemyIcon;
+		UpgradeInfo.MiniRewardImage = UpgradeReward.UpgradeData.UpgradeIcon;
 
 		UpgradeRewardOptionInfo.Add(UpgradeInfo);
 	}
@@ -172,7 +165,7 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 		//Create and set the struct for displaying the upgrade's icon, name, and description.
 		FRewardInfo UpgradeInfo;
 		UpgradeInfo.RewardDescription = UpgradeReward->Description;
-		UpgradeInfo.RewardImage = UpgradeReward->UIIcon;
+		UpgradeInfo.LargeRewardImage = UpgradeReward->UpgrageIcon;
 
 		UpgradeRewardOptionInfo.Add(UpgradeInfo);
 
@@ -316,7 +309,6 @@ FEnemyWave UUrsadeathGameInstance::GenerateEnemyWave(FEnemyWaveScheme WaveScheme
 		FEnemySpawnParams SpawnParams;
 		SpawnParams.Count = 1;
 		SpawnParams.Upgrade = KnightUpgrade;
-		SpawnParams.SpawnScalar = GetSpawnDataEntry(KnightClass).SpawnScalar;
 		EnemyWave.KnightParams.Add(KnightClass, SpawnParams);
 
 		//Record that the Knight Type is in the wave for later use.
@@ -365,9 +357,6 @@ void UUrsadeathGameInstance::SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightCl
 			FEnemySpawnParams SpawnParams;
 			Wave->KnightParams.RemoveAndCopyValue(UnchosenKnightSpawnData[UnchosenKnightIndex].EnemyClass, SpawnParams);
 
-			//Make sure the enemy being replaced has the proper Spawn Scalar.
-			SpawnParams.SpawnScalar = GetSpawnDataEntry(NewKnightClass).SpawnScalar;
-
 			//Add the new enemy type to the wave.
 			Wave->KnightParams.Add(NewKnightClass, SpawnParams);
 		}	
@@ -387,7 +376,7 @@ const FEnemySpawnData UUrsadeathGameInstance::GetSpawnDataEntry(TSubclassOf<AUDE
 {
 	if (EnemyDataMap.Contains(EnemyClass))
 	{
-		return *EnemyDataMap[EnemyClass];
+		return EnemyDataMap[EnemyClass];
 	}
 	else
 	{
@@ -510,6 +499,9 @@ void UUrsadeathGameInstance::ResetGame()
 	RoundWaveNumber = 0;
 	AbsoluteWaveNumber = 0;
 
+	//Reset the enemy spawn data
+	EnemyDataMap.Empty();
+
 	//Empty the Round Progressions for the player.
 	NewRoundProgessions.Empty();
 	UnchosenEnemies = 0;
@@ -627,8 +619,11 @@ void UUrsadeathGameInstance::AddKnightReward()
 
 		UpgradeReward.EnemyUpgraded = KnightRewardClass;
 
+		//Set the upgrade to display the enemy being upgraded.
+		UpgradeReward.UpgradeData.EnemyIcon = KnightRewardData.EnemyIcon;
+
 		//Change the upgrade's title to include the name of the enemy type being upgraded.
-		UpgradeReward.UpgradeData.Description.Title = FText::Format(LOCTEXT("EnemyUpgradeInit", "{UpgradeTitle} {EnemyTitle}"), UpgradeReward.UpgradeData.Description.Title, EnemyDataMap[UpgradeReward.EnemyUpgraded]->Description.Title);
+		UpgradeReward.UpgradeData.Description.Title = FText::Format(LOCTEXT("EnemyUpgradeInit", "{UpgradeTitle} {EnemyTitle}"), UpgradeReward.UpgradeData.Description.Title, EnemyDataMap[UpgradeReward.EnemyUpgraded].Description.Title);
 
 		EnemyUpgradeRewardPool.Add(UpgradeReward);
 	}
@@ -644,6 +639,12 @@ void UUrsadeathGameInstance::AddEnemyUpgradeReward()
 	UUDEnemyUpgrade* EnemyUpgrade = UpgradeReward.UpgradeInstance;
 	TSubclassOf<AUDEnemy> EnemyToUpgrade = UpgradeReward.EnemyUpgraded;
 
+	//Update the enemy's spawn data. The data may remain the same if the upgrade has no changed to make to it.
+	EnemyDataMap[EnemyToUpgrade] = EnemyUpgrade->OnEnemyDataChangeApplied(EnemyDataMap[EnemyToUpgrade]);
+
+	//From now on, the enemy icons also include the icon of their upgrade when shown in the UI.
+	EnemyDataMap[EnemyToUpgrade].UpgradeIcon = UpgradeReward.UpgradeData.UpgradeIcon;
+	
 	//Find the enemy being upgraded in the spawn pool and set them to have the upgrade.
 	for (int i = 0; i < KnightSpawnPool.Num(); i++)
 	{
@@ -683,6 +684,13 @@ void UUrsadeathGameInstance::AddEnemyUpgradeReward()
 			i++;
 		}
 	}
+
+	//Update the round screen to display the upgraded enemies.
+	UpdateRoundScreen();
+
+	//Update the player's HUD to also show the enemy's upgrade whenever it spawns.
+	UUDEnemySpawnIndicator* SpawnIndicator = PlayerCharacter->GetHUDWidget()->GetEnemySpawnIndicator(EnemyToUpgrade);
+	SpawnIndicator->SetUpgradeImage(UpgradeReward.UpgradeData.UpgradeIcon);
 
 	CheckEnemyProgression();
 }
@@ -733,9 +741,17 @@ void UUrsadeathGameInstance::SetupGame()
 		RandomStream.Initialize(GameSeedName);
 	}
 	
-	//Get the spawn data from the data table.
+	//Generate an array of the EnemySpawnData structures.
 	TArray<FEnemySpawnData*> KnightSpawnData;
 	KnightSpawnDataTable->GetAllRows("GameInstanceKnightSpawnDataMapInit", KnightSpawnData);
+
+	//Populate the EnemyDataMap with the spawn data of each enemy.
+	for (int i = 0; i < KnightSpawnData.Num(); i++)
+	{
+		//We dereference the pointer to each spawn entry since the enemy data can change mid-game (and we don't want to change the original data table too!)
+		FEnemySpawnData SpawnDataEntry = *KnightSpawnData[i];
+		EnemyDataMap.Add(SpawnDataEntry.EnemyClass, SpawnDataEntry);
+	}
 
 	//Populate the KnightReward pool with the spawn data of each enemy.
 	KnightRewardPool.Empty(KnightSpawnData.Num());

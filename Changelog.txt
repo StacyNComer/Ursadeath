@@ -2,6 +2,32 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 42 Proliferation of Doom ===
+
+* Added the enemy Ascension "Prolific", which doubles the amount of the enemy that spawns whenever
+  they spawn in a wave.
+	* This also halves their spawn weight meaning that they will spawn in pairs (or quads
+	  if they already spawned in pairs).
+
+* Changed the UI for Ascending an enemy to show the enemy being ascended as a large icon and the
+  symbol for the ascension type as a small icon.
+
+* Ascended enemies now show a small icon representing their ascension on their spawn counters.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+* The numbers for Blood Claw's cooldown display -0.0 when off cooldown.
+
+
 === Update 41 Frenzy of Doom ===
 
 * Added the "Frenzy" mechanic. Certain upgrades grant frenzy, doubling primary fire and melee attack speed.
@@ -25,18 +51,6 @@ Auto aim or aim accel for controller?
  	  generally useful that self damage is more of a weakness of rockets than it is encouragement to use
 	  shockwaves.
 
-	~ Known Bugs
-
-* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
-
-* Buttons do not appear "pressed" when used via controller input.
-
-* Sometimes Vigilant show their laser before spawning!
-
-* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
-  confirm it as if it were still selected.
-
-* The numbers for Blood Claw's cooldown display -0.0 when off cooldown.
 
 
 === Update 40 Ascension of Doom ===

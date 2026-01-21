@@ -4,14 +4,38 @@
 #include "UDRoundRewardIconWidget.h"
 #include "Components/Image.h"
 
-void UUDRoundRewardIconWidget::SetImageUI(UTexture2D* Image)
+void UUDRoundRewardIconWidget::SetLargeImage(UTexture2D* Image)
 {
-	RewardImage = Image;
+	RewardLargeImage = Image;
 
-	RewardImageUI->SetBrushFromTexture(Image);
+	LargeUIImage->SetBrushFromTexture(Image);
 }
 
-UTexture2D* UUDRoundRewardIconWidget::GetImage()
+void UUDRoundRewardIconWidget::SetMiniImage(UTexture2D* Image)
 {
-	return RewardImage;
+	RewardMiniImage = Image;
+
+	//We use "IsValid", since the pointer may be populated but invalid
+	if (Image->IsValidLowLevel())
+	{
+		//Make sure that the image UI is visible.
+		MiniUIImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+		MiniUIImage->SetBrushFromTexture(Image);
+	}
+	else
+	{
+		//Hide the image if no image is given (otherwise the player will just see a white square)
+		MiniUIImage->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+UTexture2D* UUDRoundRewardIconWidget::GetLargeImage() const
+{
+	return RewardLargeImage;
+}
+
+UTexture2D* UUDRoundRewardIconWidget::GetMiniImage() const
+{
+	return RewardMiniImage;
 }

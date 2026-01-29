@@ -7,6 +7,11 @@
 
 //TODO: recomment the code because a lot of this functionality has had major changes to it.
 
+void UUDPlayerStatusIcon::NativePreConstruct()
+{
+	StatusCounterFormat.MinimumFractionalDigits = StatusCounterFormat.MaximumFractionalDigits = StatusCounterMinFractionalDigits;
+}
+
 void UUDPlayerStatusIcon::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -62,9 +67,7 @@ void UUDPlayerStatusIcon::StartStatusBarFromTime(float MaxStatusTime, float Curr
 	MaxStatusBarTime = MaxStatusTime;
 	CurrentStatusBarTime = CurrentStatusTime;
 
-	FNumberFormattingOptions StatusNumberFormat;
-	StatusNumberFormat.MinimumFractionalDigits = StatusNumberFormat.MaximumFractionalDigits = 1;
-	StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
+	StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusCounterFormat));
 }
 
 void UUDPlayerStatusIcon::StartStatusBar(float StatusTime)
@@ -78,28 +81,25 @@ void UUDPlayerStatusIcon::SetStatusValue(float StatusValue)
 
 	StatusBar->SetPercent(CurrentStatusBarTime / MaxStatusBarTime);
 
-	FNumberFormattingOptions StatusNumberFormat;
-	StatusNumberFormat.MinimumFractionalDigits = StatusNumberFormat.MaximumFractionalDigits = 1;
-
 	if (CurrentStatusBarTime <= 0)
 	{
 		if (bDisappearWhenStatusDepleted)
 		{
 			SetVisibility(ESlateVisibility::Collapsed);
 		}
-		/*else if (bCounterDisplaysStatusTime)
+		else if (bHideCounterWhenStatusDepleted)
 		{
 			StatusCounter->SetVisibility(ESlateVisibility::Collapsed);
-		}*/
+		}
 
 		if (bCounterDisplaysStatusTime)
 		{
-			StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
+			StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusCounterFormat));
 		}
 	}
 	else if (bCounterDisplaysStatusTime)
 	{
-		StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusNumberFormat));
+		StatusCounter->SetText(FText::AsNumber(CurrentStatusBarTime, &StatusCounterFormat));
 	}
 }
 
@@ -116,4 +116,11 @@ UProgressBar* const UUDPlayerStatusIcon::GetStatusBar()
 UTextBlock* const UUDPlayerStatusIcon::GetStatusCounter()
 {
 	return StatusCounter;
+}
+
+void UUDPlayerStatusIcon::SetStatusCounterMinFractionalDigits(int32 Digits)
+{
+	StatusCounterMinFractionalDigits = Digits;
+
+	StatusCounterFormat.MinimumFractionalDigits = StatusCounterFormat.MaximumFractionalDigits = StatusCounterMinFractionalDigits;
 }

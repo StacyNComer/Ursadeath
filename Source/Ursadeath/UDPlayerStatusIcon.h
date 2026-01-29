@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Internationalization/Text.h"
 #include "UDPlayerStatusIcon.generated.h"
 
 //TODO: recomment the code because a lot of this functionality has had major changes to it.
@@ -30,6 +31,13 @@ protected:
 	float MaxStatusBarTime;
 
 	float CurrentStatusBarTime;
+
+	/** How the number shown above the status bar should be formatted.*/
+	FNumberFormattingOptions StatusCounterFormat;
+
+	/** The number of digits right of the decimal that the status counter will always show*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int32 StatusCounterMinFractionalDigits = 1;
 	
 public:
 	/** If true, the status counter will display the remaining time until the status bar is completely empty.*/
@@ -44,6 +52,7 @@ public:
 		bool bHideCounterWhenStatusDepleted = false;
 
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 public:
@@ -73,4 +82,8 @@ public:
 	/** Sets the image shown by the status icon widget,*/
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void SetStatusImage(UTexture2D* Image);
-};
+
+	/** Sets how many digits right of the decimal point that the status counter should always display.*/
+	UFUNCTION(BlueprintCallable)
+		void SetStatusCounterMinFractionalDigits(int32 Digits);
+};	

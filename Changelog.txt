@@ -2,6 +2,37 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 43 Shieldbreaker of Doom ===
+
+* Redcued the Ward amount of enemies with the Warded Ascension: 50% Max HP => 25% Max HP.
+
+* The Minibomb Upgrade (Heavy Weapon in game) no longer has a decimal point when counting the
+	shots until a minibomb fires.
+
+	> Bugfixes
+
+* The Warded enemy ascension now works properly. As does the DebugUpgrade, if you were testing with that.
+
+* The MiniBomb Upgrade (Heavy Weapon in game) no longer has a debug message.
+
+* The cooldown timer for the Blood Claw now correctly disappears when the cooldown completes.
+
+* Being Hasted has its proper status symbol no longer has the same symbol as being frenzied.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+
 === Update 42 Proliferation of Doom ===
 
 * Added the enemy Ascension "Prolific", which doubles the amount of the enemy that spawns whenever

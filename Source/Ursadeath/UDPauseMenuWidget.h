@@ -6,7 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UDPauseMenuWidget.generated.h"
 
-class UButton;
+class UUDButton;
 
 /**
  * 
@@ -18,10 +18,10 @@ class URSADEATH_API UUDPauseMenuWidget : public UUserWidget
 
 protected:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-		TObjectPtr<UButton> ResumeButton;
+		TObjectPtr<UUDButton> ResumeButton;
 
 	UPROPERTY(BlueprintReadWrite)
-		TObjectPtr<UButton> CurrentBackButton;
+		TObjectPtr<UUDButton> CurrentBackButton;
 
 protected:
 	virtual void NativeOnInitialized() override;

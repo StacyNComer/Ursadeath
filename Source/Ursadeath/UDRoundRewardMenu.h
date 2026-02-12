@@ -8,7 +8,7 @@
 #include "UDRoundRewardMenu.generated.h"
 
 class UTextBlock;
-class UButton;
+class UUDButton;
 class UUDRoundRewardIconWidget;
 class UUDRoundRewardOptionWidget;
 class UUDDescriptionSourceWidget;
@@ -95,7 +95,7 @@ protected:
 		TObjectPtr<UTextBlock> SelectedRewardText;
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-		TObjectPtr<UButton> ConfirmRewardButton;
+		TObjectPtr<UUDButton> ConfirmRewardButton;
 
 	/** The maximums different rewards this widget will accept as an option.*/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -157,7 +157,7 @@ public:
 	void UpdateRewardOptionSelected(UUDRoundRewardOptionWidget* RewardOption);
 
 	/** Returns the button that confirms the player's reward choice when pressed.*/
-	UButton* const GetConfirmButton();
+	UUDButton* const GetConfirmButton();
 
 	/** Returns the naximum number of reward options that this widget is meant to have available at once.*/
 	int32 GetMaxRewardOptions();

@@ -14,6 +14,7 @@ class UUDRoundRewardMenu;
 class UButton;
 class UTextBlock;
 class UCheckBox;
+class UUDButton;
 struct FEnemyWave;
 
 /**
@@ -41,10 +42,7 @@ protected:
 		TSubclassOf<UUDWaveEntryWidget> WaveEntryClass;
 
 	UPROPERTY(BlueprintReadWrite, Category = RoundDisplay, meta = (BindWidget))
-		TObjectPtr<UButton> RoundStartButton;
-
-	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
-		TObjectPtr<UTextBlock> StartButtonText;
+		TObjectPtr<UUDButton> RoundStartButton;
 
 	UPROPERTY(BlueprintReadWrite, Category = DescriptionUI, meta = (BindWidget))
 		TObjectPtr<UTextBlock> DescriptionTitleUI;
@@ -57,10 +55,10 @@ protected:
 		TObjectPtr<UWidget> StartConfirmationWidget;
 
 	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
-		TObjectPtr<UButton> ConfirmStartButton;
+		TObjectPtr<UUDButton> ConfirmStartButton;
 
 	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
-		TObjectPtr<UButton> ConfirmBackButton;
+		TObjectPtr<UUDButton> ConfirmBackButton;
 
 	UPROPERTY(BlueprintReadWrite, Category = RoundStartConfirmation, meta = (BindWidget))
 		TObjectPtr<UCheckBox> HideConfirmationCheckbox;
@@ -118,7 +116,7 @@ public:
 	UFUNCTION()
 		void TryEnableRoundStart();
 
-	UButton* const GetRoundStartButton();
+	UUDButton* const GetRoundStartButton();
 
 	UTextBlock* const GetStartButtonText();
 

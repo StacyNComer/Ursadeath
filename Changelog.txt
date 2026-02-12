@@ -2,6 +2,28 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 44 Buttons of Doom ===
+
+* The "How to Play" button's text in the Pause Menu no longer has been changed, reading "How To Play"
+  instead of "How-to-Play".
+
+* Revamped how UI buttons work. Nothing should be changed on the surface, except for maybe the button
+  sizes being ever so slightly different.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+
 === Update 43 Shieldbreaker of Doom ===
 
 * Redcued the Ward amount of enemies with the Warded Ascension: 50% Max HP => 25% Max HP.
@@ -19,18 +41,7 @@ Auto aim or aim accel for controller?
 
 * Being Hasted has its proper status symbol no longer has the same symbol as being frenzied.
 
-	~ Known Bugs
 
-* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
-
-* Buttons do not appear "pressed" when used via controller input.
-
-* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
-
-* Sometimes Vigilant show their laser before spawning!
-
-* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
-  confirm it as if it were still selected.
 
 
 === Update 42 Proliferation of Doom ===

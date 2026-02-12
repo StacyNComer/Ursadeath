@@ -6,6 +6,7 @@
 #include "UDRoundRewardIconWidget.h"
 #include "UDDescriptionSourceWidget.h"
 #include "UDUIDescriptionReceiver.h"
+#include "UDButton.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/WidgetTree.h"
@@ -18,7 +19,7 @@ void UUDRoundRewardMenu::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	//The confirm button for the rewards menu starts disable.
-	ConfirmRewardButton->SetIsEnabled(false); 
+	ConfirmRewardButton->SetButtonIsEnabled(false); 
 
 	ConfirmRewardButton->OnClicked.AddDynamic(this, &UUDRoundRewardMenu::ConfirmReward);
 
@@ -61,7 +62,7 @@ void UUDRoundRewardMenu::ConfirmReward()
 	}
 
 	//Disable the confirm button so another reward must be reselected next time the menu is active.
-	ConfirmRewardButton->SetIsEnabled(false);
+	ConfirmRewardButton->SetButtonIsEnabled(false);
 	
 	//Get the Reward Option Widget the player just accepted.
 	FRewardOptionEntry RewardOptionEntryAccepted = RewardOptionEntries[RewardIndexSelected]; 
@@ -194,7 +195,7 @@ void UUDRoundRewardMenu::UpdateRewardOptionSelected(UUDRoundRewardOptionWidget* 
 	else
 	{
 		//Enable the confirm button.
-		ConfirmRewardButton->SetIsEnabled(true);
+		ConfirmRewardButton->SetButtonIsEnabled(true);
 	}
 
 	int32 RewardIndex = RewardOption->GetRewardIndex();
@@ -207,7 +208,7 @@ void UUDRoundRewardMenu::UpdateRewardOptionSelected(UUDRoundRewardOptionWidget* 
 	SelectedRewardText->SetText(RewardTitle);
 }
 
-UButton* const UUDRoundRewardMenu::GetConfirmButton()
+UUDButton* const UUDRoundRewardMenu::GetConfirmButton()
 {
 	return ConfirmRewardButton;
 }

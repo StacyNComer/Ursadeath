@@ -6,6 +6,7 @@
 #include "UDRoundRewardMenu.h"
 #include "Blueprint/WidgetTree.h"
 #include "UDWaveEntryWidget.h"
+#include "UDButton.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/CheckBox.h"
@@ -74,13 +75,13 @@ bool UUDRoundScreenWidget::GetHideConfirmationMenu()
 
 void UUDRoundScreenWidget::ConfirmRoundStart()
 {
-	RoundStartButton->SetIsEnabled(false);
+	RoundStartButton->SetButtonIsEnabled(false);
 
 	OwningPlayer->ToggleRoundMenu();
 
 	StartConfirmationWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
-	StartButtonText->SetText(LOCTEXT("StartButtonRoundInProgress", "Round In Progress"));
+	RoundStartButton->GetButtonText()->SetText(LOCTEXT("StartButtonRoundInProgress", "Round In Progress"));
 
 	UrsadeathGameInstance->StartRound();
 }
@@ -144,20 +145,20 @@ void UUDRoundScreenWidget::TryEnableRoundStart()
 {
 	if (UrsadeathGameInstance->RoundReadyToStart())
 	{
-		RoundStartButton->SetIsEnabled(true);
+		RoundStartButton->SetButtonIsEnabled(true);
 
-		StartButtonText->SetText(LOCTEXT("StartButtonCanStartRound", "Start Round"));
+		RoundStartButton->GetButtonText()->SetText(LOCTEXT("StartButtonCanStartRound", "Start Round"));
 	}	
 }
 
-UButton* const UUDRoundScreenWidget::GetRoundStartButton()
+UUDButton* const UUDRoundScreenWidget::GetRoundStartButton()
 {
 	return RoundStartButton;
 }
 
 UTextBlock* const UUDRoundScreenWidget::GetStartButtonText()
 {
-	return StartButtonText;
+	return RoundStartButton->GetButtonText();
 }
 
 UUDRoundRewardMenu* const UUDRoundScreenWidget::GetKnightRewardMenu() const

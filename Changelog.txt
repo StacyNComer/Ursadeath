@@ -2,6 +2,33 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 45 Brutes of Doom ===
+
+* The DashEnemy (Legionairre Brute in-game) is now properly in the game and can show up as an option
+  to be added to the pool of enemies.
+
+* Adjusted the DashEnemy:
+	* Decreased their health: 3000 => 2000.
+	* Decreased their base speed: 750 => 600.
+	* Increased their dash speed: 2000 => 4500.
+	* The delay on their first dash attack after spawning is now randomized between 1.5 
+	  and 3.5 seconds instead of always being 5 seconds.
+	* They no longer share the slow/rocket weaknesses with the Gladiator.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+	
+
 === Update 44 Buttons of Doom ===
 
 * The "How to Play" button's text in the Pause Menu no longer has been changed, reading "How To Play"
@@ -40,8 +67,6 @@ Auto aim or aim accel for controller?
 * The cooldown timer for the Blood Claw now correctly disappears when the cooldown completes.
 
 * Being Hasted has its proper status symbol no longer has the same symbol as being frenzied.
-
-
 
 
 === Update 42 Proliferation of Doom ===

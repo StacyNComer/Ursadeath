@@ -15,6 +15,10 @@ Auto aim or aim accel for controller?
 	  and 3.5 seconds instead of always being 5 seconds.
 	* They no longer share the slow/rocket weaknesses with the Gladiator.
 
+	> Bugfixes
+
+* The DashEnemy now properly ragdolls when dying.
+
 	~ Known Bugs
 
 * Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
@@ -117,8 +121,6 @@ Auto aim or aim accel for controller?
 	  range and its better at hitting enemies through walls. However, I'm realizing that shockwaves are so
  	  generally useful that self damage is more of a weakness of rockets than it is encouragement to use
 	  shockwaves.
-
-
 
 === Update 40 Ascension of Doom ===
 

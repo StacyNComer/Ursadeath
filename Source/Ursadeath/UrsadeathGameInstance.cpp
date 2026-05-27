@@ -30,7 +30,7 @@ bool FEnemySpawnEntry::operator==(FEnemySpawnEntry const& Other) const
 }
 
 void UUrsadeathGameInstance::Init()
-{
+{	
 	//Get an array of the enemy upgrades
 	TArray<FEnemyUpgradeData*> EnemyUpgradeData;
 	EnemyUpgradeDataTable->GetAllRows("GameInstanceEnemyUpgradeInit", EnemyUpgradeData);
@@ -839,6 +839,9 @@ void UUrsadeathGameInstance::SetupGame()
 
 void UUrsadeathGameInstance::FinalizePlayerSetup(AUDPlayerCharacter* Player)
 {
+	//Load the audio settings. We can't do this in the Init function since the audio subsystems haven't been loaded yet.
+	LoadAudioSettings();
+
 	PlayerCharacter = Player;
 	
 	UUDRoundScreenWidget* RoundScreenWidget = PlayerCharacter->GetRoundScreenWidget();

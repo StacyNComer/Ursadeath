@@ -367,6 +367,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void SetUnchosenKnight(TSubclassOf<AUDEnemy> NewKnightClass, int32 UnchosenKnightIndex);
 
+	/** An event used to update the games audio from the saved config settings for the first time.*/
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void LoadAudioSettings();
+
 	virtual void Init() override;
 
 	/** Removes the given enemy class from the KnightPool. Gets around conversion issues surrounding FEnemySpawnEntry.

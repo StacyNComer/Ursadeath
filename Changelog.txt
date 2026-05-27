@@ -2,6 +2,27 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 46 Audio of Doom ===
+
+* The Settings menu now has a submenu for adjusting the audio.
+	* It's possible that the audio will be set to 0 for everything instead of their default values.
+	  You might need to adjust the audio on your first time playing the game for their to be sound!
+	* Also note that while there is a setting for the music volume, there is no actual music in game currently.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+
 === Update 45 Brutes of Doom ===
 
 * The DashEnemy (Legionairre Brute in-game) is now properly in the game and can show up as an option

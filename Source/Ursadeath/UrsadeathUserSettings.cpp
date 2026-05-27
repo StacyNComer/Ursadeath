@@ -24,6 +24,11 @@ void UUrsadeathUserSettings::ResetToDefaultSettings(bool bThisCannotBeReversedAr
 
 		bInvertYAxis = false;
 
+		MasterVolume = 1;
+		MusicVolume = 1;
+		EnemySFXVolume = 1;
+		PlayerSFXVolume = 1;
+
 		//Reset the other user settings to default
 		SetToDefaults();
 
@@ -60,4 +65,44 @@ bool UUrsadeathUserSettings::GetInvertYAxis()
 void UUrsadeathUserSettings::SetInvertYAxis(bool bInvertY)
 {
 	bInvertYAxis = bInvertY;
+}
+
+float UUrsadeathUserSettings::GetMasterVolume()
+{
+	return MasterVolume;
+}
+
+void UUrsadeathUserSettings::SetMasterVolume(float Volume)
+{
+	MasterVolume = Volume;
+}
+
+float UUrsadeathUserSettings::GetPlayerSFXVolume()
+{
+	return PlayerSFXVolume;
+}
+
+void UUrsadeathUserSettings::SetPlayerSFXVolume(float Volume)
+{
+	PlayerSFXVolume = Volume;
+}
+
+float UUrsadeathUserSettings::GetEnemySFXVolume()
+{
+	return EnemySFXVolume;
+}
+
+void UUrsadeathUserSettings::SetEnemySFXVolume(float Volume)
+{
+	EnemySFXVolume = Volume;
+}
+
+float UUrsadeathUserSettings::GetMusicVolume()
+{
+	return MusicVolume;
+}
+
+void UUrsadeathUserSettings::SetMusicVolume(float Volume)
+{
+	MusicVolume = Volume;
 }

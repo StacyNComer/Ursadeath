@@ -11,6 +11,9 @@ Auto aim or aim accel for controller?
 
 	~ Known Bugs
 
+* Some of the audio is not classed correctly and will be at the default volume no matter what the settings 
+  are set to!
+
 * Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
 
 * Buttons do not appear "pressed" when used via controller input.

@@ -2,6 +2,32 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 47 Slider Feedback of Doom ===
+
+* The audio settings (except the music slider) now play a feedback sound when player finishes moving the
+   slider.
+
+	> Bugfixes
+
+* Rocket Explosions, Health Pickups, Blood Claw SFX should now be affected by the audio settings.
+
+	~ Known Bugs
+
+* Some of the audio is not classed correctly and will be at the default volume no matter what the settings 
+  are set to!
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occaisionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Sometimes Vigilant show their laser before spawning!
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+
 === Update 46 Audio of Doom ===
 
 * The Settings menu now has a submenu for adjusting the audio.

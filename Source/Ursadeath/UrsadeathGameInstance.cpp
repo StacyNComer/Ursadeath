@@ -167,6 +167,9 @@ void UUrsadeathGameInstance::PopulateUpgradeRewards()
 		UpgradeInfo.RewardDescription = UpgradeReward->Description;
 		UpgradeInfo.LargeRewardImage = UpgradeReward->UpgrageIcon;
 
+		//Make sure the mini reward is a nullptr instead of some strange value from being undefined (player upgrades never have mini icons)
+		UpgradeInfo.MiniRewardImage = nullptr;
+
 		UpgradeRewardOptionInfo.Add(UpgradeInfo);
 
 		UpgradeRewardPool.Remove(UpgradeReward);
@@ -453,9 +456,6 @@ void UUrsadeathGameInstance::ProcessEndWave()
 
 				KnightRewardMenu->SetVisibility(ESlateVisibility::Visible);
 				EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Collapsed);
-
-				//Players only get an upgrade on rounds where a new knight type is being chosen.
-				PopulateUpgradeRewards();
 			}
 			else
 			{
@@ -465,8 +465,10 @@ void UUrsadeathGameInstance::ProcessEndWave()
 				EnemyUpgradeRewardMenu->SetVisibility(ESlateVisibility::Visible);
 
 				//Tell the player that they don't get an upgrade!
-				UpgradeRewardMenu->ShowLockedMessage();
+				//UpgradeRewardMenu->ShowLockedMessage();
 			}
+
+			PopulateUpgradeRewards();
 
 			UpdateRoundScreen();
 
@@ -798,7 +800,7 @@ void UUrsadeathGameInstance::SetupGame()
 		RoundNumber = StartingRound;
 
 		//Give the player extra upgrade if starting beyond the first round
-		//ExtraUpgrades = StartingRound;
+		ExtraUpgrades = StartingRound;
 		
 		//Make sure the absolute wave count lines up.
 		for (int i = 0; i < StartingRound; i++)
@@ -820,10 +822,10 @@ void UUrsadeathGameInstance::SetupGame()
 				ExtraNewEnemies++;
 
 				//Add an extra upgrade for each New Enemy Round. We make sure i is not zero since, while the first round is supposed to be a new enemy round, a single upgrade is given to the player regardless of round type!
-				if (i != 0)
+				/*if (i != 0)
 				{
 					ExtraUpgrades++;
-				}
+				}*/
 
 				NewRoundProgessions.Add(ENewRoundType::NEW_ENEMY);
 			}

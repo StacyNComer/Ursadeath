@@ -2,6 +2,34 @@ TODO: Maybe add effect to Gladiator to show attack radius.
 See how controller feels
 Auto aim or aim accel for controller?
 
+=== Update 49 Fixes of Doom ===
+
+* Changed the following descriptions to be more accurate, clear, or concise:
+	* "Legionnnaire Archer" enemy.
+	* "Legionnaire Brute" enemy.
+	* "Prolific" enemy upgrade.
+	* "Blood Claw" player upgrade.
+	* "Exhileration" player upgrade.
+	* "Flick of the Wrist" player upgrade.
+	* "Piercing Blast" player upgrade
+	* "Siphon Soul" player upgrade.
+
+	> Bugfixes
+
+* Fixed a bug where the Frenzy status icon showed as the Haste status icon instead.
+
+	~ Known Bugs
+
+* Catching a Gladiator melee attack at the wrong angle can cause the play to get hit many times at once.
+
+* Buttons do not appear "pressed" when used via controller input.
+
+* It is occasionally possible for an enemy to walk inside one of the lava falls and be unable to leave.
+
+* Clicking an upgrade/knight after it is already selected will make it appear deselected but still let you
+  confirm it as if it were still selected.
+
+
 === Update 48 Final Rounds of Doom ===
 
 * Added three more rounds; one the adds the fourth enemy and two that upgrade enemies.

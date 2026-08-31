@@ -103,7 +103,7 @@ void AUDPlayerCharacter::BeginPlay()
 	InvulnerableStatusWidget->SetStatusImage(InvulnerableStatusImage);
 
 	FrenzyStatusWidget = HUDWidget->AddPlayerStatusIcon();
-	FrenzyStatusWidget->SetStatusImage(HasteStatusImage);
+	FrenzyStatusWidget->SetStatusImage(FrenzyStatusImage);
 
 	//Create the round screen.
 	RoundScreenWidget = CreateWidget<UUDRoundScreenWidget>(UDPlayerController, RoundScreenWidgetClass);
